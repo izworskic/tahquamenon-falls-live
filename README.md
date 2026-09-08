@@ -112,17 +112,26 @@ The data source is primarily Michigan DNR plus official concession/operator page
 
 ## Architecture
 
-This repository deliberately avoids an always-on Replit runtime and avoids a heavy app framework:
+This repository deliberately avoids an always-on Replit runtime and avoids a heavy app framework. As of the hub-integration migration, files live where Vercel's rewrite from chrisizworski.com expects them, matching the isle-royale-outdoors pattern:
 
 ```text
-index.html             Static UI / SEO shell
-styles.css             Responsive Michigan visual system
-app.js                 Live UI, map, filters, planner, share/deep links
-data/places.js         Curated Tahquamenon POI database
-api/live.js            Vercel serverless normalization + score engine
-vercel.json            Cache/security headers
-package.json           Syntax-check command only
+public/tahquamenon-falls/index.html   Static UI / SEO shell, served at /tahquamenon-falls/
+public/tahquamenon-falls/data/places.js  Curated Tahquamenon POI database
+public/assets/tahquamenon-falls.js    Live UI, map, filters, planner, share/deep links
+public/assets/tahquamenon-falls.css   Responsive Michigan visual system (imports css/*.css)
+public/assets/css/*.css               Taste system: base, content, field, responsive
+public/robots.txt                     Allow-all (real crawl traffic flows through the hub)
+api/tahquamenon-falls.js              Vercel serverless normalization + score engine
+vercel.json                           Function config, cache header, API noindex
+package.json                          Syntax-check command only
 ```
+
+Canonical public URL is https://chrisizworski.com/tahquamenon-falls/, proxied there via rewrites
+in the chrisizworski-com hub repo's vercel.json (the same pattern used for /isle-royale-map/).
+This project's own tahquamenon-falls-live-94is.vercel.app domain still serves the same bytes at
+/tahquamenon-falls/ (Vercel needs a live origin to proxy to), but the page's own canonical/og:url
+tags always point at the chrisizworski.com URL, so that is the one that should get indexed and
+linked to.
 
 The only front-end runtime dependency is Leaflet loaded from a public CDN. OpenStreetMap supplies map tiles. The Vercel function uses Node's native `fetch` and needs no npm dependencies.
 
@@ -130,7 +139,8 @@ The only front-end runtime dependency is Leaflet loaded from a public CDN. OpenS
 
 ```bash
 npm run check
-python3 -m http.server 8080
+cd public && python3 -m http.server 8080
+# then open http://localhost:8080/tahquamenon-falls/
 ```
 
 The static server renders the page and map. `/api/live` requires Vercel dev or deployment because it is a Vercel serverless function.

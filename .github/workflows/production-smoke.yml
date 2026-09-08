@@ -22,9 +22,9 @@ jobs:
           ok=0
           for attempt in $(seq 1 36); do
             echo "Smoke attempt ${attempt}/36"
-            if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 20 -fsS "$PROD_URL/" -o /tmp/index.html; then
+            if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 20 -fsS "$PROD_URL/tahquamenon-falls/" -o /tmp/index.html; then
               if grep -q "Tahquamenon" /tmp/index.html; then
-                if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 25 -fsS "$PROD_URL/api/live" -o /tmp/live.json; then
+                if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 25 -fsS "$PROD_URL/api/tahquamenon-falls" -o /tmp/live.json; then
                   if python - <<'PY'
           import json
           from pathlib import Path
