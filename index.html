@@ -3,13 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0d1715" />
+  <meta name="theme-color" content="#173629" />
   <meta name="description" content="Tahquamenon Falls live river conditions, waterfall score, weather, trail intelligence, campgrounds, brewery, photo windows and an interactive park map." />
   <meta property="og:title" content="Tahquamenon Falls Live · Michigan Outdoors Now" />
-  <meta property="og:description" content="One live view of the falls, river, weather, trails, campgrounds and the best way to spend your time at Tahquamenon right now." />
+  <meta property="og:description" content="Know whether to go, which falls to visit, and how to spend your time at Tahquamenon right now." />
   <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://commons.wikimedia.org/wiki/Special:Redirect/file/Tahquamenon_falls_upper.jpg?width=1600" />
   <meta name="twitter:card" content="summary_large_image" />
   <title>Tahquamenon Falls Live · Michigan Outdoors Now</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://unpkg.com" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <link rel="stylesheet" href="styles.css" />
@@ -30,52 +34,123 @@
 
   <main id="main">
     <section class="hero" aria-labelledby="heroTitle">
-      <div class="hero-glow" aria-hidden="true"></div>
-      <div class="hero-copy">
-        <div class="eyebrow"><span class="live-dot" id="liveDot"></span><span id="freshnessText">Connecting to Tahquamenon…</span></div>
-        <h1 id="heroTitle">Tahquamenon<br><em>right now.</em></h1>
-        <p class="hero-sub">River power, trail comfort, weather, photo light, campgrounds and the park map — synthesized into one decision instead of six tabs.</p>
-        <div class="hero-actions">
-          <button class="primary-button" data-scroll="#mapSection" type="button">Explore the live map</button>
-          <button class="secondary-button" data-scroll="#planSection" type="button">Build a visit</button>
+      <div class="hero-media" role="img" aria-label="Upper Tahquamenon Falls flowing through the forest"></div>
+      <div class="hero-scrim" aria-hidden="true"></div>
+      <div class="hero-inner section-shell">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="live-dot" id="liveDot"></span><span id="freshnessText">Connecting to Tahquamenon…</span></div>
+          <p class="hero-place">Paradise, Michigan · Tahquamenon Falls State Park</p>
+          <h1 id="heroTitle">Tahquamenon,<br><em>right now.</em></h1>
+          <p class="hero-sub">Know whether it is worth the drive, which falls fit your day, and what the river, weather and light are doing before you leave the parking lot.</p>
+          <div class="hero-actions">
+            <button class="primary-button" data-scroll="#visitModeSection" type="button">Plan my visit</button>
+            <button class="secondary-button" data-scroll="#mapSection" type="button">Open park map</button>
+          </div>
+          <div class="hero-facts" aria-label="Park highlights">
+            <span><strong>2</strong> falls areas</span>
+            <span><strong>35+</strong> trail miles</span>
+            <span><strong>13+</strong> miles of park</span>
+          </div>
+        </div>
+
+        <article class="decision-card loading-card" id="decisionCard" aria-live="polite">
+          <div class="decision-topline">
+            <span class="decision-kicker">Worth going right now?</span>
+            <span class="confidence-pill" id="confidencePill">— confidence</span>
+          </div>
+          <div class="decision-main">
+            <div class="score-orb" id="scoreOrb" style="--score: 0">
+              <span class="score-number" id="scoreNumber">—</span>
+              <small>/ 100</small>
+            </div>
+            <div>
+              <div class="decision-label" id="decisionLabel">Reading the river</div>
+              <p id="decisionSummary">Connecting live hydrology and weather…</p>
+            </div>
+          </div>
+          <div class="score-strip" aria-label="Score components">
+            <div><span>River</span><strong id="riverComponent">—</strong></div>
+            <div><span>Walking</span><strong id="trailComponent">—</strong></div>
+            <div><span>Photos</span><strong id="photoComponent">—</strong></div>
+            <div><span>Safety</span><strong id="safetyComponent">—</strong></div>
+          </div>
+          <button class="text-button" id="whyButton" type="button">What is driving this? <span>→</span></button>
+        </article>
+      </div>
+      <div class="photo-credit">Upper Falls photo: Attila Nagy · CC BY 2.5 · Wikimedia Commons</div>
+    </section>
+
+    <section class="visit-mode section-shell" id="visitModeSection" aria-labelledby="visitModeTitle">
+      <div class="section-heading compact-heading">
+        <div>
+          <span class="section-kicker">START WITH YOUR DAY</span>
+          <h2 id="visitModeTitle">What kind of visit are you having?</h2>
+          <p class="section-intro">Skip the research spiral. Pick the reason you are here and the tool will move you to the useful stuff.</p>
         </div>
       </div>
+      <div class="intent-grid" id="intentGrid">
+        <button class="intent-card featured" data-intent="first" type="button">
+          <span class="intent-number">01</span><strong>First time here</strong><small>Both falls · about 2½–4 hours</small><b>Best default →</b>
+        </button>
+        <button class="intent-card" data-intent="easy" type="button">
+          <span class="intent-number">02</span><strong>Easy + accessible</strong><small>Boardwalks · benches · short walks</small><b>Low-stress plan →</b>
+        </button>
+        <button class="intent-card" data-intent="hike" type="button">
+          <span class="intent-number">03</span><strong>River Trail day</strong><small>5.1 mi one way · transport matters</small><b>Hiker plan →</b>
+        </button>
+        <button class="intent-card" data-intent="photo" type="button">
+          <span class="intent-number">04</span><strong>Best photos</strong><small>Flow · clouds · sunset window</small><b>Find the light →</b>
+        </button>
+        <button class="intent-card" data-intent="camp" type="button">
+          <span class="intent-number">05</span><strong>Camping here</strong><small>Lower Falls · Rivermouth · sunset</small><b>Explore camp areas →</b>
+        </button>
+      </div>
+    </section>
 
-      <article class="decision-card loading-card" id="decisionCard" aria-live="polite">
-        <div class="decision-topline">
-          <span class="mono-label">TAHQUAMENON NOW</span>
-          <span class="confidence-pill" id="confidencePill">— confidence</span>
-        </div>
-        <div class="decision-main">
-          <div class="score-orb" id="scoreOrb" style="--score: 0">
-            <span class="score-number" id="scoreNumber">—</span>
-            <small>/ 100</small>
+    <section class="falls-compare section-shell" aria-labelledby="fallsCompareTitle">
+      <div class="section-heading compact-heading">
+        <div><span class="section-kicker">UPPER OR LOWER?</span><h2 id="fallsCompareTitle">They are different trips.</h2></div>
+      </div>
+      <div class="falls-grid">
+        <article class="fall-card upper-card">
+          <div class="fall-photo upper-photo" role="img" aria-label="Upper Tahquamenon Falls"></div>
+          <div class="fall-copy">
+            <span>UPPER FALLS</span>
+            <h3>The big one.</h3>
+            <p>Best first stop for the classic view. A paved approach and new accessible boardwalk lead toward the brink; the brewery and Fact Shack are in the same area.</p>
+            <div class="fall-tags"><span>Most dramatic</span><span>Accessible</span><span>Brewery</span></div>
+            <button class="inline-action" data-place-id="upper-falls" type="button">Show Upper Falls on map →</button>
           </div>
-          <div>
-            <div class="decision-label" id="decisionLabel">Reading the river</div>
-            <p id="decisionSummary">Connecting live hydrology and weather…</p>
+        </article>
+        <article class="fall-card lower-card">
+          <div class="fall-photo lower-photo" role="img" aria-label="Lower Tahquamenon Falls cascades"></div>
+          <div class="fall-copy">
+            <span>LOWER FALLS</span>
+            <h3>More to explore.</h3>
+            <p>Smaller cascades around an island, an accessible boardwalk, the Olson Island Bridge, paddling access and the campground close by. Plan more time here.</p>
+            <div class="fall-tags"><span>Island</span><span>Paddling</span><span>Campground</span></div>
+            <button class="inline-action" data-place-id="lower-falls" type="button">Show Lower Falls on map →</button>
           </div>
-        </div>
-        <div class="score-strip" aria-label="Score components">
-          <div><span>River</span><strong id="riverComponent">—</strong></div>
-          <div><span>Trail</span><strong id="trailComponent">—</strong></div>
-          <div><span>Photo</span><strong id="photoComponent">—</strong></div>
-          <div><span>Safety</span><strong id="safetyComponent">—</strong></div>
-        </div>
-        <button class="text-button" id="whyButton" type="button">Why this score <span>→</span></button>
-      </article>
+        </article>
+      </div>
+      <div class="practical-strip" aria-label="Know before you go">
+        <div><strong>Park entry</strong><span>Michigan Recreation Passport required</span></div>
+        <div><strong>River Trail</strong><span>5.1 miles one way · roughly 3 hours</span></div>
+        <div><strong>Accessibility</strong><span>Upper + Lower accessible viewpoints</span></div>
+        <div><strong>Shuttle</strong><span>Seasonal · confirm before one-way hiking</span></div>
+      </div>
     </section>
 
     <section class="now-grid section-shell" id="nowSection" aria-labelledby="nowTitle">
       <div class="section-heading">
-        <div><span class="section-kicker">LIVE SIGNALS</span><h2 id="nowTitle">What changed the decision?</h2></div>
+        <div><span class="section-kicker">LIVE CONDITIONS</span><h2 id="nowTitle">What matters right now.</h2><p class="section-intro">The data stays underneath the decision, but it is here when you want to inspect it.</p></div>
         <span class="updated-badge" id="updatedBadge">Refreshing…</span>
       </div>
 
       <div class="signal-grid">
         <article class="signal-card river-card">
           <div class="signal-icon">≈</div>
-          <div class="signal-title"><span>USGS river flow</span><strong id="cfsValue">—</strong></div>
+          <div class="signal-title"><span>River at Upper Falls</span><strong id="cfsValue">—</strong></div>
           <div class="signal-detail"><span id="flowContext">Waiting for gauge</span><span id="flowPercentile">—</span></div>
           <div class="mini-band" aria-hidden="true"><i id="flowBand"></i></div>
           <p id="riverFootnote">USGS 04045500 · near Upper Falls</p>
@@ -83,21 +158,21 @@
 
         <article class="signal-card">
           <div class="signal-icon">°</div>
-          <div class="signal-title"><span>Trail weather</span><strong id="tempValue">—</strong></div>
+          <div class="signal-title"><span>Walking weather</span><strong id="tempValue">—</strong></div>
           <div class="signal-detail"><span id="weatherSummary">Connecting</span><span id="windValue">—</span></div>
           <p id="weatherFootnote">NWS + fallback weather</p>
         </article>
 
         <article class="signal-card">
           <div class="signal-icon">◐</div>
-          <div class="signal-title"><span>Photo window</span><strong id="photoValue">—</strong></div>
+          <div class="signal-title"><span>Photo conditions</span><strong id="photoValue">—</strong></div>
           <div class="signal-detail"><span id="sunsetValue">Sunset —</span><span id="cloudValue">Clouds —</span></div>
           <p id="photoFootnote">Light + clouds + precipitation</p>
         </article>
 
         <article class="signal-card alert-card" id="alertCard">
           <div class="signal-icon">!</div>
-          <div class="signal-title"><span>NWS hazards</span><strong id="alertValue">Checking</strong></div>
+          <div class="signal-title"><span>Weather hazards</span><strong id="alertValue">Checking</strong></div>
           <div class="signal-detail"><span id="alertDetail">Active warnings and advisories</span></div>
           <p>NWS active-alert feed</p>
         </article>
@@ -112,9 +187,9 @@
     <section class="map-section" id="mapSection" aria-labelledby="mapTitle">
       <div class="section-shell map-heading">
         <div>
-          <span class="section-kicker">EXPLORE THE PARK</span>
-          <h2 id="mapTitle">One map. Every reason to stop.</h2>
-          <p>Tap a point — falls, trails, campgrounds, food, access, paddling or photography — and the map becomes the trip planner.</p>
+          <span class="section-kicker">THE WHOLE PARK</span>
+          <h2 id="mapTitle">See how the day connects.</h2>
+          <p>Falls, trails, campgrounds, food, access, paddling and photo stops — all in one park-scale view.</p>
         </div>
         <div class="filter-row" id="filterRow" aria-label="Map filters">
           <button class="filter-chip active" data-filter="all" type="button">All</button>
@@ -151,12 +226,12 @@
 
     <section class="section-shell plan-section" id="planSection" aria-labelledby="planTitle">
       <div class="section-heading plan-heading">
-        <div><span class="section-kicker">MAKE THE DAY FIT</span><h2 id="planTitle">Build around the time you actually have.</h2></div>
+        <div><span class="section-kicker">MAKE IT FIT</span><h2 id="planTitle">Build the day you actually have.</h2><p class="section-intro">Realistic timing beats a giant checklist. Start with a preset, then add places from the map.</p></div>
         <div class="duration-toggle" id="durationToggle" aria-label="Visit length">
           <button data-duration="90" type="button">90 min</button>
           <button data-duration="240" class="active" type="button">Half day</button>
           <button data-duration="480" type="button">Full day</button>
-          <button data-duration="hike" type="button">Hiker</button>
+          <button data-duration="hike" type="button">River Trail</button>
         </div>
       </div>
 
@@ -168,8 +243,8 @@
           <p id="planContextText">The itinerary will adapt its emphasis to current river, weather and hazard conditions.</p>
           <div class="context-metrics">
             <div><span>River</span><strong id="planRiver">—</strong></div>
-            <div><span>Trail</span><strong id="planTrail">—</strong></div>
-            <div><span>Light</span><strong id="planLight">—</strong></div>
+            <div><span>Walking</span><strong id="planTrail">—</strong></div>
+            <div><span>Photos</span><strong id="planLight">—</strong></div>
           </div>
           <button class="primary-button full" id="copyPlanButton" type="button">Copy visit plan</button>
         </aside>
@@ -178,13 +253,13 @@
 
     <section class="section-shell intelligence-section" aria-labelledby="intelligenceTitle">
       <div class="section-heading">
-        <div><span class="section-kicker">WHY THIS IS DIFFERENT</span><h2 id="intelligenceTitle">The waterfall engine, rebuilt for one place.</h2></div>
+        <div><span class="section-kicker">UNDER THE HOOD</span><h2 id="intelligenceTitle">Why the live score is trustworthy.</h2></div>
       </div>
       <div class="intelligence-grid">
-        <article><span>01</span><h3>Observed flow first</h3><p>Actual USGS discharge drives the waterfall signal. Rain in the forecast never masquerades as water already over the falls.</p></article>
-        <article><span>02</span><h3>Seasonal context</h3><p>The live discharge is compared against USGS daily percentiles for this date, so 500 cfs in September is not interpreted like 500 cfs during spring runoff.</p></article>
-        <article><span>03</span><h3>Park, not pin</h3><p>The output resolves the next decision: Upper or Lower, hike or drive, island, brewery, campground, paddling access or sunset at Rivermouth.</p></article>
-        <article><span>04</span><h3>Failure is visible</h3><p>Every live source has freshness and health. If USGS drops out, the site says so and lowers confidence rather than inventing certainty.</p></article>
+        <article><span>01</span><h3>Observed flow first</h3><p>Actual USGS discharge drives the waterfall signal. Forecast rain never pretends to be water already over the falls.</p></article>
+        <article><span>02</span><h3>Seasonal context</h3><p>Today’s discharge is compared with historical USGS percentiles for this date, so September and spring runoff are judged differently.</p></article>
+        <article><span>03</span><h3>Park-scale decisions</h3><p>The tool answers the next question: Upper or Lower, hike or drive, brewery, campground, paddling or sunset.</p></article>
+        <article><span>04</span><h3>Stale means stale</h3><p>If the river gauge is old or unavailable, the site withholds the current score instead of manufacturing certainty.</p></article>
       </div>
     </section>
   </main>
@@ -192,6 +267,7 @@
   <footer>
     <div><strong>Tahquamenon Falls Live</strong><span>A Michigan Outdoors Now field tool.</span></div>
     <p>Decision support, not an official park-safety service. Follow posted closures, DNR rules and NWS warnings on site.</p>
+    <p class="photo-license">Photography via Wikimedia Commons: Attila Nagy (CC BY 2.5) · Joe Passe (CC BY-SA 2.0).</p>
   </footer>
 
   <dialog id="whyDialog" class="sheet-dialog">
@@ -201,7 +277,7 @@
     <div id="reasonList" class="reason-list"></div>
     <div class="formula-box">
       <strong>Current score</strong>
-      <p>46% observed river experience · 24% trail comfort · 18% photography · 12% safety. Severe hazards cap the result.</p>
+      <p>46% observed river experience · 24% walking comfort · 18% photography · 12% safety. Severe hazards cap the result.</p>
       <small>Forecast precipitation can change the outlook, but does not inflate current river flow.</small>
     </div>
   </dialog>
@@ -219,5 +295,29 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="data/places.js"></script>
   <script src="app.js"></script>
+  <script>
+    (() => {
+      const intents = {
+        first: { duration: '240', filter: 'falls', target: '#planSection' },
+        easy: { duration: '90', filter: 'access', target: '#mapSection' },
+        hike: { duration: 'hike', filter: 'trail', target: '#planSection' },
+        photo: { duration: '480', filter: 'photo', target: '#mapSection' },
+        camp: { duration: '480', filter: 'camp', target: '#mapSection' }
+      };
+      document.getElementById('intentGrid')?.addEventListener('click', (event) => {
+        const card = event.target.closest('[data-intent]');
+        if (!card) return;
+        document.querySelectorAll('.intent-card').forEach(item => item.classList.toggle('selected', item === card));
+        const preset = intents[card.dataset.intent];
+        document.querySelector(`#durationToggle [data-duration="${preset.duration}"]`)?.click();
+        document.querySelector(`#filterRow [data-filter="${preset.filter}"]`)?.click();
+        document.querySelector(preset.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      document.querySelectorAll('[data-place-id]').forEach(button => button.addEventListener('click', () => {
+        document.querySelector('#filterRow [data-filter="falls"]')?.click();
+        document.querySelector('#mapSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }));
+    })();
+  </script>
 </body>
 </html>
