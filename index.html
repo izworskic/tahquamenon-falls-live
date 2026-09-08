@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0d1715" />
+  <meta name="description" content="Tahquamenon Falls live river conditions, waterfall score, weather, trail intelligence, campgrounds, brewery, photo windows and an interactive park map." />
+  <meta property="og:title" content="Tahquamenon Falls Live · Michigan Outdoors Now" />
+  <meta property="og:description" content="One live view of the falls, river, weather, trails, campgrounds and the best way to spend your time at Tahquamenon right now." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <title>Tahquamenon Falls Live · Michigan Outdoors Now</title>
+  <link rel="preconnect" href="https://unpkg.com" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3yn5MZJOZQpCZ2giXf6b4T7VYgP9s=" crossorigin="" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <a class="brand" href="https://chrisizworski.com" aria-label="Michigan Outdoors Now home">
+      <span class="brand-mark">MI</span>
+      <span><strong>Michigan Outdoors Now</strong><small>Live field tools</small></span>
+    </a>
+    <nav aria-label="Utility">
+      <button class="ghost-button" id="sourcesButton" type="button">Sources</button>
+      <button class="ghost-button" id="shareButton" type="button">Share</button>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="live-dot" id="liveDot"></span><span id="freshnessText">Connecting to Tahquamenon…</span></div>
+        <h1 id="heroTitle">Tahquamenon<br><em>right now.</em></h1>
+        <p class="hero-sub">River power, trail comfort, weather, photo light, campgrounds and the park map — synthesized into one decision instead of six tabs.</p>
+        <div class="hero-actions">
+          <button class="primary-button" data-scroll="#mapSection" type="button">Explore the live map</button>
+          <button class="secondary-button" data-scroll="#planSection" type="button">Build a visit</button>
+        </div>
+      </div>
+
+      <article class="decision-card loading-card" id="decisionCard" aria-live="polite">
+        <div class="decision-topline">
+          <span class="mono-label">TAHQUAMENON NOW</span>
+          <span class="confidence-pill" id="confidencePill">— confidence</span>
+        </div>
+        <div class="decision-main">
+          <div class="score-orb" id="scoreOrb" style="--score: 0">
+            <span class="score-number" id="scoreNumber">—</span>
+            <small>/ 100</small>
+          </div>
+          <div>
+            <div class="decision-label" id="decisionLabel">Reading the river</div>
+            <p id="decisionSummary">Connecting live hydrology and weather…</p>
+          </div>
+        </div>
+        <div class="score-strip" aria-label="Score components">
+          <div><span>River</span><strong id="riverComponent">—</strong></div>
+          <div><span>Trail</span><strong id="trailComponent">—</strong></div>
+          <div><span>Photo</span><strong id="photoComponent">—</strong></div>
+          <div><span>Safety</span><strong id="safetyComponent">—</strong></div>
+        </div>
+        <button class="text-button" id="whyButton" type="button">Why this score <span>→</span></button>
+      </article>
+    </section>
+
+    <section class="now-grid section-shell" id="nowSection" aria-labelledby="nowTitle">
+      <div class="section-heading">
+        <div><span class="section-kicker">LIVE SIGNALS</span><h2 id="nowTitle">What changed the decision?</h2></div>
+        <span class="updated-badge" id="updatedBadge">Refreshing…</span>
+      </div>
+
+      <div class="signal-grid">
+        <article class="signal-card river-card">
+          <div class="signal-icon">≈</div>
+          <div class="signal-title"><span>USGS river flow</span><strong id="cfsValue">—</strong></div>
+          <div class="signal-detail"><span id="flowContext">Waiting for gauge</span><span id="flowPercentile">—</span></div>
+          <div class="mini-band" aria-hidden="true"><i id="flowBand"></i></div>
+          <p id="riverFootnote">USGS 04045500 · near Upper Falls</p>
+        </article>
+
+        <article class="signal-card">
+          <div class="signal-icon">°</div>
+          <div class="signal-title"><span>Trail weather</span><strong id="tempValue">—</strong></div>
+          <div class="signal-detail"><span id="weatherSummary">Connecting</span><span id="windValue">—</span></div>
+          <p id="weatherFootnote">NWS + fallback weather</p>
+        </article>
+
+        <article class="signal-card">
+          <div class="signal-icon">◐</div>
+          <div class="signal-title"><span>Photo window</span><strong id="photoValue">—</strong></div>
+          <div class="signal-detail"><span id="sunsetValue">Sunset —</span><span id="cloudValue">Clouds —</span></div>
+          <p id="photoFootnote">Light + clouds + precipitation</p>
+        </article>
+
+        <article class="signal-card alert-card" id="alertCard">
+          <div class="signal-icon">!</div>
+          <div class="signal-title"><span>NWS hazards</span><strong id="alertValue">Checking</strong></div>
+          <div class="signal-detail"><span id="alertDetail">Active warnings and advisories</span></div>
+          <p>NWS active-alert feed</p>
+        </article>
+      </div>
+
+      <article class="outlook-bar">
+        <span class="outlook-label">NEXT 24 HOURS</span>
+        <p id="outlookText">Forecast rain is intentionally kept separate from the current waterfall-flow score.</p>
+      </article>
+    </section>
+
+    <section class="map-section" id="mapSection" aria-labelledby="mapTitle">
+      <div class="section-shell map-heading">
+        <div>
+          <span class="section-kicker">EXPLORE THE PARK</span>
+          <h2 id="mapTitle">One map. Every reason to stop.</h2>
+          <p>Tap a point — falls, trails, campgrounds, food, access, paddling or photography — and the map becomes the trip planner.</p>
+        </div>
+        <div class="filter-row" id="filterRow" aria-label="Map filters">
+          <button class="filter-chip active" data-filter="all" type="button">All</button>
+          <button class="filter-chip" data-filter="falls" type="button">Falls</button>
+          <button class="filter-chip" data-filter="trail" type="button">Trails</button>
+          <button class="filter-chip" data-filter="camp" type="button">Camp</button>
+          <button class="filter-chip" data-filter="food" type="button">Food</button>
+          <button class="filter-chip" data-filter="access" type="button">Access</button>
+          <button class="filter-chip" data-filter="paddle" type="button">Paddle</button>
+          <button class="filter-chip" data-filter="photo" type="button">Photo</button>
+        </div>
+      </div>
+
+      <div class="map-stage">
+        <div id="parkMap" role="application" aria-label="Interactive Tahquamenon Falls State Park map"></div>
+        <div class="map-hud top-left">
+          <span class="map-status"><i></i> Live park intelligence</span>
+          <button id="fitMapButton" type="button">Fit park</button>
+        </div>
+        <div class="place-drawer" id="placeDrawer" aria-live="polite">
+          <button class="drawer-close" id="drawerClose" type="button" aria-label="Close place details">×</button>
+          <span class="drawer-kicker" id="drawerKicker">SELECT A POINT</span>
+          <h3 id="drawerTitle">Tap the map to explore</h3>
+          <p id="drawerDescription">Every marker opens a concise park-specific briefing and can be added to a visit plan.</p>
+          <div class="fact-chips" id="drawerFacts"></div>
+          <div class="drawer-actions">
+            <button class="primary-button compact" id="addToPlanButton" type="button" disabled>Add to my visit</button>
+            <button class="secondary-button compact" id="focusButton" type="button" disabled>Center point</button>
+          </div>
+          <small id="drawerSource">Michigan DNR-backed place database</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-shell plan-section" id="planSection" aria-labelledby="planTitle">
+      <div class="section-heading plan-heading">
+        <div><span class="section-kicker">MAKE THE DAY FIT</span><h2 id="planTitle">Build around the time you actually have.</h2></div>
+        <div class="duration-toggle" id="durationToggle" aria-label="Visit length">
+          <button data-duration="90" type="button">90 min</button>
+          <button data-duration="240" class="active" type="button">Half day</button>
+          <button data-duration="480" type="button">Full day</button>
+          <button data-duration="hike" type="button">Hiker</button>
+        </div>
+      </div>
+
+      <div class="plan-layout">
+        <div class="plan-list" id="planList"></div>
+        <aside class="plan-context">
+          <span class="mono-label">LIVE ADJUSTMENT</span>
+          <h3 id="planContextTitle">Half day · both falls</h3>
+          <p id="planContextText">The itinerary will adapt its emphasis to current river, weather and hazard conditions.</p>
+          <div class="context-metrics">
+            <div><span>River</span><strong id="planRiver">—</strong></div>
+            <div><span>Trail</span><strong id="planTrail">—</strong></div>
+            <div><span>Light</span><strong id="planLight">—</strong></div>
+          </div>
+          <button class="primary-button full" id="copyPlanButton" type="button">Copy visit plan</button>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section-shell intelligence-section" aria-labelledby="intelligenceTitle">
+      <div class="section-heading">
+        <div><span class="section-kicker">WHY THIS IS DIFFERENT</span><h2 id="intelligenceTitle">The waterfall engine, rebuilt for one place.</h2></div>
+      </div>
+      <div class="intelligence-grid">
+        <article><span>01</span><h3>Observed flow first</h3><p>Actual USGS discharge drives the waterfall signal. Rain in the forecast never masquerades as water already over the falls.</p></article>
+        <article><span>02</span><h3>Seasonal context</h3><p>The live discharge is compared against USGS daily percentiles for this date, so 500 cfs in September is not interpreted like 500 cfs during spring runoff.</p></article>
+        <article><span>03</span><h3>Park, not pin</h3><p>The output resolves the next decision: Upper or Lower, hike or drive, island, brewery, campground, paddling access or sunset at Rivermouth.</p></article>
+        <article><span>04</span><h3>Failure is visible</h3><p>Every live source has freshness and health. If USGS drops out, the site says so and lowers confidence rather than inventing certainty.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div><strong>Tahquamenon Falls Live</strong><span>A Michigan Outdoors Now field tool.</span></div>
+    <p>Decision support, not an official park-safety service. Follow posted closures, DNR rules and NWS warnings on site.</p>
+  </footer>
+
+  <dialog id="whyDialog" class="sheet-dialog">
+    <form method="dialog"><button class="dialog-close" aria-label="Close">×</button></form>
+    <span class="section-kicker">THE SCORE</span>
+    <h2>Why Tahquamenon Now says <span id="dialogDecision">—</span></h2>
+    <div id="reasonList" class="reason-list"></div>
+    <div class="formula-box">
+      <strong>Current score</strong>
+      <p>46% observed river experience · 24% trail comfort · 18% photography · 12% safety. Severe hazards cap the result.</p>
+      <small>Forecast precipitation can change the outlook, but does not inflate current river flow.</small>
+    </div>
+  </dialog>
+
+  <dialog id="sourcesDialog" class="sheet-dialog">
+    <form method="dialog"><button class="dialog-close" aria-label="Close">×</button></form>
+    <span class="section-kicker">PROVENANCE</span>
+    <h2>Live and reference sources</h2>
+    <div id="sourcesList" class="source-list"></div>
+    <p class="source-note">Static park facts are curated from Michigan DNR and official operator pages. Location markers are a planning aid; posted park signs and official maps control on the ground.</p>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="data/places.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
