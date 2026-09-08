@@ -1,0 +1,59 @@
+.visit-mode { padding: 88px 0 54px; }
+.section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; margin-bottom: 28px; }
+.compact-heading { margin-bottom: 22px; }
+.section-kicker { color: var(--tannin); font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+.section-heading h2, .map-heading h2 { margin: 7px 0 0; max-width: 820px; font-family: "Source Serif 4", Georgia, serif; font-size: clamp(38px, 5vw, 64px); line-height: .98; font-weight: 600; letter-spacing: -.045em; }
+.section-intro { max-width: 690px; margin: 12px 0 0; color: var(--muted); font-size: 15px; line-height: 1.55; }
+.updated-badge { flex: none; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+
+.intent-grid { display: grid; grid-template-columns: 1.3fr repeat(4, 1fr); gap: 10px; }
+.intent-card { min-height: 176px; padding: 18px; display: flex; flex-direction: column; text-align: left; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.34); cursor: pointer; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+.intent-card:hover { transform: translateY(-2px); border-color: rgba(182,106,47,.42); background: var(--surface); }
+.intent-card.selected { outline: 2px solid var(--tannin); outline-offset: 2px; }
+.intent-card.featured { background: var(--evergreen); color: var(--foam); border-color: var(--evergreen); }
+.intent-number { color: var(--tannin); font-size: 10px; font-weight: 800; letter-spacing: .12em; }
+.intent-card.featured .intent-number { color: #e8b577; }
+.intent-card strong { margin-top: 28px; font-family: "Source Serif 4", Georgia, serif; font-size: 22px; line-height: 1.05; font-weight: 600; letter-spacing: -.025em; }
+.intent-card small { margin-top: 8px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+.intent-card.featured small { color: rgba(255,250,241,.72); }
+.intent-card b { margin-top: auto; padding-top: 16px; color: var(--tannin); font-size: 11px; }
+.intent-card.featured b { color: #efbf84; }
+
+.falls-compare { padding: 50px 0 84px; }
+.falls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.fall-card { overflow: hidden; border: 1px solid var(--line); border-radius: 22px; background: var(--surface); }
+.fall-photo { height: 330px; background-size: cover; background-position: center; }
+.upper-photo { background-image: url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Tahquamenon_falls_upper.jpg?width=1300"); }
+.lower-photo { background-image: url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Lower_Tahquamenon_Falls.jpg?width=1300"); }
+.fall-copy { padding: 24px 24px 26px; }
+.fall-copy > span { color: var(--tannin); font-size: 10px; font-weight: 800; letter-spacing: .13em; }
+.fall-copy h3 { margin: 5px 0 9px; font-family: "Source Serif 4", Georgia, serif; font-size: 34px; line-height: 1; font-weight: 600; letter-spacing: -.04em; }
+.fall-copy p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+.fall-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+.fall-tags span { border: 1px solid var(--line); border-radius: 999px; padding: 6px 9px; color: var(--pine); font-size: 10px; font-weight: 700; }
+.inline-action { margin-top: 18px; padding: 0; border: 0; background: none; color: var(--tannin-deep); cursor: pointer; font-size: 12px; font-weight: 800; }
+.inline-action:hover { text-decoration: underline; text-underline-offset: 3px; }
+.practical-strip { display: grid; grid-template-columns: repeat(4,1fr); margin-top: 14px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.28); overflow: hidden; }
+.practical-strip div { padding: 16px; border-right: 1px solid var(--line); }
+.practical-strip div:last-child { border: 0; }
+.practical-strip strong, .practical-strip span { display: block; }
+.practical-strip strong { color: var(--evergreen); font-size: 11px; }
+.practical-strip span { margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.4; }
+
+.now-grid { padding: 82px 0 92px; border-top: 1px solid var(--line); }
+.signal-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+.signal-card { min-height: 220px; padding: 20px; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.34); }
+.signal-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: rgba(182,106,47,.10); color: var(--tannin); font-family: Georgia, serif; font-size: 18px; }
+.signal-title { margin-top: 24px; }
+.signal-title span, .signal-title strong { display: block; }
+.signal-title span { color: var(--muted); font-size: 11px; }
+.signal-title strong { margin-top: 4px; color: var(--evergreen); font-size: 28px; font-weight: 800; letter-spacing: -.035em; }
+.signal-detail { display: flex; gap: 8px; justify-content: space-between; margin-top: 10px; color: #465149; font-size: 10px; }
+.signal-card p { margin: auto 0 0; padding-top: 18px; color: var(--faint); font-size: 9px; line-height: 1.4; text-transform: uppercase; letter-spacing: .07em; }
+.mini-band { width: 100%; height: 4px; margin-top: 13px; position: relative; border-radius: 99px; background: linear-gradient(90deg, #d7c5ae, var(--tannin), #73856c); }
+.mini-band i { position: absolute; top: 50%; left: 0; width: 10px; height: 10px; transform: translate(-50%,-50%); border-radius: 50%; border: 2px solid var(--surface); background: var(--evergreen); transition: left .6s ease; }
+.alert-card.has-alert { border-color: rgba(180,79,63,.4); background: rgba(180,79,63,.06); }
+.alert-card.has-alert .signal-icon, .alert-card.has-alert .signal-title strong { color: var(--danger); }
+.outlook-bar { margin-top: 12px; padding: 15px 18px; display: flex; gap: 18px; align-items: center; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.24); }
+.outlook-label { flex: none; color: var(--tannin); font-size: 9px; font-weight: 800; letter-spacing: .11em; }
+.outlook-bar p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
