@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Live Tahquamenon Falls park intelligence tool",
   "scripts": {
-    "check": "node --check app.js && node --check data/places.js && node --check api/live.js"
+    "check": "node --check public/assets/tahquamenon-falls.js && node --check public/tahquamenon-falls/data/places.js && node --check api/tahquamenon-falls.js"
   },
   "engines": {
     "node": ">=20"

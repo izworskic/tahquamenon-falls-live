@@ -5,26 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#173629" />
   <meta name="description" content="Tahquamenon Falls live river conditions, waterfall score, weather, trail intelligence, campgrounds, brewery, photo windows and an interactive park map." />
-  <meta property="og:title" content="Tahquamenon Falls Live · Michigan Outdoors Now" />
+  <link rel="canonical" href="https://chrisizworski.com/tahquamenon-falls/" />
+  <meta property="og:title" content="Tahquamenon Falls Live | Chris Izworski" />
   <meta property="og:description" content="Know whether to go, which falls to visit, and how to spend your time at Tahquamenon right now." />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://chrisizworski.com/tahquamenon-falls/" />
   <meta property="og:image" content="https://commons.wikimedia.org/wiki/Special:Redirect/file/Tahquamenon_falls_upper.jpg?width=1600" />
   <meta name="twitter:card" content="summary_large_image" />
-  <title>Tahquamenon Falls Live · Michigan Outdoors Now</title>
+  <title>Tahquamenon Falls Live, River Conditions and Park Planner | Chris Izworski</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://unpkg.com" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="/assets/tahquamenon-falls.css" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://chrisizworski.com/tahquamenon-falls/#app","url":"https://chrisizworski.com/tahquamenon-falls/","name":"Tahquamenon Falls Live, River Conditions and Park Planner","description":"Live USGS river flow, same-date historical context, NWS weather and hazards, Upper versus Lower Falls guidance, an interactive park map, trails, campgrounds, brewery stops, paddling access, photo conditions, and time-based visit planning for Tahquamenon Falls State Park.","isPartOf":{"@type":"WebSite","url":"https://chrisizworski.com/","name":"Chris Izworski"},"author":{"@id":"https://chrisizworski.com/#person"},"creator":{"@id":"https://chrisizworski.com/#person"},"breadcrumb":{"@id":"https://chrisizworski.com/tahquamenon-falls/#breadcrumb"}},{"@type":"BreadcrumbList","@id":"https://chrisizworski.com/tahquamenon-falls/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://chrisizworski.com/"},{"@type":"ListItem","position":2,"name":"Tools","item":"https://chrisizworski.com/tools/"},{"@type":"ListItem","position":3,"name":"Tahquamenon Falls Live","item":"https://chrisizworski.com/tahquamenon-falls/"}]},{"@type":"Person","@id":"https://chrisizworski.com/#person","name":"Chris Izworski","url":"https://chrisizworski.com/"}]}</script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
 
   <header class="site-header">
-    <a class="brand" href="https://chrisizworski.com" aria-label="Michigan Outdoors Now home">
+    <a class="brand" href="https://chrisizworski.com" aria-label="Chris Izworski home">
       <span class="brand-mark">MI</span>
-      <span><strong>Michigan Outdoors Now</strong><small>Live field tools</small></span>
+      <span><strong>Chris Izworski</strong><small>Live field tools</small></span>
     </a>
     <nav aria-label="Utility">
       <button class="ghost-button" id="sourcesButton" type="button">Sources</button>
@@ -266,7 +269,7 @@
   </main>
 
   <footer>
-    <div><strong>Tahquamenon Falls Live</strong><span>A Michigan Outdoors Now field tool.</span></div>
+    <div><strong>Tahquamenon Falls Live</strong><span>A Chris Izworski field tool.</span></div>
     <p>Decision support, not an official park-safety service. Follow posted closures, DNR rules and NWS warnings on site.</p>
     <p class="photo-license">Photography via Wikimedia Commons: Attila Nagy (CC BY 2.5) · Joe Passe (CC BY-SA 2.0).</p>
   </footer>
@@ -294,8 +297,8 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script src="data/places.js"></script>
-  <script src="app.js"></script>
+  <script src="/tahquamenon-falls/data/places.js"></script>
+  <script src="/assets/tahquamenon-falls.js"></script>
   <script>
     (() => {
       const intents = {

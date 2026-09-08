@@ -358,7 +358,7 @@
 
   async function loadLive() {
     try {
-      const response = await fetch('/api/live', { headers: { Accept: 'application/json' } });
+      const response = await fetch('/api/tahquamenon-falls', { headers: { Accept: 'application/json' } });
       if (!response.ok) throw new Error(`Live API ${response.status}`);
       const payload = await response.json();
       renderLive(payload);
