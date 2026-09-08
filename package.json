@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Live Tahquamenon Falls park intelligence tool",
   "scripts": {
-    "check": "node --check public/assets/tahquamenon-falls.js && node --check public/tahquamenon-falls/data/places.js && node --check api/tahquamenon-falls.js"
+    "check": "node --check public/assets/tahquamenon-falls.js && node --check public/tahquamenon-falls/data/places.js && node --check api/tahquamenon-falls.js",
+    "vercel-build": "node scripts/inject-ga4.mjs"
   },
   "engines": {
     "node": ">=20"
