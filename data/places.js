@@ -8,7 +8,8 @@ window.TAHQUAMENON_PLACES = [
     kicker: 'The main event',
     description: 'The park’s largest waterfall: nearly 50 feet high and more than 200 feet across. The live river score is anchored to the USGS gage roughly 0.6 miles upstream.',
     facts: ['Accessible overlooks', 'New 1,100-foot accessible boardwalk', 'Best anchor for the live river score'],
-    action: 'Open Upper Falls view',
+    action: 'Official park page ↗',
+    url: 'https://www.michigan.gov/recsearch/parks/tahquamenonfalls',
     source: 'Michigan DNR + USGS'
   },
   {
@@ -20,7 +21,8 @@ window.TAHQUAMENON_PLACES = [
     kicker: 'New accessible approach',
     description: 'A newly completed 1,100-foot accessible boardwalk winds through old-growth forest toward the brink, with five switchback landings and interpretive stops.',
     facts: ['1,100 feet', 'Five landings', 'Accessible'],
-    action: 'Add to visit plan',
+    action: 'Accessibility details ↗',
+    url: 'https://www.michigan.gov/dnr/about/accessibility',
     source: 'Michigan DNR'
   },
   {
@@ -32,7 +34,8 @@ window.TAHQUAMENON_PLACES = [
     kicker: 'Camp 33 · Upper Falls',
     description: 'Privately operated brewpub inside the Upper Falls day-use area. A natural before-or-after-falls stop rather than a separate drive.',
     facts: ['24019 Upper Falls Drive', '2026 posted hours: 11:00 AM–8:30 PM', 'Inside Upper Falls area'],
-    action: 'Open brewery details',
+    action: 'Brewery menu, hours & directions ↗',
+    url: 'https://www.tahquamenonfallsbrewery.com/',
     source: 'Tahquamenon Falls Brewery & Pub'
   },
   {
@@ -44,7 +47,8 @@ window.TAHQUAMENON_PLACES = [
     kicker: 'Park orientation',
     description: 'Visitor-information stop in the Upper Falls area and meeting point for some DNR naturalist programs.',
     facts: ['Visitor information', 'Naturalist-program meeting point', 'Upper Falls area'],
-    action: 'Open park info',
+    action: 'Official park page ↗',
+    url: 'https://www.michigan.gov/recsearch/parks/tahquamenonfalls',
     source: 'Michigan DNR'
   },
   {
@@ -56,7 +60,8 @@ window.TAHQUAMENON_PLACES = [
     kicker: 'Five cascades around an island',
     description: 'A broad complex of smaller cascades four miles downstream of the Upper Falls, with boardwalks, overlooks and island access.',
     facts: ['Five cascades', 'Accessible viewpoints', 'Island access'],
-    action: 'Open Lower Falls view',
+    action: 'Official park page ↗',
+    url: 'https://www.michigan.gov/recsearch/parks/tahquamenonfalls',
     source: 'Michigan DNR'
   },
   {
@@ -66,9 +71,10 @@ window.TAHQUAMENON_PLACES = [
     lat: 46.60379,
     lng: -85.20631,
     kicker: 'Walk onto the Lower Falls island',
-    description: 'Accessible bridge connecting the Lower Falls day-use area to the island for a different set of views and a short island walk.',
-    facts: ['Accessible', 'Island Trail ~0.5 mi', 'Close-up Lower Falls views'],
-    action: 'Add island loop',
+    description: 'Accessible bridge connecting the Lower Falls day-use area to the island for a different set of views and a short island walk. Before the bridge was built the island was rowboat-only, and renting one from the concession is still the alternate way over.',
+    facts: ['Accessible', 'Island Trail ~0.5 mi', 'Close-up Lower Falls views', 'Rowboat rental is the alternate route'],
+    action: 'Rowboat rentals & island access ↗',
+    url: 'https://lowertahquamenonfalls.com/',
     source: 'Michigan DNR'
   },
   {
@@ -78,9 +84,10 @@ window.TAHQUAMENON_PLACES = [
     lat: 46.61055,
     lng: -85.20645,
     kicker: 'Lower Falls concessions',
-    description: 'Seasonal food, snacks and gift shop in the Lower Falls day-use area.',
-    facts: ['6999 N. Lower Campground Ln', 'Seasonal', 'Near Lower Falls day use'],
-    action: 'Open café details',
+    description: 'Seasonal food, snacks and gift shop in the Lower Falls day-use area, and the concession that rents the rowboats, canoes and kayaks used to reach the island and paddle the river.',
+    facts: ['6999 N. Lower Campground Ln', 'Seasonal, Memorial Day–mid-Oct', 'Rowboat, canoe & kayak rentals', 'Near Lower Falls day use'],
+    action: 'Menu, hours & rentals ↗',
+    url: 'https://lowertahquamenonfalls.com/',
     source: 'Lower Tahquamenon Falls concession'
   },
   {
@@ -90,9 +97,10 @@ window.TAHQUAMENON_PLACES = [
     lat: 46.60965,
     lng: -85.20748,
     kicker: 'Closest modern camping to Lower Falls',
-    description: 'The sunnier, more open Lower Falls modern-campground loop, roughly a quarter-mile from the falls with North Country Trail access.',
-    facts: ['Modern electric sites', 'Near river', 'NCT access'],
-    action: 'Compare campground',
+    description: 'The sunnier, more open Lower Falls modern-campground loop, roughly a quarter-mile from the falls with North Country Trail access. Part of 188 total sites across the Lower Falls campground; the reservation map shows exact site numbers per loop.',
+    facts: ['Part of 188 Lower Falls sites', 'Accessible sites + shower building', 'Near river', 'NCT access'],
+    action: 'Reserve a site ↗',
+    url: 'https://www.midnrreservations.com/',
     source: 'Michigan DNR'
   },
   {
@@ -102,9 +110,10 @@ window.TAHQUAMENON_PLACES = [
     lat: 46.61214,
     lng: -85.21020,
     kicker: 'Shaded year-round loop',
-    description: 'More shaded than Portage and about a mile from Lower Falls, with direct access to the park trail system.',
-    facts: ['Year-round', 'More shade', 'Trail access'],
-    action: 'Compare campground',
+    description: 'More shaded than Portage and about a mile from Lower Falls, with direct access to the park trail system. Part of 188 total sites across the Lower Falls campground; the reservation map shows exact site numbers per loop.',
+    facts: ['Part of 188 Lower Falls sites', 'Open year-round', 'More shade', 'Trail access'],
+    action: 'Reserve a site ↗',
+    url: 'https://www.midnrreservations.com/',
     source: 'Michigan DNR'
   },
   {
@@ -114,9 +123,10 @@ window.TAHQUAMENON_PLACES = [
     lat: 46.58988,
     lng: -85.22971,
     kicker: 'Classic point-to-point hike',
-    description: 'The official 2025 Lower Falls hiking map lists the River Trail as 5.1 miles from the Lower Falls parking lot to the Upper Falls parking lot.',
-    facts: ['5.1 mi one way', 'North Country Trail corridor', 'Plan a shuttle or return strategy'],
-    action: 'Build hiking plan',
+    description: 'The official 2025 Lower Falls hiking map lists the River Trail as 5.1 miles from the Lower Falls parking lot to the Upper Falls parking lot. It follows the river through old-growth cedar and hemlock with exposed roots, hills and several staircases, so it hikes harder than the mileage suggests. The Hunter Shuttle runs between the two lots in summer if you would rather not hike it both ways.',
+    facts: ['5.1 mi one way', 'Rated difficult, roots and hills', 'North Country Trail corridor', 'Pair with the Hunter Shuttle'],
+    action: 'Official trail map (PDF) ↗',
+    url: 'https://www.michigan.gov/recsearch/-/media/Project/Websites/recsearch/documents/MapsT-Z/tahquamenon-lower_hiking_trail_map.pdf',
     source: 'Michigan DNR 2025 trail map'
   },
   {
@@ -126,9 +136,10 @@ window.TAHQUAMENON_PLACES = [
     lat: 46.61170,
     lng: -85.22660,
     kicker: 'Quieter side trip',
-    description: 'The official Lower Falls hiking map shows a 1.6-mile trail connection from the Lower Falls trail system toward Clark Lake.',
-    facts: ['1.6 mi signed connection', 'Lower Falls trail system', 'Backcountry feel'],
-    action: 'Add trail option',
+    description: 'The official Lower Falls hiking map shows a 1.6-mile trail connection from the Lower Falls trail system toward Clark Lake, a quieter walk than the falls trails with real odds of wildlife.',
+    facts: ['1.6 mi signed connection', 'Lower Falls trail system', 'Quiet, backcountry feel', 'Waterfowl, cranes, black bear reported'],
+    action: 'Official trail map (PDF) ↗',
+    url: 'https://www.michigan.gov/recsearch/-/media/Project/Websites/recsearch/documents/MapsT-Z/tahquamenon-lower_hiking_trail_map.pdf',
     source: 'Michigan DNR 2025 trail map'
   },
   {
@@ -138,9 +149,10 @@ window.TAHQUAMENON_PLACES = [
     lat: 46.60979,
     lng: -85.20564,
     kicker: 'Paddling access',
-    description: 'Michigan DNR lists a canoe/kayak launch in the Lower Falls day-use area. River conditions and skill matter; waterfall zones are not normal flatwater.',
-    facts: ['DNR-designated launch', 'Lower Falls day-use area', 'Check flow + weather first'],
-    action: 'Check paddle conditions',
+    description: 'Michigan DNR lists a canoe/kayak launch in the Lower Falls day-use area, with 17 miles of paddling down to the Rivermouth. River conditions and skill matter; waterfall zones are not normal flatwater.',
+    facts: ['DNR-designated launch', '17 mi to Rivermouth', 'Rentals at the concession', 'Check flow + weather first'],
+    action: 'Boat & kayak rentals ↗',
+    url: 'https://lowertahquamenonfalls.com/',
     source: 'Michigan DNR'
   },
   {
@@ -150,9 +162,10 @@ window.TAHQUAMENON_PLACES = [
     lat: 46.55903,
     lng: -85.03515,
     kicker: 'Tahquamenon meets Lake Superior',
-    description: 'Modern and rustic camping near the river mouth, plus an accessible paved boat launch and fishing pier.',
-    facts: ['72 modern sites', '36 rustic sites', 'Boat launch + fishing pier'],
-    action: 'Open Rivermouth',
+    description: 'Modern and rustic camping near the river mouth, plus an accessible paved boat launch and fishing pier. A camper cabin and the park lodge are also based here and book through the same reservation system.',
+    facts: ['72 modern sites', '36 rustic sites', 'Camper cabin + lodge nearby', 'Boat launch + fishing pier'],
+    action: 'Reserve a site ↗',
+    url: 'https://www.midnrreservations.com/',
     source: 'Michigan DNR'
   },
   {
@@ -164,7 +177,47 @@ window.TAHQUAMENON_PLACES = [
     kicker: 'Evening photo option',
     description: 'The DNR specifically notes sunset river views at the Rivermouth rustic campground; the photo panel uses live cloud cover and sunset timing to flag the better window.',
     facts: ['Sunset-oriented', 'River + Lake Superior context', 'Cloud-sensitive'],
-    action: 'Check photo window',
+    action: 'Official park page ↗',
+    url: 'https://www.michigan.gov/recsearch/parks/tahquamenonfalls',
     source: 'Michigan DNR + live weather'
+  },
+  {
+    id: 'hunter-shuttle',
+    name: 'Hunter Shuttle · Upper ↔ Lower Falls',
+    category: 'access',
+    lat: 46.57780,
+    lng: -85.25230,
+    kicker: 'Skip the 4-mile drive or the 5.1-mile hike',
+    description: 'A fee-based shuttle runs between the Upper and Lower Falls day-use areas, the practical way to see both without doubling back to your vehicle or hiking the River Trail one way.',
+    facts: ['Noon–8pm daily through Labor Day', 'Weekend-only before/after peak season', 'Fee-based, book ahead in summer'],
+    action: 'Shuttle schedule & booking ↗',
+    url: 'https://huntertransportation.net/',
+    source: 'Hunter Shuttle Service'
+  },
+  {
+    id: 'backcountry-camp',
+    name: 'Backcountry Camping · North Country Trail',
+    category: 'camp',
+    lat: 46.58988,
+    lng: -85.22971,
+    kicker: 'Hike-in, three sites total',
+    description: 'Three reservable backcountry campsites sit along or near the North Country Trail corridor between the falls, each with a picnic table, fire ring and latrine. Hike-in distance runs 1 to 5 miles depending on the site and where you park.',
+    facts: ['3 sites, reservation required', 'Hike-in 1–5 mi', 'Picnic table, fire ring, latrine'],
+    action: 'Reserve a backcountry site ↗',
+    url: 'https://www.midnrreservations.com/',
+    source: 'Michigan DNR'
+  },
+  {
+    id: 'winter-trail-system',
+    name: 'Upper Falls Winter Trail System',
+    category: 'trail',
+    lat: 46.57760,
+    lng: -85.25340,
+    kicker: 'Lantern Loop + Giant Pines Loop',
+    description: 'The Upper Falls hiking trail system doubles as the park\u2019s groomed cross-country ski network in winter: the 1-mile Lantern Loop and the 3.8-mile Giant Pines Loop, both starting from the Upper Falls day-use area and open to snowshoeing and winter hiking as well.',
+    facts: ['1-mi Lantern Loop', '3.8-mi Giant Pines Loop', 'Groomed for skiing in winter', 'Open to hiking/snowshoeing'],
+    action: 'Winter trail map (PDF) \u2197',
+    url: 'https://www.michigan.gov/recsearch/-/media/Project/Websites/recsearch/documents/MapsT-Z/tahquamenon_upper_falls_winter_trail_map.pdf',
+    source: 'Michigan DNR'
   }
 ];

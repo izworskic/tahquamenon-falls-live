@@ -243,6 +243,15 @@
     $('drawerTitle').textContent = place.name;
     $('drawerDescription').textContent = place.description;
     $('drawerFacts').innerHTML = (place.facts || []).map(f => `<span>${escapeHtml(f)}</span>`).join('');
+    const drawerLink = $('drawerLink');
+    if (place.url) {
+      drawerLink.href = escapeAttr(place.url);
+      drawerLink.textContent = place.action || 'Learn more ↗';
+      drawerLink.hidden = false;
+    } else {
+      drawerLink.hidden = true;
+      drawerLink.removeAttribute('href');
+    }
     $('drawerSource').textContent = `Source: ${place.source}`;
     $('addToPlanButton').disabled = false;
     $('focusButton').disabled = false;
