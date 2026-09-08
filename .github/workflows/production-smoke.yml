@@ -1,0 +1,68 @@
+name: Production smoke
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      PROD_URL: https://tahquamenon-falls-live-94is.vercel.app
+    steps:
+      - name: Wait for Vercel production and verify app
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for attempt in $(seq 1 36); do
+            echo "Smoke attempt ${attempt}/36"
+            if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 20 -fsS "$PROD_URL/" -o /tmp/index.html; then
+              if grep -q "Tahquamenon" /tmp/index.html; then
+                if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 25 -fsS "$PROD_URL/api/live" -o /tmp/live.json; then
+                  if python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path('/tmp/live.json').read_text())
+          required = ['generatedAt', 'decision', 'sourceHealth', 'river', 'weather']
+          missing = [key for key in required if key not in data]
+          if missing:
+              raise SystemExit(f"Missing required API keys: {missing}")
+
+          decision = data.get('decision') or {}
+          source_health = data.get('sourceHealth') or {}
+          if 'confidence' not in decision:
+              raise SystemExit('Decision confidence missing')
+          if not any(source_health.get(k) for k in ('usgs', 'nws', 'openMeteo')):
+              raise SystemExit(f"No live source healthy: {source_health}")
+
+          river = data.get('river') or {}
+          print('generatedAt=', data.get('generatedAt'))
+          print('score=', decision.get('score'))
+          print('decision=', decision.get('label'))
+          print('confidence=', decision.get('confidence'))
+          print('cfs=', river.get('cfs'))
+          print('sourceHealth=', source_health)
+          PY
+                  then
+                    ok=1
+                    break
+                  fi
+                fi
+              fi
+            fi
+            sleep 10
+          done
+
+          if [ "$ok" -ne 1 ]; then
+            echo "Production smoke test failed after 36 attempts" >&2
+            exit 1
+          fi
+
+          echo "Production smoke test passed"
