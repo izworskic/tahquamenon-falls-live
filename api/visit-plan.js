@@ -1,6 +1,6 @@
 import { getVercelOidcToken } from '@vercel/oidc';
 const ALLOWED_PREFS = new Set(['kids','easy','hike','photo','food','winter']);
-const HARNESS_URL = process.env.HARNESS_URL || 'https://agentbase-registry.vercel.app/api/harness';
+const HARNESS_URL = process.env.HARNESS_URL || 'https://agentbase-registry-izworski-gmailcoms-projects.vercel.app/api/harness';
 
 function clampText(value, max = 700) { return String(value || '').trim().slice(0, max); }
 function nearestMinutes(value, fallback = 180) {
@@ -152,7 +152,7 @@ export default async function handler(req, res) {
   const result = judged || deterministicResult(s);
   console.info(JSON.stringify({ event:'visit_plan_engine', engine:result.engine, focus:result.focus }));
   res.setHeader('Cache-Control','no-store');
-  return res.status(200).json({ ...result, architecture:'shared-harness-v1' });
+  return res.status(200).json({ ...result, architecture:'shared-harness-v2' });
 }
 
 export { inferVisitPreferences, inferMinutes, sanitizeClientState, deterministicResult, oidcToken };
