@@ -3,6 +3,7 @@ const LON = -85.25659;
 const USGS_SITE = '04045500';
 const USER_AGENT = 'TahquamenonFallsLive/1.0 (chrisizworski.com)';
 const MAX_USGS_AGE_MIN = 120;
+const FETCH_TIMEOUT_MS = 3500;
 const statsCache = new Map();
 
 const clamp = (value, min = 0, max = 100) => Math.min(max, Math.max(min, value));
@@ -11,7 +12,7 @@ const safeNumber = (value) => {
   return Number.isFinite(n) ? n : null;
 };
 
-async function fetchJson(url, options = {}, timeoutMs = 8000) {
+async function fetchJson(url, options = {}, timeoutMs = FETCH_TIMEOUT_MS) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -23,7 +24,7 @@ async function fetchJson(url, options = {}, timeoutMs = 8000) {
   }
 }
 
-async function fetchText(url, options = {}, timeoutMs = 8000) {
+async function fetchText(url, options = {}, timeoutMs = FETCH_TIMEOUT_MS) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -36,7 +37,15 @@ async function fetchText(url, options = {}, timeoutMs = 8000) {
 }
 
 function parseUsgsSeries(payload) {
-  const out = { cfs: null, gageHeightFt: null, precipIn: null, observedAt: null };
+  const out = {
+    cfs: null,
+    gageHeightFt: null,
+    precipIn: null,
+    observedAt: null,
+    dischargeObservedAt: null,
+    stageObservedAt: null,
+    precipObservedAt: null
+  };
   const series = payload?.value?.timeSeries || [];
   for (const item of series) {
     const code = item?.variable?.variableCode?.[0]?.value;
@@ -44,10 +53,22 @@ function parseUsgsSeries(payload) {
     const latest = values[values.length - 1];
     if (!latest) continue;
     const value = safeNumber(latest.value);
-    if (code === '00060') out.cfs = value;
-    if (code === '00065') out.gageHeightFt = value;
-    if (code === '00045') out.precipIn = value;
-    if (!out.observedAt || new Date(latest.dateTime) > new Date(out.observedAt)) out.observedAt = latest.dateTime;
+    if (!Number.isFinite(value)) continue;
+
+    if (code === '00060') {
+      out.cfs = value;
+      out.dischargeObservedAt = latest.dateTime;
+      // River freshness must be tied to the discharge observation, never a newer stage/precip timestamp.
+      out.observedAt = latest.dateTime;
+    }
+    if (code === '00065') {
+      out.gageHeightFt = value;
+      out.stageObservedAt = latest.dateTime;
+    }
+    if (code === '00045') {
+      out.precipIn = value;
+      out.precipObservedAt = latest.dateTime;
+    }
   }
   return out;
 }
@@ -108,7 +129,7 @@ function riverExperienceScore(cfs, percentile) {
   return Math.round(clamp(power * 0.72 + relative * 0.28));
 }
 
-function scoreWeather(weather, alerts = []) {
+function scoreWeather(weather, alerts = [], alertsVerified = true) {
   const temp = weather.tempF;
   const wind = weather.windMph;
   const precipChance = weather.precipChance;
@@ -130,7 +151,7 @@ function scoreWeather(weather, alerts = []) {
 
   const severe = alerts.some(a => /Tornado|Severe Thunderstorm|Flash Flood|Extreme Wind|Blizzard|Ice Storm/i.test(a.event || ''));
   const notable = alerts.some(a => /Flood|Winter Storm|High Wind|Dense Fog|Red Flag|Heat|Cold|Wind Chill/i.test(a.event || ''));
-  const safety = severe ? 5 : notable ? 45 : 96;
+  const safety = !alertsVerified ? 70 : severe ? 5 : notable ? 45 : 96;
 
   return { trail: Math.round(clamp(trail)), photo: Math.round(clamp(photo)), safety };
 }
@@ -162,7 +183,7 @@ function flowWords(percentile, cfs) {
 function buildDecision({ river, stats, weather, alerts, sourceHealth }) {
   const percentile = percentileEstimate(river.cfs, stats);
   const riverScore = riverExperienceScore(river.cfs, percentile);
-  const wx = scoreWeather(weather, alerts);
+  const wx = scoreWeather(weather, alerts, sourceHealth.nwsAlerts);
 
   let score = sourceHealth.usgs && riverScore != null
     ? Math.round(riverScore * 0.46 + wx.trail * 0.24 + wx.photo * 0.18 + wx.safety * 0.12)
@@ -175,6 +196,7 @@ function buildDecision({ river, stats, weather, alerts, sourceHealth }) {
   if (!sourceHealth.usgs) confidence -= 38;
   if (!sourceHealth.nws && sourceHealth.openMeteo) confidence -= 12;
   if (!sourceHealth.nws && !sourceHealth.openMeteo) confidence -= 30;
+  if (!sourceHealth.nwsAlerts) confidence -= 12;
   if (!stats) confidence -= 8;
   if (river.observedAt) {
     const ageMin = (Date.now() - new Date(river.observedAt).getTime()) / 60000;
@@ -187,8 +209,9 @@ function buildDecision({ river, stats, weather, alerts, sourceHealth }) {
   if (sourceHealth.usgs && riverScore != null) reasons.push(`${Math.round(river.cfs)} cfs is ${flowWords(percentile, river.cfs)}${Number.isFinite(percentile) ? ` (~${percentile}th percentile)` : ''}.`);
   else reasons.push('Fresh USGS discharge is unavailable, so the tool is not claiming a current waterfall-flow score.');
   if (Number.isFinite(weather.tempF)) reasons.push(`${Math.round(weather.tempF)}°F with ${Math.round(weather.windMph || 0)} mph wind shapes trail comfort.`);
-  if (alerts.length) reasons.push(`${alerts.length} active NWS alert${alerts.length === 1 ? '' : 's'} affect the safety score.`);
-  else reasons.push('No active NWS hazard in the normalized feed.');
+  if (!sourceHealth.nwsAlerts) reasons.push('The NWS alert feed could not be verified, so hazard status is unknown; check official NWS alerts before exposed trails or river access.');
+  else if (alerts.length) reasons.push(`${alerts.length} active NWS alert${alerts.length === 1 ? '' : 's'} affect the safety score.`);
+  else reasons.push('The NWS alert feed was checked and returned no active hazards for the park point.');
 
   let outlook = 'No strong flow change signal yet.';
   if (Number.isFinite(weather.qpf24In)) {
@@ -244,29 +267,20 @@ function parseNwsWind(text) {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
-async function getNws() {
+async function getNwsForecast() {
   const headers = { 'User-Agent': USER_AGENT, Accept: 'application/geo+json, application/json' };
   const pointUrl = `https://api.weather.gov/points/${LAT},${LON}`;
   const point = await fetchJson(pointUrl, { headers });
   const hourlyUrl = point?.properties?.forecastHourly;
   const dailyUrl = point?.properties?.forecast;
-  const alertsUrl = `https://api.weather.gov/alerts/active?point=${LAT},${LON}`;
-  const [hourly, daily, alertPayload] = await Promise.all([
+  const [hourly, daily] = await Promise.all([
     hourlyUrl ? fetchJson(hourlyUrl, { headers }) : null,
-    dailyUrl ? fetchJson(dailyUrl, { headers }).catch(() => null) : null,
-    fetchJson(alertsUrl, { headers }).catch(() => ({ features: [] }))
+    dailyUrl ? fetchJson(dailyUrl, { headers }).catch(() => null) : null
   ]);
   const now = hourly?.properties?.periods?.[0] || {};
   const periods24 = (hourly?.properties?.periods || []).slice(0, 24);
   const precipProbs = periods24.map(p => safeNumber(p?.probabilityOfPrecipitation?.value)).filter(Number.isFinite);
   const qpfProxy = precipProbs.length ? precipProbs.reduce((a, b) => a + b, 0) / precipProbs.length : null;
-  const alerts = (alertPayload?.features || []).map(f => ({
-    event: f?.properties?.event,
-    severity: f?.properties?.severity,
-    headline: f?.properties?.headline,
-    expires: f?.properties?.expires,
-    instruction: f?.properties?.instruction
-  }));
   return {
     weather: {
       tempF: safeNumber(now.temperature),
@@ -281,9 +295,22 @@ async function getNws() {
       nwsPrecipSignal: qpfProxy,
       forecastPeriods: (daily?.properties?.periods || []).slice(0, 6)
     },
-    alerts,
-    urls: { pointUrl, hourlyUrl, dailyUrl, alertsUrl }
+    urls: { pointUrl, hourlyUrl, dailyUrl }
   };
+}
+
+async function getNwsAlerts() {
+  const headers = { 'User-Agent': USER_AGENT, Accept: 'application/geo+json, application/json' };
+  const alertsUrl = `https://api.weather.gov/alerts/active?point=${LAT},${LON}`;
+  const alertPayload = await fetchJson(alertsUrl, { headers });
+  const alerts = (alertPayload?.features || []).map(f => ({
+    event: f?.properties?.event,
+    severity: f?.properties?.severity,
+    headline: f?.properties?.headline,
+    expires: f?.properties?.expires,
+    instruction: f?.properties?.instruction
+  }));
+  return { alerts, url: alertsUrl };
 }
 
 async function getOpenMeteo() {
@@ -340,45 +367,78 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
   const started = Date.now();
-  const sourceHealth = { usgs: false, nws: false, openMeteo: false };
+  const sourceHealth = { usgs: false, nws: false, nwsAlerts: false, openMeteo: false };
   const sourceErrors = {};
 
-  const [usgsResult, nwsResult, omResult] = await Promise.allSettled([getUsgs(), getNws(), getOpenMeteo()]);
+  const [usgsResult, nwsResult, alertsResult, omResult] = await Promise.allSettled([
+    getUsgs(),
+    getNwsForecast(),
+    getNwsAlerts(),
+    getOpenMeteo()
+  ]);
+
   let usgs = { river: {}, stats: null, urls: {} };
-  let nws = { weather: {}, alerts: [], urls: {} };
+  let nws = { weather: {}, urls: {} };
+  let nwsAlerts = { alerts: [], url: null };
   let om = { weather: {}, daylight: {}, url: null };
 
   if (usgsResult.status === 'fulfilled') {
     usgs = usgsResult.value;
-    const observedMs = usgs.river.observedAt ? new Date(usgs.river.observedAt).getTime() : NaN;
+    const observedMs = usgs.river.dischargeObservedAt ? new Date(usgs.river.dischargeObservedAt).getTime() : NaN;
     const ageMin = Number.isFinite(observedMs) ? (Date.now() - observedMs) / 60000 : Infinity;
     sourceHealth.usgs = Number.isFinite(usgs.river.cfs) && ageMin >= -10 && ageMin <= MAX_USGS_AGE_MIN;
     usgs.river.fresh = sourceHealth.usgs;
     usgs.river.ageMinutes = Number.isFinite(ageMin) ? Math.round(ageMin) : null;
+  } else {
+    sourceErrors.usgs = usgsResult.reason?.message || 'USGS unavailable';
   }
-  else sourceErrors.usgs = usgsResult.reason?.message || 'USGS unavailable';
-  if (nwsResult.status === 'fulfilled') { nws = nwsResult.value; sourceHealth.nws = Number.isFinite(nws.weather.tempF); }
-  else sourceErrors.nws = nwsResult.reason?.message || 'NWS unavailable';
-  if (omResult.status === 'fulfilled') { om = omResult.value; sourceHealth.openMeteo = Number.isFinite(om.weather.tempF); }
-  else sourceErrors.openMeteo = omResult.reason?.message || 'Open-Meteo unavailable';
 
+  if (nwsResult.status === 'fulfilled') {
+    nws = nwsResult.value;
+    sourceHealth.nws = Number.isFinite(nws.weather.tempF);
+  } else {
+    sourceErrors.nws = nwsResult.reason?.message || 'NWS forecast unavailable';
+  }
+
+  if (alertsResult.status === 'fulfilled') {
+    nwsAlerts = alertsResult.value;
+    sourceHealth.nwsAlerts = true;
+  } else {
+    sourceErrors.nwsAlerts = alertsResult.reason?.message || 'NWS alert feed unavailable';
+  }
+
+  if (omResult.status === 'fulfilled') {
+    om = omResult.value;
+    sourceHealth.openMeteo = Number.isFinite(om.weather.tempF);
+  } else {
+    sourceErrors.openMeteo = omResult.reason?.message || 'Open-Meteo unavailable';
+  }
+
+  const alerts = nwsAlerts.alerts || [];
   const weather = mergeWeather(nws, om);
-  const decision = buildDecision({ river: usgs.river, stats: usgs.stats, weather, alerts: nws.alerts, sourceHealth });
+  const decision = buildDecision({ river: usgs.river, stats: usgs.stats, weather, alerts, sourceHealth });
+  const generatedAt = new Date().toISOString();
 
   const payload = {
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     latencyMs: Date.now() - started,
     location: { name: 'Tahquamenon Upper Falls', lat: LAT, lon: LON, timezone: 'America/Detroit' },
     river: { ...usgs.river, site: USGS_SITE, stats: usgs.stats },
     weather,
     daylight: om.daylight || {},
-    alerts: nws.alerts || [],
+    alerts,
+    alertStatus: {
+      verified: sourceHealth.nwsAlerts,
+      count: alerts.length,
+      checkedAt: sourceHealth.nwsAlerts ? generatedAt : null
+    },
     decision,
     sourceHealth,
     sourceErrors,
     sources: [
       { id: 'usgs', name: 'USGS Water Data', live: sourceHealth.usgs, url: `https://waterdata.usgs.gov/monitoring-location/${USGS_SITE}/` },
-      { id: 'nws', name: 'National Weather Service', live: sourceHealth.nws, url: `https://forecast.weather.gov/MapClick.php?lat=${LAT}&lon=${LON}` },
+      { id: 'nws', name: 'National Weather Service forecast', live: sourceHealth.nws, url: `https://forecast.weather.gov/MapClick.php?lat=${LAT}&lon=${LON}` },
+      { id: 'nws-alerts', name: 'National Weather Service alerts', live: sourceHealth.nwsAlerts, url: `https://api.weather.gov/alerts/active?point=${LAT},${LON}` },
       { id: 'open-meteo', name: 'Open-Meteo fallback / cloud + QPF', live: sourceHealth.openMeteo, url: 'https://open-meteo.com/' },
       { id: 'dnr', name: 'Michigan DNR park database', live: true, url: 'https://www.michigan.gov/recsearch/parks/tahquamenonfalls' }
     ]
@@ -387,3 +447,5 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=900');
   return res.status(200).json(payload);
 }
+
+export { parseUsgsSeries, scoreWeather, buildDecision };
