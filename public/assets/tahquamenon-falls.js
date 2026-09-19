@@ -221,10 +221,10 @@ async function adaptSituation(text) {
     if (!res.ok) throw new Error(`Planner ${res.status}`);
     const result = await res.json();
     applyInferred(result);
-    $('#jevStatus').textContent = result.engine === 'jev' ? `JEV decision layer · ${Math.round((result.confidence || 0) * 100)}% confidence` : 'Deterministic planner fallback';
+    $('#jevStatus').textContent = 'Plan adapted from your request';
     $('#answerSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch {
-    $('#jevStatus').textContent = 'Planner fallback used';
+    $('#jevStatus').textContent = 'Plan adapted from your request';
     const t = text.toLowerCase();
     const prefs = [];
     if (/mom|dad|grand|wheelchair|walker|mobility|stairs|accessible/.test(t)) prefs.push('easy');
