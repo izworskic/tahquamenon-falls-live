@@ -174,8 +174,8 @@ function renderPlan() {
 }
 
 function syncControls() {
-  $$('#timeChoices button').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.minutes) === state.minutes));
-  $$('#preferenceChoices button').forEach(btn => btn.classList.toggle('active', state.prefs.has(btn.dataset.pref)));
+  $$$('#timeChoices button').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.minutes) === state.minutes));
+  $$$('#preferenceChoices button').forEach(btn => btn.classList.toggle('active', state.prefs.has(btn.dataset.pref)));
 }
 
 function seasonalHeadline(fall) {
@@ -452,8 +452,8 @@ function copyPlan() {
 
 function bind() {
   $('#customPlan')?.addEventListener('toggle', e => { if (e.currentTarget.open) track('customize_open'); });
-  $('#timeChoices button').forEach(btn => btn.addEventListener('click', () => { state.minutes = Number(btn.dataset.minutes); track('planner_time_select',{minutes:state.minutes}); syncControls(); renderPlan(); }));
-  $('#preferenceChoices button').forEach(btn => btn.addEventListener('click', () => { const pref = btn.dataset.pref; state.prefs.has(pref) ? state.prefs.delete(pref) : state.prefs.add(pref); track('priority_select',{priority:pref,active:state.prefs.has(pref)}); syncControls(); renderPlan(); }));
+  $$('#timeChoices button').forEach(btn => btn.addEventListener('click', () => { state.minutes = Number(btn.dataset.minutes); track('planner_time_select',{minutes:state.minutes}); syncControls(); renderPlan(); }));
+  $$('#preferenceChoices button').forEach(btn => btn.addEventListener('click', () => { const pref = btn.dataset.pref; state.prefs.has(pref) ? state.prefs.delete(pref) : state.prefs.add(pref); track('priority_select',{priority:pref,active:state.prefs.has(pref)}); syncControls(); renderPlan(); }));
   $('#buildPlanButton').addEventListener('click', () => { const plan=basePlan(); track('planner_build',{minutes:state.minutes,persona:state.persona||'none',season:state.seasonal?.season||'unknown',value:totalProductValue(plan,{minutes:state.minutes,prefs:state.prefs,intent:state.intent,persona:state.persona,seasonal:state.seasonal,live:state.live}).total}); renderPlan(); $('#answerSection').scrollIntoView({behavior:'smooth',block:'start'}); });
   $('#situationForm').addEventListener('submit', e => { e.preventDefault(); const text = $('#situationInput').value.trim(); if (text) adaptSituation(text); });
   $('#copyPlanButton').addEventListener('click', () => { track('copy_plan',{minutes:state.minutes}); copyPlan(); });
@@ -461,7 +461,7 @@ function bind() {
   $$('[data-scroll]').forEach(btn => btn.addEventListener('click', () => document.querySelector(btn.dataset.scroll)?.scrollIntoView({behavior:'smooth'})));
   $$('#filterRow button').forEach(btn => btn.addEventListener('click', async () => { state.activeFilter = btn.dataset.filter; $$('#filterRow button').forEach(x => x.classList.toggle('active', x === btn)); await ensureMap(); renderMarkers(); }));
   $('#addPlaceButton').addEventListener('click', () => { const p = state.selectedPlace; if (!p || state.customStops.includes(p.id)) return; state.customStops.push(p.id); track('map_stop_add',{stop_id:p.id}); saveState(); renderPlan(); selectPlace(p,false); });
-  $('[data-place-id]').forEach(btn => btn.addEventListener('click', async () => { const p = places().find(x => x.id === btn.dataset.placeId); if (!p) return; $('#mapSection').scrollIntoView({behavior:'smooth'}); await ensureMap(); selectPlace(p,true); }));
+  $$('[data-place-id]').forEach(btn => btn.addEventListener('click', async () => { const p = places().find(x => x.id === btn.dataset.placeId); if (!p) return; $('#mapSection').scrollIntoView({behavior:'smooth'}); await ensureMap(); selectPlace(p,true); }));
   $('#seasonLink')?.addEventListener('click', () => {
     const kind=$('#seasonLink').dataset.seasonLink;
     track(kind==='xc'?'xc_detail_click':'fall_color_detail_click',{placement:'season_context'});
