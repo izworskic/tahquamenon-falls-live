@@ -9,6 +9,8 @@
     duration: '240',
     customPlan: []
   };
+  const PLAN_STORAGE_KEY = 'tahquamenon.visit.v1';
+  let mapLoadPromise = null;
 
   const FALLBACK_BASELINE = {
     generatedAt: null,
@@ -22,7 +24,8 @@
       percentile: null, flowContext: 'Gauge unavailable', reasons: ['Live sources could not be reached. No current waterfall score is being claimed.'],
       outlook: 'Refresh when connectivity returns.'
     },
-    sourceHealth: { usgs: false, nws: false, openMeteo: false },
+    sourceHealth: { usgs: false, nws: false, nwsAlerts: false, openMeteo: false },
+    alertStatus: { verified: false, count: 0, checkedAt: null },
     sources: [
       { id: 'usgs', name: 'USGS Water Data · 04045500', live: false, url: 'https://waterdata.usgs.gov/monitoring-location/04045500/' },
       { id: 'nws', name: 'National Weather Service', live: false, url: 'https://forecast.weather.gov/MapClick.php?lat=46.5749&lon=-85.25659' },
@@ -104,9 +107,12 @@
 
   function sourceStateText(data) {
     const health = data?.sourceHealth || {};
-    const liveCount = ['usgs', 'nws', 'openMeteo'].filter(k => health[k]).length;
-    if (liveCount === 3) return { cls: 'live', text: 'Live river + weather connected' };
-    if (liveCount > 0) return { cls: 'partial', text: 'Partial live data · fallback active' };
+    const river = Boolean(health.usgs);
+    const weather = Boolean(health.nws || health.openMeteo);
+    const hazards = Boolean(health.nwsAlerts);
+    if (river && weather && hazards) return { cls: 'live', text: 'Live river + weather + alerts connected' };
+    if (river && weather) return { cls: 'partial', text: 'Live conditions · hazard feed needs verification' };
+    if (river || weather || hazards) return { cls: 'partial', text: 'Partial live data · fallback active' };
     return { cls: '', text: 'Live sources unavailable' };
   }
 
@@ -149,9 +155,13 @@
     $('cloudValue').textContent = Number.isFinite(wx.cloudCover) ? `Clouds ${Math.round(wx.cloudCover)}%` : 'Clouds —';
 
     const alerts = data.alerts || [];
-    $('alertCard').classList.toggle('has-alert', alerts.length > 0);
-    $('alertValue').textContent = alerts.length ? `${alerts.length} active` : 'None active';
-    $('alertDetail').textContent = alerts.length ? alerts[0].event || alerts[0].headline || 'NWS alert' : 'No active NWS hazards returned';
+    const alertsVerified = data.alertStatus?.verified === true || data.sourceHealth?.nwsAlerts === true;
+    $('alertCard').classList.toggle('has-alert', alertsVerified && alerts.length > 0);
+    $('alertCard').classList.toggle('unverified', !alertsVerified);
+    $('alertValue').textContent = !alertsVerified ? 'Not verified' : alerts.length ? `${alerts.length} active` : 'None active';
+    $('alertDetail').textContent = !alertsVerified
+      ? 'NWS alert feed unavailable · verify official hazards'
+      : alerts.length ? alerts[0].event || alerts[0].headline || 'NWS alert' : 'NWS alert feed checked · no active hazards';
 
     $('outlookText').textContent = d.outlook || 'Forecast precipitation is kept separate from current flow.';
 
@@ -194,11 +204,80 @@
   }
   function escapeAttr(value) { return escapeHtml(value); }
 
-  function initMap() {
-    if (!window.L || !Array.isArray(window.TAHQUAMENON_PLACES)) {
-      $('parkMap').innerHTML = '<div style="padding:2rem;color:#b7c4be">Map library unavailable. Place intelligence remains available in the visit planner.</div>';
+  function loadLeaflet() {
+    if (window.L) return Promise.resolve(window.L);
+    if (mapLoadPromise) return mapLoadPromise;
+
+    mapLoadPromise = new Promise((resolve, reject) => {
+      if (!document.querySelector('link[data-leaflet-css]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+        link.crossOrigin = '';
+        link.dataset.leafletCss = 'true';
+        document.head.appendChild(link);
+      }
+
+      const existing = document.querySelector('script[data-leaflet-js]');
+      if (existing) {
+        existing.addEventListener('load', () => resolve(window.L), { once: true });
+        existing.addEventListener('error', () => reject(new Error('Leaflet failed to load')), { once: true });
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+      script.crossOrigin = '';
+      script.dataset.leafletJs = 'true';
+      script.onload = () => resolve(window.L);
+      script.onerror = () => reject(new Error('Leaflet failed to load'));
+      document.body.appendChild(script);
+    });
+    return mapLoadPromise;
+  }
+
+  async function ensureMap() {
+    if (state.map) return state.map;
+    const node = $('parkMap');
+    node?.classList.add('map-loading');
+    try {
+      await loadLeaflet();
+      initMap();
+      return state.map;
+    } catch (error) {
+      console.warn('Map unavailable:', error);
+      if (node) node.innerHTML = '<div class="map-placeholder">Interactive map could not load. The visit planner and place links remain available.</div>';
+      return null;
+    } finally {
+      node?.classList.remove('map-loading');
+    }
+  }
+
+  function setupMapLazyLoad() {
+    const mapSection = $('mapSection');
+    const hasDeepLink = new URLSearchParams(location.search).has('place');
+    if (hasDeepLink) {
+      ensureMap();
       return;
     }
+    if (!('IntersectionObserver' in window) || !mapSection) {
+      ensureMap();
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      observer.disconnect();
+      ensureMap();
+    }, { rootMargin: '320px 0px' });
+    observer.observe(mapSection);
+  }
+
+  function initMap() {
+    if (state.map) return;
+    if (!window.L || !Array.isArray(window.TAHQUAMENON_PLACES)) throw new Error('Map dependencies unavailable');
+    $('parkMap').replaceChildren();
     const map = L.map('parkMap', { zoomControl: false, scrollWheelZoom: true, preferCanvas: true }).setView([46.5905, -85.1700], 11);
     state.map = map;
     L.control.zoom({ position: 'bottomleft' }).addTo(map);
@@ -218,6 +297,7 @@
 
     state.parkBounds = L.latLngBounds(bounds).pad(.08);
     map.fitBounds(state.parkBounds, { padding: [36, 36] });
+    applyMapFilter(state.filter);
     map.on('click', () => {
       if (window.innerWidth <= 640) $('placeDrawer').style.display = 'none';
     });
@@ -264,12 +344,42 @@
   function applyMapFilter(filter) {
     state.filter = filter;
     document.querySelectorAll('.filter-chip').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === filter));
+    persistPlanState();
+    if (!state.map) return;
     state.markers.forEach((marker, id) => {
       const place = window.TAHQUAMENON_PLACES.find(p => p.id === id);
       const show = filter === 'all' || place.category === filter;
       if (show && !state.map.hasLayer(marker)) marker.addTo(state.map);
       if (!show && state.map.hasLayer(marker)) marker.removeFrom(state.map);
     });
+  }
+
+  function persistPlanState() {
+    try {
+      localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify({
+        duration: state.duration,
+        filter: state.filter,
+        customPlanIds: state.customPlan.map(place => place.id)
+      }));
+    } catch {}
+  }
+
+  function restorePlanState() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(PLAN_STORAGE_KEY) || 'null');
+      if (!saved || typeof saved !== 'object') return;
+      if (['90', '240', '480', 'hike'].includes(saved.duration)) state.duration = saved.duration;
+      if (['all', 'falls', 'trail', 'camp', 'food', 'access', 'paddle', 'photo'].includes(saved.filter)) state.filter = saved.filter;
+      const ids = Array.isArray(saved.customPlanIds) ? saved.customPlanIds : [];
+      state.customPlan = ids
+        .map(id => window.TAHQUAMENON_PLACES?.find(place => place.id === id))
+        .filter(Boolean);
+    } catch {}
+  }
+
+  function syncSavedControls() {
+    document.querySelectorAll('#durationToggle button').forEach(button => button.classList.toggle('active', button.dataset.duration === state.duration));
+    document.querySelectorAll('.filter-chip').forEach(button => button.classList.toggle('active', button.dataset.filter === state.filter));
   }
 
   function dynamicPlanContext(preset) {
@@ -285,15 +395,16 @@
 
   function renderPlan() {
     const preset = itineraryPresets[state.duration] || itineraryPresets['240'];
-    const customStops = state.customPlan.map(place => [place.name, place.description, 'your stop']);
-    const stops = customStops.length ? [...preset.stops, ...customStops] : preset.stops;
+    const baseStops = preset.stops.map(stop => ({ name: stop[0], description: stop[1], time: stop[2], customId: null }));
+    const customStops = state.customPlan.map(place => ({ name: place.name, description: place.description, time: 'your stop', customId: place.id }));
+    const stops = [...baseStops, ...customStops];
     $('planContextTitle').textContent = preset.title;
     $('planContextText').textContent = dynamicPlanContext(preset);
     $('planList').innerHTML = stops.map((stop, idx) => `
       <article class="plan-stop">
         <div class="stop-num">${String(idx + 1).padStart(2, '0')}</div>
-        <div><h3>${escapeHtml(stop[0])}</h3><p>${escapeHtml(stop[1])}</p></div>
-        <div class="stop-time">${escapeHtml(stop[2])}</div>
+        <div><h3>${escapeHtml(stop.name)}</h3><p>${escapeHtml(stop.description)}</p></div>
+        <div class="stop-time">${escapeHtml(stop.time)}${stop.customId ? `<button class="remove-stop" data-remove-stop="${escapeAttr(stop.customId)}" type="button" aria-label="Remove ${escapeAttr(stop.name)} from visit plan">Remove</button>` : ''}</div>
       </article>`).join('');
   }
 
@@ -334,14 +445,20 @@
     });
     $('filterRow').addEventListener('click', (event) => {
       const button = event.target.closest('[data-filter]');
-      if (button && state.map) applyMapFilter(button.dataset.filter);
+      if (!button) return;
+      applyMapFilter(button.dataset.filter);
+      ensureMap();
     });
-    $('fitMapButton').addEventListener('click', () => state.map?.fitBounds(state.parkBounds, { padding: [36, 36] }));
+    $('fitMapButton').addEventListener('click', async () => {
+      const map = await ensureMap();
+      map?.fitBounds(state.parkBounds, { padding: [36, 36] });
+    });
     $('drawerClose').addEventListener('click', () => $('placeDrawer').style.display = 'none');
     $('focusButton').addEventListener('click', () => state.selectedPlace && state.map?.flyTo([state.selectedPlace.lat, state.selectedPlace.lng], 15));
     $('addToPlanButton').addEventListener('click', () => {
       if (!state.selectedPlace) return;
       if (!state.customPlan.some(p => p.id === state.selectedPlace.id)) state.customPlan.push(state.selectedPlace);
+      persistPlanState();
       renderPlan();
       toast(`${state.selectedPlace.name} added`);
       document.querySelector('#planSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -351,8 +468,25 @@
       if (!btn) return;
       state.duration = btn.dataset.duration;
       document.querySelectorAll('#durationToggle button').forEach(button => button.classList.toggle('active', button === btn));
+      persistPlanState();
       renderPlan();
     });
+    $('planList').addEventListener('click', (event) => {
+      const remove = event.target.closest('[data-remove-stop]');
+      if (!remove) return;
+      const id = remove.dataset.removeStop;
+      state.customPlan = state.customPlan.filter(place => place.id !== id);
+      persistPlanState();
+      renderPlan();
+      toast('Stop removed');
+    });
+    document.querySelectorAll('[data-place-id]').forEach(button => button.addEventListener('click', async () => {
+      const place = window.TAHQUAMENON_PLACES?.find(item => item.id === button.dataset.placeId);
+      if (!place) return;
+      await ensureMap();
+      applyMapFilter('falls');
+      selectPlace(place, true);
+    }));
     $('copyPlanButton').addEventListener('click', () => copyText(planText(), 'Visit plan copied'));
   }
 
@@ -369,9 +503,11 @@
   }
 
   function init() {
+    restorePlanState();
+    syncSavedControls();
     bindEvents();
     renderPlan();
-    initMap();
+    setupMapLazyLoad();
     loadLive();
     setInterval(loadLive, 5 * 60 * 1000);
   }
