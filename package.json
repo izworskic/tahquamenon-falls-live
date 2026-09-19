@@ -3,10 +3,10 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "Tahquamenon Falls time-and-intent visit planning engine with live conditions and winter XC integration",
+  "description": "Tahquamenon Falls season-aware destination intelligence engine with live conditions, shared fall-color context, JEV personas and winter XC integration",
   "scripts": {
-    "check": "node --check public/assets/tahquamenon-falls.js && node --check public/tahquamenon-falls/data/places.js && node --check api/tahquamenon-falls.js && node --check api/visit-plan.js && node --check scripts/verify-integrity.mjs && node --check scripts/verify-rebuild.mjs",
-    "verify": "npm run check && node scripts/verify-integrity.mjs && node scripts/verify-rebuild.mjs",
+    "check": "node --check public/assets/tahquamenon-falls.js && node --check public/assets/tahquamenon-seasonal.js && node --check public/tahquamenon-falls/data/places.js && node --check api/tahquamenon-falls.js && node --check api/tahquamenon-seasonal-context.js && node --check api/visit-plan.js && node --check scripts/verify-integrity.mjs && node --check scripts/verify-rebuild.mjs && node --check scripts/verify-seasonal-intelligence.mjs && node --check scripts/score-seasonal-release.mjs",
+    "verify": "npm run check && node scripts/verify-integrity.mjs && node scripts/verify-rebuild.mjs && node scripts/verify-seasonal-intelligence.mjs && node scripts/score-seasonal-release.mjs",
     "vercel-build": "npm run verify && node scripts/inject-ga4.mjs"
   },
   "dependencies": {

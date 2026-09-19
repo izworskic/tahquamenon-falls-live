@@ -1,12 +1,17 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { inferVisitPreferences, inferMinutes, sanitizeClientState, deterministicResult, oidcToken } from '../api/visit-plan.js';
+import { inferVisitPreferences, inferIntentSignals, inferMinutes, sanitizeClientState, deterministicResult, oidcToken } from '../api/visit-plan.js';
 
 assert.deepEqual(inferVisitPreferences('My 77-year-old mom uses a walker and we want lunch', []), ['easy','food']);
 assert.deepEqual(inferVisitPreferences('Two kids, we want photos and a hike', []), ['kids','hike','photo']);
 assert.deepEqual(inferVisitPreferences('My mom and I have three hours', []), []);
 assert.equal(inferMinutes('We have about 2 hours before dinner', 180), 120);
 assert.equal(inferMinutes('Half day please', 180), 300);
+const fallSignals = inferIntentSignals('Full day fall color road trip through M-123', 480, ['photo']);
+assert.equal(fallSignals.fallColor, true);
+assert.equal(fallSignals.scenicRoadTrip, true);
+assert.equal(fallSignals.destinationExplorer, true);
+assert.equal(fallSignals.seasonalInterest, 'fall_color');
 
 const clean = sanitizeClientState({ query:'My 77-year-old grandma, two kids, 90 minutes', minutes:480, preferences:['photo','bogus'] });
 assert.equal(clean.minutes, 90);
@@ -21,7 +26,18 @@ const html = await readFile(new URL('../public/tahquamenon-falls/index.html', im
 const js = await readFile(new URL('../public/assets/tahquamenon-falls.js', import.meta.url), 'utf8');
 const css = await readFile(new URL('../public/assets/tahquamenon-falls.css', import.meta.url), 'utf8');
 const plannerApi = await readFile(new URL('../api/visit-plan.js', import.meta.url), 'utf8');
+const seasonalApi = await readFile(new URL('../api/tahquamenon-seasonal-context.js', import.meta.url), 'utf8');
+const seasonalJs = await readFile(new URL('../public/assets/tahquamenon-seasonal.js', import.meta.url), 'utf8');
 assert(html.includes('Plan the Tahquamenon day you actually have.'), 'Visit-first hero missing');
+assert(html.includes('id="seasonContext"'), 'Compact seasonal context surface missing');
+assert(html.includes('type="module"'), 'Season-aware client must load as an ES module');
+assert(js.includes('loadSeasonal()'), 'Seasonal context loader missing');
+assert(js.includes('applySeasonalIntelligence'), 'Seasonal value engine not wired into the itinerary');
+assert(seasonalApi.includes('api/fall-color?view=snapshot'), 'Tahquamenon must consume the shared fall-color snapshot');
+assert(!seasonalApi.includes('peakStart'), 'Tahquamenon must not duplicate the fall-color timing model');
+assert(seasonalJs.includes('TOTAL') || seasonalJs.includes('totalProductValue'), 'Product value function missing');
+assert(seasonalJs.includes('.65*visitor+.35*growth'), 'Visitor-first product value weighting missing');
+
 assert(!html.includes('Need something more specific?'), 'Old custom-plan wording returned');
 assert(html.includes('Have a specific group or constraint?'), 'Optional custom-plan control missing');
 assert(html.includes('customPlanSubmit'), 'Custom-plan submit control missing');
@@ -41,6 +57,9 @@ assert(plannerApi.includes('agentbase-registry-izworski-gmailcoms-projects.verce
 assert(plannerApi.includes('x-vercel-oidc-token'), 'Vercel OIDC caller auth missing');
 assert(plannerApi.includes('getVercelOidcToken'), 'Supported Vercel OIDC helper missing');
 assert(plannerApi.includes("architecture:'shared-harness-v2'"), 'Shared-harness v2 build marker missing');
+assert(plannerApi.includes('scenic_road_trip'), 'Expanded hidden persona model missing');
+assert(plannerApi.includes('fall_color'), 'Fall-color persona missing');
+assert(plannerApi.includes('destination_explorer'), 'Full-day explorer persona missing');
 assert(!plannerApi.includes('api.typesafe.ai'), 'Tool project must not call TypeSafe directly');
 assert(!plannerApi.includes('TYPESAFE_API_KEY'), 'Tool project must not receive the shared JEV key');
 console.log('Tahquamenon visit-engine rebuild checks passed');

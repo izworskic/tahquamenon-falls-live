@@ -89,6 +89,19 @@ a{color:inherit}
 .live-adjustment{border-left:3px solid var(--tannin);border-radius:0 10px 10px 0;background:#ece0cf;padding:12px 13px}
 .live-adjustment strong{display:block;font-size:10px}
 .live-adjustment p{margin:3px 0 0;color:#645b50;font-size:10px;line-height:1.4}
+.season-context{display:grid;grid-template-columns:minmax(0,1fr) minmax(210px,320px);gap:16px;align-items:center;margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-left:3px solid var(--tannin);border-radius:12px;background:#f7f1e6}
+.season-context[hidden]{display:none}
+.season-context-kicker{display:block;color:var(--tannin-dark);font-size:8px;font-weight:800;letter-spacing:.12em}
+.season-context-copy strong{display:block;margin-top:3px;font-family:"Source Serif 4",Georgia,serif;font-size:18px;line-height:1.08;font-weight:600}
+.season-context-copy p{margin:4px 0 0;color:var(--muted);font-size:10px;line-height:1.4}
+.season-context-actions{display:grid;gap:7px;justify-items:end;text-align:right}
+.season-context-actions>a{color:var(--tannin-dark);font-size:10px;font-weight:800;text-decoration:none}
+.season-context-actions>a:hover{text-decoration:underline}
+.season-extension{max-width:300px;padding-top:7px;border-top:1px solid var(--line);color:var(--muted);font-size:9px;line-height:1.35}
+.season-extension[hidden]{display:none}
+.season-extension b,.season-extension span{display:block}
+.season-extension b{color:var(--ink);font-size:9px;margin-bottom:2px}
+
 .custom-plan{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
 .custom-plan summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;color:var(--muted);font-size:10px;font-weight:700}
 .custom-plan summary::-webkit-details-marker{display:none}
@@ -220,6 +233,9 @@ footer{margin-top:40px;padding:28px 0;background:var(--forest-2);color:#d9e2dc}
   .plan-metrics div:last-child{border-right:0}
   .plan-metrics span,.plan-metrics strong{display:block}
   .plan-metrics strong{margin-top:3px}
+  .season-context{grid-template-columns:1fr;gap:9px}
+  .season-context-actions{justify-items:start;text-align:left}
+  .season-extension{max-width:none}
   .custom-plan-form{grid-template-columns:1fr}
   .custom-plan-form .primary-button{width:100%}
   .custom-plan-status{grid-column:1}

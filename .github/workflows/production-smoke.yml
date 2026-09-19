@@ -25,12 +25,14 @@ jobs:
             if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 20 -fsS "$PROD_URL/tahquamenon-falls/" -o /tmp/index.html; then
               if grep -q "Plan the Tahquamenon day you actually have." /tmp/index.html && ! grep -q "Worth going right now?" /tmp/index.html; then
                 if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 25 -fsS "$PROD_URL/api/tahquamenon-falls" -o /tmp/live.json; then
+                  if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 20 -fsS "$PROD_URL/api/tahquamenon-seasonal-context?intent=fall-color" -o /tmp/seasonal.json; then
                   if curl --retry 1 --connect-timeout 8 --max-time 20 -fsS                     -H 'content-type: application/json'                     --data '{"query":"We have two kids, my 77-year-old mom uses a walker, we have 2 hours and want lunch.","minutes":180,"preferences":[]}'                     "$PROD_URL/api/visit-plan" -o /tmp/plan.json; then
                     if python - <<'PY'
           import json
           from pathlib import Path
 
           data = json.loads(Path('/tmp/live.json').read_text())
+          seasonal = json.loads(Path('/tmp/seasonal.json').read_text())
           required = ['generatedAt', 'decision', 'sourceHealth', 'river', 'weather']
           missing = [key for key in required if key not in data]
           if missing:
@@ -47,6 +49,16 @@ jobs:
               raise SystemExit(f"Alert verification state missing: {alert_status}")
           if source_health.get('nwsAlerts') and not alert_status.get('verified'):
               raise SystemExit(f"Alert health/status mismatch: {source_health} / {alert_status}")
+
+          if seasonal.get('schemaVersion') != 1:
+              raise SystemExit(f"Seasonal schema missing: {seasonal}")
+          fall = ((seasonal.get('modules') or {}).get('fall') or {})
+          if fall.get('active') is not True:
+              raise SystemExit(f"Fall intent did not activate seasonal module: {fall}")
+          if fall.get('available') is not True:
+              raise SystemExit(f"Shared fall-color snapshot unavailable in production: {fall}")
+          if 'Modeled eastern U.P.' not in str(fall.get('basis') or ''):
+              raise SystemExit(f"Fall model provenance missing: {fall}")
 
           plan = json.loads(Path('/tmp/plan.json').read_text())
           if plan.get('architecture') != 'shared-harness-v2':
@@ -67,11 +79,15 @@ jobs:
           print('plannerEngine=', plan.get('engine'))
           print('plannerFocus=', plan.get('focus'))
           print('harnessStatus=', plan.get('harnessStatus'))
+          print('season=', seasonal.get('season'))
+          print('fallLabel=', fall.get('label'))
+          print('fallPhase=', fall.get('phase'))
           PY
                     then
                       ok=1
                       break
                     fi
+                  fi
                   fi
                 fi
               fi
@@ -88,15 +104,40 @@ jobs:
           for attempt in $(seq 1 24); do
             if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 20 \
               -H 'Cache-Control: no-cache' \
-              -fsS "https://chrisizworski.com/tahquamenon-falls/?proxy-smoke=compact-20260919-v3" -o /tmp/canonical.html; then
-              if grep -q 'name="tahquamenon-build" content="compact-20260919-v3"' /tmp/canonical.html && \
-                 grep -q 'tahquamenon-falls.css?v=compact-20260919-v3' /tmp/canonical.html; then
+              -fsS "https://chrisizworski.com/tahquamenon-falls/?proxy-smoke=seasonal-20260919-v1" -o /tmp/canonical.html; then
+              if grep -q 'name="tahquamenon-build" content="seasonal-20260919-v1"' /tmp/canonical.html && \
+                 grep -q 'tahquamenon-falls.css?v=seasonal-20260919-v1' /tmp/canonical.html; then
                 echo "Canonical Tahquamenon proxy is serving the compact build with cache bypass"
                 if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 20 -fsS \
                   "https://chrisizworski.com/tahquamenon-falls/" -o /tmp/canonical-plain.html && \
-                   grep -q 'name="tahquamenon-build" content="compact-20260919-v3"' /tmp/canonical-plain.html && \
-                   grep -q 'tahquamenon-falls.css?v=compact-20260919-v3' /tmp/canonical-plain.html; then
-                  echo "Plain canonical Tahquamenon URL is serving the compact build"
+                   grep -q 'name="tahquamenon-build" content="seasonal-20260919-v1"' /tmp/canonical-plain.html && \
+                   grep -q 'tahquamenon-falls.css?v=seasonal-20260919-v1' /tmp/canonical-plain.html; then
+                  echo "Plain canonical Tahquamenon URL is serving the seasonal build"
+                  if ! curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 20 -fsS                     "https://chrisizworski.com/api/tahquamenon-seasonal-context?intent=fall-color" -o /tmp/canonical-seasonal.json; then
+                    echo "Canonical seasonal API proxy failed" >&2
+                    exit 1
+                  fi
+                  if ! curl --retry 1 --connect-timeout 8 --max-time 20 -fsS                     -H 'content-type: application/json'                     --data '{"query":"Full day fall color road trip on M-123 with photos.","minutes":480,"preferences":["photo"]}'                     "https://chrisizworski.com/api/visit-plan" -o /tmp/canonical-plan.json; then
+                    echo "Canonical JEV planner proxy failed" >&2
+                    exit 1
+                  fi
+                  python - <<'PY'
+          import json
+          from pathlib import Path
+          seasonal=json.loads(Path('/tmp/canonical-seasonal.json').read_text())
+          fall=((seasonal.get('modules') or {}).get('fall') or {})
+          if not (fall.get('active') is True and fall.get('available') is True):
+              raise SystemExit(f"Canonical fall module failed: {fall}")
+          plan=json.loads(Path('/tmp/canonical-plan.json').read_text())
+          if plan.get('architecture') != 'shared-harness-v2':
+              raise SystemExit(f"Canonical planner architecture mismatch: {plan}")
+          if plan.get('engine') != 'shared-harness-jev':
+              raise SystemExit(f"Canonical planner did not reach JEV: {plan}")
+          if plan.get('seasonalInterest') != 'fall_color':
+              raise SystemExit(f"Canonical fall intent missing: {plan}")
+          print('canonicalPersona=',plan.get('persona'))
+          print('canonicalFall=',fall.get('label'))
+          PY
                   exit 0
                 fi
                 echo "Plain canonical URL is still stale" >&2
@@ -105,5 +146,5 @@ jobs:
             fi
             sleep 10
           done
-          echo "Canonical public proxy is not serving compact-20260919-v3" >&2
+          echo "Canonical public proxy is not serving seasonal-20260919-v1" >&2
           exit 1

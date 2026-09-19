@@ -1,6 +1,8 @@
+import { applySeasonalIntelligence, plannedMinutes, totalProductValue } from '/assets/tahquamenon-seasonal.js?v=seasonal-20260919-v1';
 const STORAGE_KEY = 'tahquamenon.visit.v2';
 const API_URL = '/api/tahquamenon-falls';
 const PLAN_API_URL = '/api/visit-plan';
+const SEASONAL_API_URL = '/api/tahquamenon-seasonal-context';
 const DNR_URL = 'https://www.michigan.gov/recsearch/parks/tahquamenonfalls';
 
 const state = {
@@ -13,12 +15,26 @@ const state = {
   map: null,
   markers: [],
   mapPromise: null,
-  inferred: null
+  inferred: null,
+  seasonal: null,
+  intent: ['fall-color','xc'].includes(new URLSearchParams(location.search).get('intent')) ? new URLSearchParams(location.search).get('intent') : null,
+  persona: null
 };
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 const places = () => Array.isArray(window.TAHQUAMENON_PLACES) ? window.TAHQUAMENON_PLACES : [];
+
+function track(name, params = {}) {
+  try {
+    if (typeof window.gtag === 'function') window.gtag('event', name, params);
+  } catch {}
+}
+
+function safeIntentFromUrl() {
+  const value = new URLSearchParams(location.search).get('intent');
+  return ['fall-color','xc'].includes(value) ? value : null;
+}
 
 function saveState() {
   try {
@@ -44,7 +60,7 @@ function formatMinutes(total) {
 
 function stop(id, minutes, title, text, tag = '') { return { id, minutes, title, text, tag }; }
 
-function basePlan() {
+function corePlan() {
   const m = state.minutes;
   const p = state.prefs;
   const winter = p.has('winter');
@@ -106,10 +122,23 @@ function basePlan() {
   };
 }
 
+function basePlan() {
+  const core = corePlan();
+  return applySeasonalIntelligence(core, {
+    minutes: state.minutes,
+    prefs: state.prefs,
+    intent: state.intent,
+    persona: state.persona,
+    seasonal: state.seasonal,
+    live: state.live
+  });
+}
+
 function liveNote(plan) {
   const d = state.live;
   if (!d) return 'Live weather, river, daylight and hazard context is still loading. The itinerary itself does not depend on a waterfall score.';
   const notes = [];
+  if (plan?.seasonalReason) notes.push(plan.seasonalReason);
   const temp = Number(d.weather?.tempF);
   const wind = Number(d.weather?.windMph);
   const rain = Number(d.weather?.precipChance);
@@ -133,11 +162,13 @@ function renderPlan() {
   custom.forEach(p => plan.stops.push(stop(p.id, 20, p.name, p.description, 'Added by you')));
   $('#answerTitle').textContent = plan.title;
   $('#answerSummary').textContent = plan.summary;
-  $('#planDuration').textContent = `~${formatMinutes(state.minutes)}`;
+  const planned = plannedMinutes(plan);
+  $('#planDuration').textContent = planned <= state.minutes ? `~${formatMinutes(planned)} planned` : `Over by ${formatMinutes(planned-state.minutes)}`;
   $('#fallsOrder').textContent = plan.order;
   $('#walkingLevel').textContent = plan.walking;
   $('#planTimeline').innerHTML = plan.stops.map((s, idx) => `<li data-stop="${s.id}"><span class="time">${s.tag || `STOP ${idx + 1}`} · ~${formatMinutes(s.minutes)}</span><h3>${s.title}</h3><p>${s.text}</p>${state.customStops.includes(s.id) ? `<button class="remove-stop" data-remove-stop="${s.id}" type="button">Remove from plan</button>` : ''}</li>`).join('');
   $('#liveAdjustment').innerHTML = `<strong>Live adjustment</strong><p>${liveNote(plan)}</p>`;
+  renderSeasonExtension(plan);
   $$('.remove-stop').forEach(btn => btn.addEventListener('click', () => { state.customStops = state.customStops.filter(id => id !== btn.dataset.removeStop); saveState(); renderPlan(); }));
   saveState();
 }
@@ -145,6 +176,81 @@ function renderPlan() {
 function syncControls() {
   $$('#timeChoices button').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.minutes) === state.minutes));
   $$('#preferenceChoices button').forEach(btn => btn.classList.toggle('active', state.prefs.has(btn.dataset.pref)));
+}
+
+function seasonalHeadline(fall) {
+  if (!fall?.available) return 'Fall-color intelligence is temporarily unavailable.';
+  if (fall.phase === 'peak') return 'Color is at or near peak across the eastern U.P.';
+  if (fall.phase === 'rising') return Number(fall.pct) >= 75 ? 'Color is getting close to peak.' : 'Color is building across the eastern U.P.';
+  if (fall.phase === 'falling') return 'Peak color is beginning to fade.';
+  if (fall.phase === 'green') return 'The eastern U.P. is still mostly green.';
+  return fall.label || 'Fall color is active.';
+}
+
+function renderSeasonExtension(plan) {
+  const box = $('#seasonExtension');
+  if (!box) return;
+  if (plan?.optionalExtension) {
+    box.hidden = false;
+    $('#seasonExtensionTitle').textContent = plan.optionalExtension.title;
+    $('#seasonExtensionText').textContent = plan.optionalExtension.text;
+  } else {
+    box.hidden = true;
+    $('#seasonExtensionTitle').textContent = '';
+    $('#seasonExtensionText').textContent = '';
+  }
+}
+
+function renderSeasonal() {
+  const surface = $('#seasonContext');
+  if (!surface || !state.seasonal?.modules) return;
+  const { fall, winter } = state.seasonal.modules;
+  let module = null, kind = null;
+  if (fall?.active) { module = fall; kind = 'fall'; }
+  else if (winter?.active) { module = winter; kind = 'winter'; }
+  if (!module) {
+    surface.hidden = true;
+    return;
+  }
+
+  surface.hidden = false;
+  if (kind === 'fall') {
+    $('#seasonKicker').textContent = `FALL COLOR · ${module.available ? String(module.label || 'ACTIVE').toUpperCase() : 'CHECK UNAVAILABLE'}`;
+    $('#seasonHeadline').textContent = seasonalHeadline(module);
+    const pieces = [];
+    if (module.peakWindow) pieces.push(`Typical model peak window: ${module.peakWindow}.`);
+    if (module.weatherFeel) pieces.push(module.weatherFeel + '.');
+    pieces.push(module.basis || 'Seasonal model context.');
+    $('#seasonDetail').textContent = pieces.join(' ');
+    $('#seasonLink').href = module.href || 'https://chrisizworski.com/fall-color/tahquamenon-falls-fall-color/';
+    $('#seasonLink').textContent = "See today's Tahquamenon color →";
+    $('#seasonLink').dataset.seasonLink = 'fall';
+    track('season_module_visible',{season:'fall',phase:module.phase||'unknown',available:module.available===true});
+  } else {
+    $('#seasonKicker').textContent = 'WINTER / XC';
+    $('#seasonHeadline').textContent = 'Use regional snow intelligence, then verify Tahquamenon grooming locally.';
+    $('#seasonDetail').textContent = module.basis || 'Winter planning available.';
+    $('#seasonLink').href = module.href || 'https://xcski.chrisizworski.com/regions/straits-eastern-up/';
+    $('#seasonLink').textContent = 'Check Straits + Eastern UP XC conditions →';
+    $('#seasonLink').dataset.seasonLink = 'xc';
+    track('season_module_visible',{season:'winter',available:module.available===true});
+  }
+}
+
+async function loadSeasonal() {
+  const intent = safeIntentFromUrl();
+  if (intent) state.intent = intent;
+  try {
+    const query = state.intent ? `?intent=${encodeURIComponent(state.intent)}` : '';
+    const res = await fetch(SEASONAL_API_URL + query, { headers:{ Accept:'application/json' } });
+    if (!res.ok) throw new Error(`Seasonal API ${res.status}`);
+    state.seasonal = await res.json();
+    renderSeasonal();
+    renderPlan();
+  } catch {
+    state.seasonal = { modules:{ fall:{active:false,available:false}, winter:{active:state.intent==='xc',available:false} } };
+    renderSeasonal();
+  }
 }
 
 async function loadLive() {
@@ -209,7 +315,12 @@ function applyInferred(result) {
     state.minutes = Math.max(30, Math.min(600, Math.round(Number(result.minutes))));
   }
   state.inferred = result;
+  if (result?.persona || result?.focus) state.persona = result.persona || result.focus;
+  if (!state.intent && result?.seasonalInterest === 'fall_color') state.intent = 'fall-color';
+  if (!state.intent && result?.seasonalInterest === 'winter_xc') state.intent = 'xc';
+  track('persona_inferred',{persona:state.persona||'none',seasonal_interest:result?.seasonalInterest||'none',engine:result?.engine||'fallback'});
   syncControls();
+  renderSeasonal();
   renderPlan();
 }
 
@@ -244,7 +355,7 @@ async function adaptSituation(text) {
   } catch {
     const t = text.toLowerCase();
     const prefs = [];
-    if (/mom|dad|grand|wheelchair|walker|mobility|stairs|accessible/.test(t)) prefs.push('easy');
+    if (/wheelchair|walker|mobility|stairs|accessible|limited walking|bad knee|bad knees|cane|older adult|senior|elderly|\b(?:7\d|8\d|9\d)\s*(?:-|\s)?years?\s*(?:-|\s)?old\b/.test(t)) prefs.push('easy');
     if (/kid|child|toddler|baby/.test(t)) prefs.push('kids');
     if (/photo|camera|sunset/.test(t)) prefs.push('photo');
     if (/hike|trail|miles/.test(t)) prefs.push('hike');
@@ -252,9 +363,14 @@ async function adaptSituation(text) {
     if (/ski|winter|snow/.test(t)) prefs.push('winter');
     const hourMatch = t.match(/(\d+(?:\.\d+)?)\s*(hour|hr)/);
     const minuteMatch = t.match(/(\d+)\s*(minute|min)/);
+    const fallIntent = /fall color|foliage|leaf|leaves|autumn/.test(t);
+    const roadTrip = /road trip|scenic drive|m-123|paradise|whitefish/.test(t);
+    const crowd = /avoid crowds|quiet|less crowded|fewer people/.test(t);
     result = {
       preferences: prefs,
-      minutes: hourMatch ? Math.round(Number(hourMatch[1]) * 60) : minuteMatch ? Number(minuteMatch[1]) : state.minutes
+      minutes: hourMatch ? Math.round(Number(hourMatch[1]) * 60) : minuteMatch ? Number(minuteMatch[1]) : state.minutes,
+      persona: roadTrip ? 'scenic_road_trip' : crowd ? 'crowd_avoidance' : fallIntent ? 'fall_color' : null,
+      seasonalInterest: fallIntent ? 'fall_color' : prefs.includes('winter') ? 'winter_xc' : null
     };
   }
 
@@ -263,9 +379,11 @@ async function adaptSituation(text) {
   if (applied.length) {
     status.dataset.state = 'applied';
     status.textContent = `Updated: ${applied.join(' · ')}`;
+    track('customize_apply',{changed:true,persona:state.persona||'none'});
   } else {
     status.dataset.state = 'nochange';
-    status.textContent = 'No new constraint found. Add a time limit, mobility need, kids, food, hiking, photos, or winter plans.';
+    status.textContent = 'No new constraint found. Add a time limit, mobility need, kids, food, hiking, photos, fall color, a scenic drive, or winter plans.';
+    track('customize_apply',{changed:false,persona:state.persona||'none'});
   }
   submit.disabled = false;
   submit.textContent = 'Update plan';
@@ -333,16 +451,21 @@ function copyPlan() {
 }
 
 function bind() {
-  $$('#timeChoices button').forEach(btn => btn.addEventListener('click', () => { state.minutes = Number(btn.dataset.minutes); syncControls(); renderPlan(); }));
-  $$('#preferenceChoices button').forEach(btn => btn.addEventListener('click', () => { const pref = btn.dataset.pref; state.prefs.has(pref) ? state.prefs.delete(pref) : state.prefs.add(pref); syncControls(); renderPlan(); }));
-  $('#buildPlanButton').addEventListener('click', () => { renderPlan(); $('#answerSection').scrollIntoView({behavior:'smooth',block:'start'}); });
+  $('#customPlan')?.addEventListener('toggle', e => { if (e.currentTarget.open) track('customize_open'); });
+  $('#timeChoices button').forEach(btn => btn.addEventListener('click', () => { state.minutes = Number(btn.dataset.minutes); track('planner_time_select',{minutes:state.minutes}); syncControls(); renderPlan(); }));
+  $('#preferenceChoices button').forEach(btn => btn.addEventListener('click', () => { const pref = btn.dataset.pref; state.prefs.has(pref) ? state.prefs.delete(pref) : state.prefs.add(pref); track('priority_select',{priority:pref,active:state.prefs.has(pref)}); syncControls(); renderPlan(); }));
+  $('#buildPlanButton').addEventListener('click', () => { const plan=basePlan(); track('planner_build',{minutes:state.minutes,persona:state.persona||'none',season:state.seasonal?.season||'unknown',value:totalProductValue(plan,{minutes:state.minutes,prefs:state.prefs,intent:state.intent,persona:state.persona,seasonal:state.seasonal,live:state.live}).total}); renderPlan(); $('#answerSection').scrollIntoView({behavior:'smooth',block:'start'}); });
   $('#situationForm').addEventListener('submit', e => { e.preventDefault(); const text = $('#situationInput').value.trim(); if (text) adaptSituation(text); });
-  $('#copyPlanButton').addEventListener('click', copyPlan);
+  $('#copyPlanButton').addEventListener('click', () => { track('copy_plan',{minutes:state.minutes}); copyPlan(); });
   $('#shareButton').addEventListener('click', async () => { try { if (navigator.share) await navigator.share({title:document.title,url:location.href}); else await navigator.clipboard.writeText(location.href); } catch {} });
   $$('[data-scroll]').forEach(btn => btn.addEventListener('click', () => document.querySelector(btn.dataset.scroll)?.scrollIntoView({behavior:'smooth'})));
   $$('#filterRow button').forEach(btn => btn.addEventListener('click', async () => { state.activeFilter = btn.dataset.filter; $$('#filterRow button').forEach(x => x.classList.toggle('active', x === btn)); await ensureMap(); renderMarkers(); }));
-  $('#addPlaceButton').addEventListener('click', () => { const p = state.selectedPlace; if (!p || state.customStops.includes(p.id)) return; state.customStops.push(p.id); saveState(); renderPlan(); selectPlace(p,false); });
-  $$('[data-place-id]').forEach(btn => btn.addEventListener('click', async () => { const p = places().find(x => x.id === btn.dataset.placeId); if (!p) return; $('#mapSection').scrollIntoView({behavior:'smooth'}); await ensureMap(); selectPlace(p,true); }));
+  $('#addPlaceButton').addEventListener('click', () => { const p = state.selectedPlace; if (!p || state.customStops.includes(p.id)) return; state.customStops.push(p.id); track('map_stop_add',{stop_id:p.id}); saveState(); renderPlan(); selectPlace(p,false); });
+  $('[data-place-id]').forEach(btn => btn.addEventListener('click', async () => { const p = places().find(x => x.id === btn.dataset.placeId); if (!p) return; $('#mapSection').scrollIntoView({behavior:'smooth'}); await ensureMap(); selectPlace(p,true); }));
+  $('#seasonLink')?.addEventListener('click', () => {
+    const kind=$('#seasonLink').dataset.seasonLink;
+    track(kind==='xc'?'xc_detail_click':'fall_color_detail_click',{placement:'season_context'});
+  });
 }
 
 restoreState();
@@ -350,4 +473,5 @@ syncControls();
 bind();
 renderPlan();
 setupMap();
+loadSeasonal();
 loadLive();

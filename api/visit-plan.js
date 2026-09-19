@@ -31,6 +31,23 @@ function inferVisitPreferences(query, initial = []) {
   return [...prefs];
 }
 
+function inferIntentSignals(query, minutes = 180, preferences = []) {
+  const text = clampText(query).toLowerCase();
+  const prefs = new Set(preferences);
+  const fallColor = /fall color|foliage|leaf peep|leaf-peep|autumn|leaves/.test(text);
+  const scenicRoadTrip = /road trip|scenic drive|m-123|paradise|whitefish point|whitefish/.test(text);
+  const crowdAvoidance = /avoid crowds|less crowded|fewer people|quiet|solitude|crowd avoidance/.test(text);
+  const camper = /camp|camping|camper|overnight|campsite/.test(text);
+  const destinationExplorer = /full day|all day|whole day|make a day of it|explore all day/.test(text) || Number(minutes) >= 420;
+  const constraintFlags = [];
+  if (prefs.has('easy')) constraintFlags.push('limited_walking');
+  if (prefs.has('kids')) constraintFlags.push('children');
+  if (crowdAvoidance) constraintFlags.push('crowd_avoidance');
+  if (camper) constraintFlags.push('overnight');
+  const seasonalInterest = prefs.has('winter') ? 'winter_xc' : fallColor ? 'fall_color' : null;
+  return { fallColor, scenicRoadTrip, crowdAvoidance, camper, destinationExplorer, constraintFlags, seasonalInterest };
+}
+
 function sanitizeClientState(body = {}) {
   const query = clampText(body.query);
   const minutes = inferMinutes(query, nearestMinutes(body.minutes, 180));
@@ -44,22 +61,33 @@ function sanitizeClientState(body = {}) {
     activeAlerts: Array.isArray(body.live.alerts) ? body.live.alerts.slice(0,5).map(a => clampText(a?.event,100)).filter(Boolean) : [],
     alertsVerified: body.live.alertStatus?.verified === true
   } : null;
-  return { query, minutes, preferences, live };
+  const signals = inferIntentSignals(query, minutes, preferences);
+  return { query, minutes, preferences, live, signals };
 }
 
 function deterministicResult(s) {
+  const focus = s.preferences.includes('winter') ? 'winter_xc'
+    : s.preferences.includes('easy') ? 'accessibility'
+    : s.preferences.includes('kids') ? 'family'
+    : s.signals?.fallColor ? 'fall_color'
+    : s.signals?.scenicRoadTrip ? 'scenic_road_trip'
+    : s.preferences.includes('hike') ? 'active_hiker'
+    : s.preferences.includes('photo') ? 'photography'
+    : s.preferences.includes('food') ? 'food'
+    : s.signals?.crowdAvoidance ? 'crowd_avoidance'
+    : s.signals?.camper ? 'camper'
+    : s.signals?.destinationExplorer ? 'destination_explorer'
+    : 'first_visit';
   return {
     engine: 'deterministic',
     confidence: 1,
     minutes: s.minutes,
     preferences: s.preferences,
-    focus: s.preferences.includes('winter') ? 'winter_ski'
-      : s.preferences.includes('easy') ? 'accessibility'
-      : s.preferences.includes('kids') ? 'kids'
-      : s.preferences.includes('hike') ? 'hiking'
-      : s.preferences.includes('photo') ? 'photography'
-      : s.preferences.includes('food') ? 'food'
-      : 'first_visit'
+    focus,
+    persona: focus,
+    secondaryPriorities: s.preferences,
+    constraintFlags: s.signals?.constraintFlags || [],
+    seasonalInterest: s.signals?.seasonalInterest || (focus === 'fall_color' ? 'fall_color' : focus === 'winter_xc' ? 'winter_xc' : null)
   };
 }
 
@@ -89,15 +117,21 @@ async function askSharedHarness(req, s) {
       options: {
         first_visit: 'General first-time visitor who mainly wants the core Tahquamenon experience.',
         accessibility: 'Easy walking, mobility, stairs, wheelchair, walker, older-adult comfort or low-stress access is the dominant need.',
-        kids: 'Keeping children engaged and minimizing frustrating movement is the dominant need.',
-        hiking: 'Meaningful trail mileage or a challenging hike is the dominant need.',
+        family: 'Keeping children engaged and minimizing frustrating movement is the dominant need.',
+        active_hiker: 'Meaningful trail mileage or a challenging hike is the dominant need.',
         photography: 'Light, views, camera opportunities, sunrise or sunset is the dominant need.',
+        fall_color: 'Fall foliage, autumn scenery or seasonal color is the dominant reason for the visit.',
+        scenic_road_trip: 'A scenic drive, M-123, Paradise, Whitefish Point or a broader road-trip experience is the dominant need.',
         food: 'Meal timing, brewery or food access is the dominant need.',
-        winter_ski: 'Cross-country skiing, snowshoeing or winter recreation is the dominant need.'
+        crowd_avoidance: 'A quieter sequence with less crowd exposure is the dominant preference.',
+        camper: 'Camping or an overnight stay changes how activities can be spread across the visit.',
+        winter_xc: 'Cross-country skiing, snowshoeing or winter recreation is the dominant need.',
+        destination_explorer: 'The visitor has most or all of a day and wants the strongest broader destination experience rather than filler stops.'
       },
       context: {
         stated_time_minutes: s.minutes,
         explicit_preferences: s.preferences,
+        inferred_signals: s.signals,
         live_context: s.live
       },
       constraints: [
@@ -148,8 +182,8 @@ async function askSharedHarness(req, s) {
 
     const prefs = new Set(s.preferences);
     const focusMap = {
-      accessibility:'easy', kids:'kids', hiking:'hike',
-      photography:'photo', food:'food', winter_ski:'winter'
+      accessibility:'easy', family:'kids', active_hiker:'hike',
+      photography:'photo', food:'food', winter_xc:'winter'
     };
     if (focusMap[focus]) prefs.add(focusMap[focus]);
 
@@ -161,7 +195,11 @@ async function askSharedHarness(req, s) {
         model: data.result.model || 'jev-latest',
         minutes: s.minutes,
         preferences: [...prefs].filter(x => ALLOWED_PREFS.has(x)),
-        focus
+        focus,
+        persona: focus,
+        secondaryPriorities: s.preferences,
+        constraintFlags: s.signals?.constraintFlags || [],
+        seasonalInterest: s.signals?.seasonalInterest || (focus === 'fall_color' ? 'fall_color' : focus === 'winter_xc' ? 'winter_xc' : null)
       }
     };
   } catch (error) {
@@ -197,4 +235,4 @@ export default async function handler(req, res) {
   });
 }
 
-export { inferVisitPreferences, inferMinutes, sanitizeClientState, deterministicResult, oidcToken };
+export { inferVisitPreferences, inferIntentSignals, inferMinutes, sanitizeClientState, deterministicResult, oidcToken };
