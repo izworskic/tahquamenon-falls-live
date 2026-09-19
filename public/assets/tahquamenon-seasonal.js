@@ -84,6 +84,7 @@ function signatureExperience(plan) {
   return hasStop(plan,'upper-falls') ? 100 : 45;
 }
 function networkOpportunity(plan, ctx) {
+  if (plan?.optionalExtension?.id === 'm123-paradise') return 100;
   if (ctx.seasonal?.modules?.fall?.active && plan.seasonalEmphasis === 'fall-color') return 92;
   if ((ctx.seasonal?.modules?.winter?.active || prefSet(ctx.prefs).has('winter')) && hasStop(plan,'winter-trail-system')) return 92;
   return 68;
