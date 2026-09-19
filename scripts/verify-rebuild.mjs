@@ -52,6 +52,12 @@ assert(html.includes('3.8-mile Giant Pines Loop'), 'Winter ski content missing')
 assert(js.includes('tahquamenon.visit.v2'), 'Local-first planner state missing');
 assert(js.includes('/api/visit-plan'), 'Structured visitor-intent endpoint missing');
 assert(js.includes('IntersectionObserver'), 'Lazy map loading missing');
+const plannerLines = js.split('\n').map(line => line.trim());
+assert(!plannerLines.some(line => line.startsWith("$('" ) && line.includes('.forEach(')), 'Planner cannot call forEach on single-element $() selectors');
+assert(!plannerLines.some(line => line.startsWith('$$(')), 'Planner cannot reference an undefined $$ selector');
+assert(js.includes("$('#timeChoices button').forEach"), 'Time buttons must bind through $');
+assert(js.includes("$('#preferenceChoices button').forEach"), 'Priority buttons must bind through $');
+assert(js.includes("$('[data-place-id]').forEach"), 'Map buttons must bind through $');
 assert(css.includes('@media(max-width:760px)'), 'Mobile layout gate missing');
 assert(plannerApi.includes('agentbase-registry-izworski-gmailcoms-projects.vercel.app/api/harness'), 'Shared harness route missing');
 assert(plannerApi.includes('x-vercel-oidc-token'), 'Vercel OIDC caller auth missing');
