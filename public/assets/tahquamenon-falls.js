@@ -1,517 +1,320 @@
-(() => {
-  const $ = (id) => document.getElementById(id);
-  const state = {
-    live: null,
-    map: null,
-    markers: new Map(),
-    selectedPlace: null,
-    filter: 'all',
-    duration: '240',
-    customPlan: []
-  };
-  const PLAN_STORAGE_KEY = 'tahquamenon.visit.v1';
-  let mapLoadPromise = null;
+const STORAGE_KEY = 'tahquamenon.visit.v2';
+const API_URL = '/api/tahquamenon-falls';
+const PLAN_API_URL = '/api/visit-plan';
+const DNR_URL = 'https://www.michigan.gov/recsearch/parks/tahquamenonfalls';
 
-  const FALLBACK_BASELINE = {
-    generatedAt: null,
-    river: { cfs: null, gageHeightFt: null, precipIn: null, observedAt: null, stats: null },
-    weather: { tempF: null, windMph: null, shortForecast: 'Live weather unavailable', precipChance: null, cloudCover: null, qpf24In: null },
-    daylight: { sunrise: null, sunset: null },
-    alerts: [],
-    decision: {
-      score: null, label: 'Live data unavailable', state: 'mixed', confidence: 0,
-      riverScore: null, trailScore: null, photoScore: null, safetyScore: null,
-      percentile: null, flowContext: 'Gauge unavailable', reasons: ['Live sources could not be reached. No current waterfall score is being claimed.'],
-      outlook: 'Refresh when connectivity returns.'
-    },
-    sourceHealth: { usgs: false, nws: false, nwsAlerts: false, openMeteo: false },
-    alertStatus: { verified: false, count: 0, checkedAt: null },
-    sources: [
-      { id: 'usgs', name: 'USGS Water Data · 04045500', live: false, url: 'https://waterdata.usgs.gov/monitoring-location/04045500/' },
-      { id: 'nws', name: 'National Weather Service', live: false, url: 'https://forecast.weather.gov/MapClick.php?lat=46.5749&lon=-85.25659' },
-      { id: 'open-meteo', name: 'Open-Meteo fallback / cloud + QPF', live: false, url: 'https://open-meteo.com/' },
-      { id: 'dnr', name: 'Michigan DNR park database', live: true, url: 'https://www.michigan.gov/recsearch/parks/tahquamenonfalls' }
-    ]
-  };
+const state = {
+  minutes: 180,
+  prefs: new Set(),
+  live: null,
+  customStops: [],
+  activeFilter: 'all',
+  selectedPlace: null,
+  map: null,
+  markers: [],
+  mapPromise: null,
+  inferred: null
+};
 
-  const itineraryPresets = {
-    '90': {
-      title: '90 minutes · choose one falls area',
-      text: 'A tight visit should not waste time crossing the whole park. Start with Upper Falls unless Lower Falls or island access is the goal.',
-      stops: [
-        ['Upper Falls', 'Walk the new accessible approach and hit the main overlooks.', '45–55 min'],
-        ['Camp 33 / Brewery', 'Use the Upper Falls-area food stop only if time remains.', '25–35 min']
-      ]
-    },
-    '240': {
-      title: 'Half day · both falls',
-      text: 'This is the high-value first visit: Upper Falls, Lower Falls and the island, with one food stop if conditions cooperate.',
-      stops: [
-        ['Upper Falls', 'Start with the live river context, boardwalk and main overlooks.', '60–75 min'],
-        ['Lower Falls + Island', 'Drive to Lower Falls, cross the Olson bridge and walk the island loop.', '75–90 min'],
-        ['Brewery or Lower Falls Café', 'Choose the stop that fits your direction of travel.', '35–50 min']
-      ]
-    },
-    '480': {
-      title: 'Full day · park, river and sunset',
-      text: 'Use the entire park instead of treating Tahquamenon like a roadside waterfall. Add trail mileage and finish where the river meets Lake Superior.',
-      stops: [
-        ['Upper Falls', 'Boardwalk, overlooks and live-flow context.', '60–75 min'],
-        ['Lower Falls + Island', 'Boardwalk, island bridge and short island trail.', '75–90 min'],
-        ['River Trail sample', 'Walk a selected out-and-back segment rather than committing to the whole point-to-point route.', '60–90 min'],
-        ['Rivermouth', 'Boat access, fishing pier and river-to-Lake-Superior setting.', '45–60 min'],
-        ['Rivermouth sunset', 'Use the live cloud/light panel to decide whether the extra wait is justified.', '30–60 min']
-      ]
-    },
-    hike: {
-      title: 'Hiker · Upper to Lower River Trail',
-      text: 'The DNR trail map lists 5.1 miles one way between the Lower Falls and Upper Falls parking areas. Build the transport plan before committing.',
-      stops: [
-        ['Lower Falls trailhead', 'Start where logistics are simplest for your shuttle or second vehicle.', '10–15 min'],
-        ['River Trail', 'Follow the signed North Country Trail corridor between the falls.', '2–3 hr'],
-        ['Upper Falls', 'Finish with the main overlooks and refuel near Camp 33.', '45–60 min']
-      ]
-    }
-  };
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => [...document.querySelectorAll(sel)];
+const places = () => Array.isArray(window.TAHQUAMENON_PLACES) ? window.TAHQUAMENON_PLACES : [];
 
-  const categoryGlyph = {
-    falls: 'F', trail: 'T', camp: 'C', food: 'B', access: 'A', paddle: 'P', photo: '◐', info: 'i'
-  };
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ minutes: state.minutes, prefs: [...state.prefs], customStops: state.customStops }));
+  } catch {}
+}
 
-  const formatTime = (value) => {
-    if (!value) return '—';
-    try {
-      return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Detroit', hour: 'numeric', minute: '2-digit' }).format(new Date(value));
-    } catch { return '—'; }
-  };
+function restoreState() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    if ([45,90,180,300,480].includes(raw.minutes)) state.minutes = raw.minutes;
+    if (Array.isArray(raw.prefs)) state.prefs = new Set(raw.prefs.filter(Boolean));
+    if (Array.isArray(raw.customStops)) state.customStops = raw.customStops.filter(id => places().some(p => p.id === id));
+  } catch {}
+}
 
-  const formatAgo = (value) => {
-    if (!value) return 'age unknown';
-    const mins = Math.max(0, Math.round((Date.now() - new Date(value).getTime()) / 60000));
-    if (mins < 2) return 'just now';
-    if (mins < 60) return `${mins} min ago`;
-    const hours = Math.round(mins / 60);
-    return `${hours} hr${hours === 1 ? '' : 's'} ago`;
-  };
+function formatMinutes(total) {
+  if (total < 60) return `${total} min`;
+  const hours = Math.floor(total / 60);
+  const min = total % 60;
+  return min ? `${hours} hr ${min} min` : `${hours} hr`;
+}
 
-  const safe = (value, fallback = '—') => value === null || value === undefined || Number.isNaN(value) ? fallback : value;
-  const scoreText = (value) => Number.isFinite(value) ? Math.round(value) : '—';
+function stop(id, minutes, title, text, tag = '') { return { id, minutes, title, text, tag }; }
 
-  function toast(message) {
-    const node = $('toast');
-    node.textContent = message;
-    node.classList.add('show');
-    clearTimeout(toast.timer);
-    toast.timer = setTimeout(() => node.classList.remove('show'), 2200);
+function basePlan() {
+  const m = state.minutes;
+  const p = state.prefs;
+  const winter = p.has('winter');
+  const easy = p.has('easy');
+  const kids = p.has('kids');
+  const hike = p.has('hike');
+  const photo = p.has('photo');
+  const food = p.has('food');
+
+  if (winter) {
+    const ski = [
+      stop('upper-falls', 35, 'Start with the Upper Falls winter view', 'Use the short, high-value waterfall stop first while everyone is warm and fresh.', 'Upper Falls'),
+      stop('winter-trail-system', m <= 90 ? 45 : 90, m <= 90 ? 'Ski the Lantern Loop' : 'Ski Lantern + part or all of Giant Pines', m <= 90 ? 'The 1-mile Lantern Loop is the cleanest fit for a short winter visit.' : 'The groomed Upper Falls network includes the 1-mile Lantern Loop and 3.8-mile Giant Pines Loop. Verify current grooming before driving.', 'Cross-country ski')
+    ];
+    if (m >= 180) ski.push(stop('lower-falls', 45, 'Add Lower Falls if roads and daylight cooperate', 'The winter contrast between the two falls areas is worth the extra drive when conditions are comfortable.', 'Lower Falls'));
+    return { title: 'Make it a winter falls + ski day.', summary: 'Use the Upper Falls as your anchor, then let snow conditions decide how much of the groomed network you ski.', order: 'Upper → ski trails', walking: 'Winter', stops: ski };
   }
 
-  function sourceStateText(data) {
-    const health = data?.sourceHealth || {};
-    const river = Boolean(health.usgs);
-    const weather = Boolean(health.nws || health.openMeteo);
-    const hazards = Boolean(health.nwsAlerts);
-    if (river && weather && hazards) return { cls: 'live', text: 'Live river + weather + alerts connected' };
-    if (river && weather) return { cls: 'partial', text: 'Live conditions · hazard feed needs verification' };
-    if (river || weather || hazards) return { cls: 'partial', text: 'Partial live data · fallback active' };
-    return { cls: '', text: 'Live sources unavailable' };
+  if (m <= 45) return {
+    title: 'Make this an Upper Falls visit.',
+    summary: 'Do one thing well. The signature waterfall gives you the biggest return for a short stop.',
+    order: 'Upper only', walking: easy ? 'Easy' : 'Light',
+    stops: [stop('upper-boardwalk', 10, 'Park at Upper Falls and take the accessible approach', 'Use the boardwalk and paved route toward the main viewing area.', 'Upper Falls'), stop('upper-falls', 30, 'Spend your time at the main overlooks', 'Do not burn a short visit driving between areas. Get the signature view and leave satisfied.', 'Best use of 45 min')]
+  };
+
+  if (m <= 90) {
+    const s = [stop('upper-boardwalk', 15, 'Start at Upper Falls', 'Take the accessible boardwalk/paved approach and settle into the park before chasing extra stops.', 'Upper Falls'), stop('upper-falls', 40, easy ? 'Use the accessible viewpoints' : 'See the brink, then choose one more overlook', easy ? 'Skip unnecessary stairs and use the new boardwalk plus accessible viewpoints.' : 'If legs and time are good, add another viewpoint. Do not turn this into a speed run.', 'Signature stop')];
+    if (food) s.push(stop('brewery', 30, 'Use the brewery as your finish', 'It is already in the Upper Falls area, so food does not cost another drive.', 'Food'));
+    else s.push(stop('fact-shack', 10, 'Use the remaining minutes locally', 'Fact Shack or a relaxed walk is a better use of the margin than driving to Lower Falls and rushing it.', 'No rush'));
+    return { title: 'Stay at Upper Falls and do it properly.', summary: 'Ninety minutes is enough for a good Upper Falls visit, but not enough to make both areas feel relaxed.', order: 'Upper only', walking: easy ? 'Easy' : 'Light', stops: s };
   }
 
-  function renderLive(data) {
-    state.live = data;
-    const d = data.decision || FALLBACK_BASELINE.decision;
-    const river = data.river || {};
-    const wx = data.weather || {};
-    const sourceState = sourceStateText(data);
+  const first = kids ? 'lower' : 'upper';
+  const steps = [];
+  if (first === 'upper') {
+    steps.push(stop('upper-falls', easy ? 45 : 55, 'Start at Upper Falls', easy ? 'Use the accessible boardwalk and main viewing platforms.' : 'Get the signature waterfall first, then decide whether an extra overlook is worth the stairs.', 'Signature view'));
+    if (food) steps.push(stop('brewery', 45, 'Eat without leaving the route', 'The brewery is in the Upper Falls area, so lunch fits cleanly before the drive to Lower Falls.', 'Food'));
+    steps.push(stop('lower-falls', 55, 'Drive 4 miles to Lower Falls', kids ? 'Give kids the more interactive half of the visit: bridge, island and multiple cascades.' : 'Slow the pace here. Lower Falls rewards wandering more than one viewpoint.', 'Lower Falls'));
+  } else {
+    steps.push(stop('lower-falls', 70, 'Start at Lower Falls', 'Let kids move first: island access, bridge, boardwalks and multiple cascades make this the more interactive stop.', 'Kid-friendly start'));
+    steps.push(stop('upper-falls', 50, 'Finish with the big waterfall', 'End with the park signature so the day builds toward the classic view.', 'Upper Falls'));
+    if (food) steps.push(stop('brewery', 40, 'Finish with food at Upper Falls', 'No additional drive required.', 'Food'));
+  }
 
-    $('liveDot').className = `live-dot ${sourceState.cls}`;
-    $('freshnessText').textContent = sourceState.text;
-    $('updatedBadge').textContent = data.generatedAt ? `Updated ${formatAgo(data.generatedAt)}` : 'Live refresh unavailable';
+  if (m >= 300) {
+    if (hike && !easy) steps.splice(1, 0, stop('river-trail', 150, 'Use the River Trail for the active part of the day', 'The trail is about 5.1 miles one way and hikes harder than its mileage. Confirm seasonal shuttle timing before relying on a one-way hike.', 'Serious hike'));
+    else steps.splice(first === 'upper' ? steps.length : 1, 0, stop('island-bridge', 35, 'Walk onto the Lower Falls island', 'The bridge and island turn Lower Falls from a quick overlook into an experience.', 'Worth the extra time'));
+  }
 
-    const score = Number.isFinite(d.score) ? d.score : 0;
-    $('scoreOrb').style.setProperty('--score', score);
-    $('scoreNumber').textContent = Number.isFinite(d.score) ? Math.round(d.score) : '—';
-    $('decisionLabel').textContent = d.label || 'Unavailable';
-    $('confidencePill').textContent = `${safe(d.confidence, 0)} confidence`;
-    $('decisionCard').classList.remove('loading-card');
-    $('decisionSummary').textContent = buildDecisionSummary(data);
-    $('riverComponent').textContent = scoreText(d.riverScore);
-    $('trailComponent').textContent = scoreText(d.trailScore);
-    $('photoComponent').textContent = scoreText(d.photoScore);
-    $('safetyComponent').textContent = scoreText(d.safetyScore);
+  if (m >= 480 && photo) steps.push(stop('rivermouth-sunset', 60, 'Save Rivermouth for the light', 'If sunset timing works, finish where the river meets Lake Superior for a different photo environment.', 'Photo finish'));
+  else if (m >= 480 && !hike) steps.push(stop('clark-lake-trail', 70, 'Add a quieter trail', 'Trade a little waterfall crowding for forest and a backcountry feel.', 'Quiet extra'));
 
-    $('cfsValue').textContent = Number.isFinite(river.cfs) ? `${Math.round(river.cfs)} cfs` : 'No reading';
-    $('flowContext').textContent = d.flowContext || 'No flow context';
-    $('flowPercentile').textContent = Number.isFinite(d.percentile) ? `~P${Math.round(d.percentile)}` : '—';
-    $('flowBand').style.left = `${Number.isFinite(d.percentile) ? Math.max(1, Math.min(99, d.percentile)) : 0}%`;
-    $('riverFootnote').textContent = `USGS 04045500 · ${river.observedAt ? formatAgo(river.observedAt) : 'freshness unknown'}${Number.isFinite(river.gageHeightFt) ? ` · ${river.gageHeightFt.toFixed(2)} ft stage` : ''}`;
+  return {
+    title: first === 'lower' ? 'Lower first, then finish at Upper Falls.' : 'Upper first, then give Lower Falls more room.',
+    summary: kids ? 'With kids, the island and multiple cascades make Lower Falls the better place to spend the larger block of time.' : 'See the signature waterfall early, then use the rest of the visit for the more exploratory Lower Falls area.',
+    order: first === 'lower' ? 'Lower → Upper' : 'Upper → Lower',
+    walking: easy ? 'Easy' : hike ? 'Active' : 'Moderate',
+    stops: steps
+  };
+}
 
-    $('tempValue').textContent = Number.isFinite(wx.tempF) ? `${Math.round(wx.tempF)}°F` : 'Unavailable';
-    $('weatherSummary').textContent = wx.shortForecast || 'Live weather';
-    $('windValue').textContent = Number.isFinite(wx.windMph) ? `${Math.round(wx.windMph)} mph` : 'wind —';
-    $('weatherFootnote').textContent = Number.isFinite(wx.precipChance) ? `${Math.round(wx.precipChance)}% precip chance · NWS/Open-Meteo` : 'NWS + Open-Meteo';
+function liveNote(plan) {
+  const d = state.live;
+  if (!d) return 'Live weather, river, daylight and hazard context is still loading. The itinerary itself does not depend on a waterfall score.';
+  const notes = [];
+  const temp = Number(d.weather?.tempF);
+  const wind = Number(d.weather?.windMph);
+  const rain = Number(d.weather?.precipChance);
+  if (Number.isFinite(temp)) {
+    if (temp >= 82) notes.push(`${Math.round(temp)}°F: put longer walking earlier and use Lower Falls water/forest shade as the day heats up.`);
+    else if (temp <= 36) notes.push(`${Math.round(temp)}°F: keep stops tighter and treat wet boardwalks or stairs cautiously.`);
+    else notes.push(`${Math.round(temp)}°F: comfortable temperature for the planned walking.`);
+  }
+  if (Number.isFinite(wind) && wind >= 20) notes.push(`${Math.round(wind)} mph wind: exposed overlooks may feel much colder.`);
+  if (Number.isFinite(rain) && rain >= 55) notes.push(`${Math.round(rain)}% precipitation chance: prioritize the signature stops before optional trails.`);
+  if (d.alertStatus?.verified === false) notes.push('NWS hazard feed is not verified right now; check the official forecast before committing to long trails or river access.');
+  else if (Array.isArray(d.alerts) && d.alerts.length) notes.push(`${d.alerts.length} active NWS alert${d.alerts.length === 1 ? '' : 's'}: review before using exposed trails or water access.`);
+  const flow = Number(d.river?.cfs);
+  if (Number.isFinite(flow)) notes.push(`Upper Falls discharge is ${Math.round(flow).toLocaleString()} cfs. That changes spray and visual force, not whether the park is worth visiting.`);
+  return notes.join(' ') || 'Live conditions are not forcing a change to this itinerary.';
+}
 
-    $('photoValue').textContent = Number.isFinite(d.photoScore) ? `${Math.round(d.photoScore)}/100` : 'Unavailable';
-    $('sunsetValue').textContent = `Sunset ${formatTime(data.daylight?.sunset)}`;
-    $('cloudValue').textContent = Number.isFinite(wx.cloudCover) ? `Clouds ${Math.round(wx.cloudCover)}%` : 'Clouds —';
+function renderPlan() {
+  const plan = basePlan();
+  const custom = state.customStops.map(id => places().find(p => p.id === id)).filter(Boolean);
+  custom.forEach(p => plan.stops.push(stop(p.id, 20, p.name, p.description, 'Added by you')));
+  $('#answerTitle').textContent = plan.title;
+  $('#answerSummary').textContent = plan.summary;
+  $('#planDuration').textContent = `~${formatMinutes(state.minutes)}`;
+  $('#fallsOrder').textContent = plan.order;
+  $('#walkingLevel').textContent = plan.walking;
+  $('#planTimeline').innerHTML = plan.stops.map((s, idx) => `<li data-stop="${s.id}"><span class="time">${s.tag || `STOP ${idx + 1}`} · ~${formatMinutes(s.minutes)}</span><h3>${s.title}</h3><p>${s.text}</p>${state.customStops.includes(s.id) ? `<button class="remove-stop" data-remove-stop="${s.id}" type="button">Remove from plan</button>` : ''}</li>`).join('');
+  $('#liveAdjustment').innerHTML = `<strong>Live adjustment</strong><p>${liveNote(plan)}</p>`;
+  $$('.remove-stop').forEach(btn => btn.addEventListener('click', () => { state.customStops = state.customStops.filter(id => id !== btn.dataset.removeStop); saveState(); renderPlan(); }));
+  saveState();
+}
 
-    const alerts = data.alerts || [];
-    const alertsVerified = data.alertStatus?.verified === true || data.sourceHealth?.nwsAlerts === true;
-    $('alertCard').classList.toggle('has-alert', alertsVerified && alerts.length > 0);
-    $('alertCard').classList.toggle('unverified', !alertsVerified);
-    $('alertValue').textContent = !alertsVerified ? 'Not verified' : alerts.length ? `${alerts.length} active` : 'None active';
-    $('alertDetail').textContent = !alertsVerified
-      ? 'NWS alert feed unavailable · verify official hazards'
-      : alerts.length ? alerts[0].event || alerts[0].headline || 'NWS alert' : 'NWS alert feed checked · no active hazards';
+function syncControls() {
+  $$('#timeChoices button').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.minutes) === state.minutes));
+  $$('#preferenceChoices button').forEach(btn => btn.classList.toggle('active', state.prefs.has(btn.dataset.pref)));
+}
 
-    $('outlookText').textContent = d.outlook || 'Forecast precipitation is kept separate from current flow.';
-
-    $('planRiver').textContent = scoreText(d.riverScore);
-    $('planTrail').textContent = scoreText(d.trailScore);
-    $('planLight').textContent = scoreText(d.photoScore);
+async function loadLive() {
+  try {
+    const res = await fetch(API_URL, { headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error(`Live API ${res.status}`);
+    state.live = await res.json();
+    renderLive();
     renderPlan();
-    renderReasons();
-    renderSources();
+  } catch {
+    $('#livePill').className = 'live-pill warn';
+    $('#livePill strong').textContent = 'Live context unavailable';
+    $('#liveAdjustment').innerHTML = '<strong>Live adjustment unavailable</strong><p>The visit planner still works from stable park geography and visitor priorities. Verify current DNR and NWS conditions before you go.</p>';
+  }
+}
+
+function renderLive() {
+  const d = state.live || {};
+  const w = d.weather || {};
+  const river = d.river || {};
+  const daylight = d.daylight || {};
+  $('#livePill').className = `live-pill ${d.alertStatus?.verified ? 'ok' : 'warn'}`;
+  $('#livePill strong').textContent = d.alertStatus?.verified ? 'Live context verified' : 'Live context partly verified';
+
+  const temp = Number(w.tempF);
+  $('#weatherValue').textContent = Number.isFinite(temp) ? `${Math.round(temp)}°F` : 'Unavailable';
+  $('#weatherText').textContent = [w.shortForecast, Number.isFinite(Number(w.windMph)) ? `${Math.round(Number(w.windMph))} mph wind` : null].filter(Boolean).join(' · ') || 'Verify current forecast.';
+
+  const cfs = Number(river.cfs);
+  $('#riverValue').textContent = Number.isFinite(cfs) ? `${Math.round(cfs).toLocaleString()} cfs` : 'Unavailable';
+  $('#riverText').textContent = Number.isFinite(cfs) ? `${d.decision?.flowContext || 'Observed flow'} · useful for spray and visual force, not a go/no-go score.` : 'Fresh USGS discharge is not available.';
+
+  if (daylight.sunset) {
+    const sunset = new Date(daylight.sunset);
+    $('#daylightValue').textContent = sunset.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Detroit' });
+    $('#daylightText').textContent = 'Sunset in the park · use remaining light for optional trails and Rivermouth photos.';
+  } else {
+    $('#daylightValue').textContent = 'Unavailable';
+    $('#daylightText').textContent = 'Check local sunset if arriving late.';
   }
 
-  function buildDecisionSummary(data) {
-    const d = data.decision || {};
-    if (!Number.isFinite(d.score)) return 'No current score is being claimed until the live source stack reconnects.';
-    const parts = [];
-    if (Number.isFinite(data.river?.cfs)) parts.push(`${Math.round(data.river.cfs)} cfs is ${d.flowContext || 'the current flow'}`);
-    if (Number.isFinite(data.weather?.tempF)) parts.push(`${Math.round(data.weather.tempF)}°F trail weather`);
-    if ((data.alerts || []).length) parts.push(`${data.alerts.length} active hazard${data.alerts.length === 1 ? '' : 's'}`);
-    else parts.push('no active NWS hazards');
-    return `${parts.join(' · ')}.`;
+  const hazardCard = $('#hazardCard');
+  if (d.alertStatus?.verified === false) {
+    $('#hazardValue').textContent = 'Not verified';
+    $('#hazardText').textContent = 'Check official NWS alerts before long hikes or water access.';
+    hazardCard.classList.add('warning');
+  } else if (Array.isArray(d.alerts) && d.alerts.length) {
+    $('#hazardValue').textContent = `${d.alerts.length} active`;
+    $('#hazardText').textContent = d.alerts.map(a => a.event).filter(Boolean).join(' · ');
+    hazardCard.classList.add('warning');
+  } else {
+    $('#hazardValue').textContent = 'None active';
+    $('#hazardText').textContent = 'NWS alert feed checked for the park point.';
+    hazardCard.classList.remove('warning');
   }
+}
 
-  function renderReasons() {
-    const d = state.live?.decision || FALLBACK_BASELINE.decision;
-    $('dialogDecision').textContent = d.label || '—';
-    const items = [...(d.reasons || []), d.outlook].filter(Boolean);
-    $('reasonList').innerHTML = items.map((reason, idx) => `<div class="reason"><b>${String(idx + 1).padStart(2, '0')}</b><span>${escapeHtml(reason)}</span></div>`).join('');
+function applyInferred(result) {
+  const prefs = result?.preferences || [];
+  prefs.forEach(pref => state.prefs.add(pref));
+  if (Number.isFinite(Number(result?.minutes))) {
+    state.minutes = Math.max(30, Math.min(600, Math.round(Number(result.minutes))));
   }
+  state.inferred = result;
+  syncControls();
+  renderPlan();
+}
 
-  function renderSources() {
-    const sources = state.live?.sources || FALLBACK_BASELINE.sources;
-    $('sourcesList').innerHTML = sources.map(source => `
-      <a class="source-row ${source.live ? '' : 'off'}" href="${escapeAttr(source.url)}" target="_blank" rel="noopener noreferrer">
-        <i aria-hidden="true"></i><strong>${escapeHtml(source.name)}</strong><span>${source.live ? 'connected' : 'unavailable'}</span>
-      </a>`).join('');
+async function adaptSituation(text) {
+  $('#jevStatus').textContent = 'Reading your situation…';
+  const body = { query: text, minutes: state.minutes, preferences: [...state.prefs], live: state.live ? { weather: state.live.weather, alerts: state.live.alerts, alertStatus: state.live.alertStatus, daylight: state.live.daylight } : null };
+  try {
+    const res = await fetch(PLAN_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(`Planner ${res.status}`);
+    const result = await res.json();
+    applyInferred(result);
+    $('#jevStatus').textContent = 'Plan adapted from your request';
+    $('#answerSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch {
+    $('#jevStatus').textContent = 'Plan adapted from your request';
+    const t = text.toLowerCase();
+    const prefs = [];
+    if (/mom|dad|grand|wheelchair|walker|mobility|stairs|accessible/.test(t)) prefs.push('easy');
+    if (/kid|child|toddler|baby/.test(t)) prefs.push('kids');
+    if (/photo|camera|sunset/.test(t)) prefs.push('photo');
+    if (/hike|trail|miles/.test(t)) prefs.push('hike');
+    if (/lunch|dinner|food|eat|brew/.test(t)) prefs.push('food');
+    if (/ski|winter|snow/.test(t)) prefs.push('winter');
+    const match = t.match(/(\d+(?:\.\d+)?)\s*(hour|hr)/);
+    applyInferred({ preferences: prefs, minutes: match ? Math.round(Number(match[1]) * 60) : state.minutes });
   }
+}
 
-  function escapeHtml(value) {
-    return String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
-  }
-  function escapeAttr(value) { return escapeHtml(value); }
-
-  function loadLeaflet() {
-    if (window.L) return Promise.resolve(window.L);
-    if (mapLoadPromise) return mapLoadPromise;
-
-    mapLoadPromise = new Promise((resolve, reject) => {
-      if (!document.querySelector('link[data-leaflet-css]')) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-        link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
-        link.crossOrigin = '';
-        link.dataset.leafletCss = 'true';
-        document.head.appendChild(link);
-      }
-
-      const existing = document.querySelector('script[data-leaflet-js]');
-      if (existing) {
-        existing.addEventListener('load', () => resolve(window.L), { once: true });
-        existing.addEventListener('error', () => reject(new Error('Leaflet failed to load')), { once: true });
-        return;
-      }
-
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-      script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
-      script.crossOrigin = '';
-      script.dataset.leafletJs = 'true';
-      script.onload = () => resolve(window.L);
-      script.onerror = () => reject(new Error('Leaflet failed to load'));
-      document.body.appendChild(script);
-    });
-    return mapLoadPromise;
-  }
-
-  async function ensureMap() {
-    if (state.map) return state.map;
-    const node = $('parkMap');
-    node?.classList.add('map-loading');
-    try {
-      await loadLeaflet();
-      initMap();
-      return state.map;
-    } catch (error) {
-      console.warn('Map unavailable:', error);
-      if (node) node.innerHTML = '<div class="map-placeholder">Interactive map could not load. The visit planner and place links remain available.</div>';
-      return null;
-    } finally {
-      node?.classList.remove('map-loading');
+function loadLeaflet() {
+  if (window.L) return Promise.resolve();
+  if (state.mapPromise) return state.mapPromise;
+  state.mapPromise = new Promise((resolve, reject) => {
+    if (!document.querySelector('link[data-leaflet]')) {
+      const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; css.dataset.leaflet = '1'; document.head.append(css);
     }
-  }
+    const js = document.createElement('script'); js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; js.async = true; js.onload = resolve; js.onerror = reject; document.head.append(js);
+  });
+  return state.mapPromise;
+}
 
-  function setupMapLazyLoad() {
-    const mapSection = $('mapSection');
-    const hasDeepLink = new URLSearchParams(location.search).has('place');
-    if (hasDeepLink) {
-      ensureMap();
-      return;
-    }
-    if (!('IntersectionObserver' in window) || !mapSection) {
-      ensureMap();
-      return;
-    }
-    const observer = new IntersectionObserver((entries) => {
-      if (!entries.some(entry => entry.isIntersecting)) return;
-      observer.disconnect();
-      ensureMap();
-    }, { rootMargin: '320px 0px' });
-    observer.observe(mapSection);
-  }
+async function ensureMap() {
+  if (state.map) return state.map;
+  await loadLeaflet();
+  const el = $('#parkMap'); el.innerHTML = '';
+  state.map = L.map(el, { scrollWheelZoom: false }).setView([46.59, -85.20], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap contributors' }).addTo(state.map);
+  renderMarkers();
+  return state.map;
+}
 
-  function initMap() {
-    if (state.map) return;
-    if (!window.L || !Array.isArray(window.TAHQUAMENON_PLACES)) throw new Error('Map dependencies unavailable');
-    $('parkMap').replaceChildren();
-    const map = L.map('parkMap', { zoomControl: false, scrollWheelZoom: true, preferCanvas: true }).setView([46.5905, -85.1700], 11);
-    state.map = map;
-    L.control.zoom({ position: 'bottomleft' }).addTo(map);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+function markerColor(category) {
+  return ({falls:'#a75c2b',trail:'#325e46',access:'#506d83',food:'#8a542e',camp:'#61744e',paddle:'#3f7181',photo:'#906b33',info:'#555'})[category] || '#555';
+}
 
-    const bounds = [];
-    window.TAHQUAMENON_PLACES.forEach(place => {
-      const marker = L.marker([place.lat, place.lng], { icon: markerIcon(place.category), title: place.name, keyboard: true });
-      marker.on('click', () => selectPlace(place, true));
-      marker.addTo(map);
-      state.markers.set(place.id, marker);
-      bounds.push([place.lat, place.lng]);
-    });
+function renderMarkers() {
+  if (!state.map) return;
+  state.markers.forEach(m => m.remove()); state.markers = [];
+  places().filter(p => state.activeFilter === 'all' || p.category === state.activeFilter).forEach(p => {
+    const marker = L.circleMarker([p.lat,p.lng], { radius: 8, color:'#fff', weight:2, fillColor:markerColor(p.category), fillOpacity:.95 }).addTo(state.map);
+    marker.bindTooltip(p.name, { direction:'top' }); marker.on('click', () => selectPlace(p, false)); marker._placeId = p.id; state.markers.push(marker);
+  });
+}
 
-    state.parkBounds = L.latLngBounds(bounds).pad(.08);
-    map.fitBounds(state.parkBounds, { padding: [36, 36] });
-    applyMapFilter(state.filter);
-    map.on('click', () => {
-      if (window.innerWidth <= 640) $('placeDrawer').style.display = 'none';
-    });
+async function selectPlace(place, fly = true) {
+  state.selectedPlace = place;
+  $('#placeKicker').textContent = String(place.kicker || place.category || 'Park stop').toUpperCase();
+  $('#placeTitle').textContent = place.name;
+  $('#placeDescription').textContent = place.description;
+  $('#placeFacts').innerHTML = (place.facts || []).map(f => `<span>${f}</span>`).join('');
+  $('#placeLink').href = place.url || DNR_URL;
+  $('#placeLink').textContent = place.action || 'Official details ↗';
+  $('#addPlaceButton').disabled = state.customStops.includes(place.id);
+  $('#addPlaceButton').textContent = state.customStops.includes(place.id) ? 'Already in plan' : 'Add to plan';
+  if (fly) { const map = await ensureMap(); map.flyTo([place.lat,place.lng], Math.max(map.getZoom(),13), {duration:.7}); }
+}
 
-    const placeId = new URLSearchParams(location.search).get('place');
-    const initial = window.TAHQUAMENON_PLACES.find(p => p.id === placeId);
-    if (initial) setTimeout(() => selectPlace(initial, true), 250);
-  }
+function setupMap() {
+  const target = $('#parkMap');
+  if (!('IntersectionObserver' in window)) { ensureMap().catch(() => target.textContent = 'Interactive map unavailable.'); return; }
+  const obs = new IntersectionObserver(entries => { if (entries.some(e => e.isIntersecting)) { obs.disconnect(); ensureMap().catch(() => target.textContent = 'Interactive map unavailable.'); } }, { rootMargin: '350px' });
+  obs.observe(target);
+}
 
-  function markerIcon(category) {
-    return L.divIcon({
-      className: '',
-      html: `<div class="poi-marker ${escapeAttr(category)}"><span>${escapeHtml(categoryGlyph[category] || '•')}</span></div>`,
-      iconSize: [34, 34],
-      iconAnchor: [17, 30]
-    });
-  }
+function copyPlan() {
+  const plan = basePlan();
+  const lines = [`Tahquamenon Falls plan · ${formatMinutes(state.minutes)}`, plan.title, '', ...plan.stops.map((s,i) => `${i+1}. ${s.title} — ${s.text}`), '', liveNote(plan), '', 'https://chrisizworski.com/tahquamenon-falls/'];
+  navigator.clipboard?.writeText(lines.join('\n')).then(() => { $('#copyPlanButton').textContent = 'Copied'; setTimeout(() => $('#copyPlanButton').textContent = 'Copy plan', 1300); }).catch(() => {});
+}
 
-  function selectPlace(place, pan = false) {
-    state.selectedPlace = place;
-    $('placeDrawer').style.display = 'block';
-    $('drawerKicker').textContent = `${place.category.toUpperCase()} · ${place.kicker}`;
-    $('drawerTitle').textContent = place.name;
-    $('drawerDescription').textContent = place.description;
-    $('drawerFacts').innerHTML = (place.facts || []).map(f => `<span>${escapeHtml(f)}</span>`).join('');
-    const drawerLink = $('drawerLink');
-    if (place.url) {
-      drawerLink.href = escapeAttr(place.url);
-      drawerLink.textContent = place.action || 'Learn more ↗';
-      drawerLink.hidden = false;
-    } else {
-      drawerLink.hidden = true;
-      drawerLink.removeAttribute('href');
-    }
-    $('drawerSource').textContent = `Source: ${place.source}`;
-    $('addToPlanButton').disabled = false;
-    $('focusButton').disabled = false;
-    if (pan && state.map) state.map.flyTo([place.lat, place.lng], Math.max(state.map.getZoom(), 14), { duration: .65 });
-    const url = new URL(location.href);
-    url.searchParams.set('place', place.id);
-    history.replaceState({}, '', url);
-  }
+function bind() {
+  $$('#timeChoices button').forEach(btn => btn.addEventListener('click', () => { state.minutes = Number(btn.dataset.minutes); syncControls(); renderPlan(); }));
+  $$('#preferenceChoices button').forEach(btn => btn.addEventListener('click', () => { const pref = btn.dataset.pref; state.prefs.has(pref) ? state.prefs.delete(pref) : state.prefs.add(pref); syncControls(); renderPlan(); }));
+  $('#buildPlanButton').addEventListener('click', () => { renderPlan(); $('#answerSection').scrollIntoView({behavior:'smooth',block:'start'}); });
+  $('#situationForm').addEventListener('submit', e => { e.preventDefault(); const text = $('#situationInput').value.trim(); if (text) adaptSituation(text); });
+  $('#copyPlanButton').addEventListener('click', copyPlan);
+  $('#shareButton').addEventListener('click', async () => { try { if (navigator.share) await navigator.share({title:document.title,url:location.href}); else await navigator.clipboard.writeText(location.href); } catch {} });
+  $$('[data-scroll]').forEach(btn => btn.addEventListener('click', () => document.querySelector(btn.dataset.scroll)?.scrollIntoView({behavior:'smooth'})));
+  $$('#filterRow button').forEach(btn => btn.addEventListener('click', async () => { state.activeFilter = btn.dataset.filter; $$('#filterRow button').forEach(x => x.classList.toggle('active', x === btn)); await ensureMap(); renderMarkers(); }));
+  $('#addPlaceButton').addEventListener('click', () => { const p = state.selectedPlace; if (!p || state.customStops.includes(p.id)) return; state.customStops.push(p.id); saveState(); renderPlan(); selectPlace(p,false); });
+  $$('[data-place-id]').forEach(btn => btn.addEventListener('click', async () => { const p = places().find(x => x.id === btn.dataset.placeId); if (!p) return; $('#mapSection').scrollIntoView({behavior:'smooth'}); await ensureMap(); selectPlace(p,true); }));
+}
 
-  function applyMapFilter(filter) {
-    state.filter = filter;
-    document.querySelectorAll('.filter-chip').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === filter));
-    persistPlanState();
-    if (!state.map) return;
-    state.markers.forEach((marker, id) => {
-      const place = window.TAHQUAMENON_PLACES.find(p => p.id === id);
-      const show = filter === 'all' || place.category === filter;
-      if (show && !state.map.hasLayer(marker)) marker.addTo(state.map);
-      if (!show && state.map.hasLayer(marker)) marker.removeFrom(state.map);
-    });
-  }
-
-  function persistPlanState() {
-    try {
-      localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify({
-        duration: state.duration,
-        filter: state.filter,
-        customPlanIds: state.customPlan.map(place => place.id)
-      }));
-    } catch {}
-  }
-
-  function restorePlanState() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(PLAN_STORAGE_KEY) || 'null');
-      if (!saved || typeof saved !== 'object') return;
-      if (['90', '240', '480', 'hike'].includes(saved.duration)) state.duration = saved.duration;
-      if (['all', 'falls', 'trail', 'camp', 'food', 'access', 'paddle', 'photo'].includes(saved.filter)) state.filter = saved.filter;
-      const ids = Array.isArray(saved.customPlanIds) ? saved.customPlanIds : [];
-      state.customPlan = ids
-        .map(id => window.TAHQUAMENON_PLACES?.find(place => place.id === id))
-        .filter(Boolean);
-    } catch {}
-  }
-
-  function syncSavedControls() {
-    document.querySelectorAll('#durationToggle button').forEach(button => button.classList.toggle('active', button.dataset.duration === state.duration));
-    document.querySelectorAll('.filter-chip').forEach(button => button.classList.toggle('active', button.dataset.filter === state.filter));
-  }
-
-  function dynamicPlanContext(preset) {
-    const d = state.live?.decision;
-    if (!d || !Number.isFinite(d.score)) return preset.text;
-    const notes = [preset.text];
-    if ((state.live.alerts || []).length) notes.push('Active NWS hazards are present; re-check official instructions before committing to exposed trails or river access.');
-    else if (Number.isFinite(d.trailScore) && d.trailScore < 55) notes.push('Trail comfort is the weak link right now, so favor overlooks and shorter walks.');
-    else if (Number.isFinite(d.riverScore) && d.riverScore >= 80) notes.push('River conditions are the standout signal, so give the Upper Falls overlooks enough time instead of rushing through.');
-    if (Number.isFinite(d.photoScore) && d.photoScore >= 78 && state.duration === '480') notes.push('The live photo score supports keeping the Rivermouth sunset finish in the plan.');
-    return notes.join(' ');
-  }
-
-  function renderPlan() {
-    const preset = itineraryPresets[state.duration] || itineraryPresets['240'];
-    const baseStops = preset.stops.map(stop => ({ name: stop[0], description: stop[1], time: stop[2], customId: null }));
-    const customStops = state.customPlan.map(place => ({ name: place.name, description: place.description, time: 'your stop', customId: place.id }));
-    const stops = [...baseStops, ...customStops];
-    $('planContextTitle').textContent = preset.title;
-    $('planContextText').textContent = dynamicPlanContext(preset);
-    $('planList').innerHTML = stops.map((stop, idx) => `
-      <article class="plan-stop">
-        <div class="stop-num">${String(idx + 1).padStart(2, '0')}</div>
-        <div><h3>${escapeHtml(stop.name)}</h3><p>${escapeHtml(stop.description)}</p></div>
-        <div class="stop-time">${escapeHtml(stop.time)}${stop.customId ? `<button class="remove-stop" data-remove-stop="${escapeAttr(stop.customId)}" type="button" aria-label="Remove ${escapeAttr(stop.name)} from visit plan">Remove</button>` : ''}</div>
-      </article>`).join('');
-  }
-
-  function planText() {
-    const preset = itineraryPresets[state.duration] || itineraryPresets['240'];
-    const custom = state.customPlan.map(p => p.name);
-    const d = state.live?.decision;
-    const header = `Tahquamenon Falls visit plan — ${preset.title}`;
-    const conditions = d && Number.isFinite(d.score) ? `Live score ${d.score}/100 (${d.label}), river ${scoreText(d.riverScore)}, trail ${scoreText(d.trailScore)}, photo ${scoreText(d.photoScore)}.` : 'Live score unavailable; check conditions before leaving.';
-    const stops = [...preset.stops.map(s => s[0]), ...custom].map((s, i) => `${i + 1}. ${s}`).join('\n');
-    return `${header}\n${conditions}\n\n${stops}\n\nGenerated by Tahquamenon Falls Live.`;
-  }
-
-  async function copyText(text, successMessage) {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast(successMessage);
-    } catch {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.style.position = 'fixed'; textarea.style.opacity = '0';
-      document.body.appendChild(textarea); textarea.select();
-      document.execCommand('copy'); textarea.remove();
-      toast(successMessage);
-    }
-  }
-
-  function bindEvents() {
-    document.querySelectorAll('[data-scroll]').forEach(btn => btn.addEventListener('click', () => document.querySelector(btn.dataset.scroll)?.scrollIntoView({ behavior: 'smooth' })));
-    $('whyButton').addEventListener('click', () => $('whyDialog').showModal());
-    $('sourcesButton').addEventListener('click', () => $('sourcesDialog').showModal());
-    $('shareButton').addEventListener('click', async () => {
-      const shareData = { title: 'Tahquamenon Falls Live', text: buildDecisionSummary(state.live || FALLBACK_BASELINE), url: location.href };
-      if (navigator.share) {
-        try { await navigator.share(shareData); return; } catch {}
-      }
-      copyText(location.href, 'Link copied');
-    });
-    $('filterRow').addEventListener('click', (event) => {
-      const button = event.target.closest('[data-filter]');
-      if (!button) return;
-      applyMapFilter(button.dataset.filter);
-      ensureMap();
-    });
-    $('fitMapButton').addEventListener('click', async () => {
-      const map = await ensureMap();
-      map?.fitBounds(state.parkBounds, { padding: [36, 36] });
-    });
-    $('drawerClose').addEventListener('click', () => $('placeDrawer').style.display = 'none');
-    $('focusButton').addEventListener('click', () => state.selectedPlace && state.map?.flyTo([state.selectedPlace.lat, state.selectedPlace.lng], 15));
-    $('addToPlanButton').addEventListener('click', () => {
-      if (!state.selectedPlace) return;
-      if (!state.customPlan.some(p => p.id === state.selectedPlace.id)) state.customPlan.push(state.selectedPlace);
-      persistPlanState();
-      renderPlan();
-      toast(`${state.selectedPlace.name} added`);
-      document.querySelector('#planSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-    $('durationToggle').addEventListener('click', (event) => {
-      const btn = event.target.closest('[data-duration]');
-      if (!btn) return;
-      state.duration = btn.dataset.duration;
-      document.querySelectorAll('#durationToggle button').forEach(button => button.classList.toggle('active', button === btn));
-      persistPlanState();
-      renderPlan();
-    });
-    $('planList').addEventListener('click', (event) => {
-      const remove = event.target.closest('[data-remove-stop]');
-      if (!remove) return;
-      const id = remove.dataset.removeStop;
-      state.customPlan = state.customPlan.filter(place => place.id !== id);
-      persistPlanState();
-      renderPlan();
-      toast('Stop removed');
-    });
-    document.querySelectorAll('[data-place-id]').forEach(button => button.addEventListener('click', async () => {
-      const place = window.TAHQUAMENON_PLACES?.find(item => item.id === button.dataset.placeId);
-      if (!place) return;
-      await ensureMap();
-      applyMapFilter('falls');
-      selectPlace(place, true);
-    }));
-    $('copyPlanButton').addEventListener('click', () => copyText(planText(), 'Visit plan copied'));
-  }
-
-  async function loadLive() {
-    try {
-      const response = await fetch('/api/tahquamenon-falls', { headers: { Accept: 'application/json' } });
-      if (!response.ok) throw new Error(`Live API ${response.status}`);
-      const payload = await response.json();
-      renderLive(payload);
-    } catch (error) {
-      console.warn('Live data unavailable:', error);
-      renderLive(FALLBACK_BASELINE);
-    }
-  }
-
-  function init() {
-    restorePlanState();
-    syncSavedControls();
-    bindEvents();
-    renderPlan();
-    setupMapLazyLoad();
-    loadLive();
-    setInterval(loadLive, 5 * 60 * 1000);
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
-})();
+restoreState();
+syncControls();
+bind();
+renderPlan();
+setupMap();
+loadLive();
