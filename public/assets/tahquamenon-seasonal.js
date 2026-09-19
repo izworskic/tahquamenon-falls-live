@@ -209,7 +209,7 @@ export function applySeasonalIntelligence(basePlan, ctx = {}) {
   let winner=pool[0], winnerValue=totalProductValue(pool[0],ctx);
   for(const candidate of pool.slice(1)){
     const value=totalProductValue(candidate,ctx);
-    if(value.total>winnerValue.total){ winner=candidate; winnerValue=value; }
+    if(value.total>=winnerValue.total){ winner=candidate; winnerValue=value; }
   }
   return { ...winner, value:winnerValue };
 }
