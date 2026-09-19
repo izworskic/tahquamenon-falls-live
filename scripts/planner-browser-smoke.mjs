@@ -12,8 +12,13 @@ try {
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForSelector('#buildPlanButton', { state: 'visible', timeout: 15000 });
 
+  const plannerScript = await page.locator('script[src*="tahquamenon-falls.js"]').getAttribute('src');
+  console.log('plannerScript=', plannerScript);
+  console.log('pageErrorsBeforeClick=', JSON.stringify(pageErrors));
   const time45 = page.locator('#timeChoices button[data-minutes="45"]');
   await time45.click();
+  console.log('time45ClassAfterClick=', await time45.getAttribute('class'));
+  console.log('pageErrorsAfterClick=', JSON.stringify(pageErrors));
   assert.equal(await time45.evaluate(el => el.classList.contains('active')), true);
   assert.match(await page.locator('#answerTitle').innerText(), /Upper Falls visit/i);
 
