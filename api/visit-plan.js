@@ -1,6 +1,6 @@
 import { getVercelOidcToken } from '@vercel/oidc';
 const ALLOWED_PREFS = new Set(['kids','easy','hike','photo','food','winter']);
-const HARNESS_URL = process.env.HARNESS_URL || 'https://agentbase-registry.vercel.app/api/harness';
+const HARNESS_URL = process.env.HARNESS_URL || 'https://agentbase-registry-izworski-gmailcoms-projects.vercel.app/api/harness';
 
 function clampText(value, max = 700) { return String(value || '').trim().slice(0, max); }
 function nearestMinutes(value, fallback = 180) {
