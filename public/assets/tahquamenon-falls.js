@@ -213,18 +213,35 @@ function applyInferred(result) {
   renderPlan();
 }
 
+function preferenceLabel(pref) {
+  return ({ kids:'Kids', easy:'Easy access', hike:'Hiking', photo:'Photos', food:'Food', winter:'Winter / ski' })[pref] || pref;
+}
+
+function appliedPlanSummary(result, before) {
+  const parts = [];
+  const minutes = Number(result?.minutes);
+  if (Number.isFinite(minutes) && minutes !== before.minutes) parts.push(formatMinutes(minutes));
+  const newPrefs = (result?.preferences || []).filter(pref => !before.prefs.has(pref));
+  newPrefs.forEach(pref => parts.push(preferenceLabel(pref)));
+  return parts;
+}
+
 async function adaptSituation(text) {
-  $('#jevStatus').textContent = 'Reading your situation…';
-  const body = { query: text, minutes: state.minutes, preferences: [...state.prefs], live: state.live ? { weather: state.live.weather, alerts: state.live.alerts, alertStatus: state.live.alertStatus, daylight: state.live.daylight } : null };
+  const status = $('#jevStatus');
+  const submit = $('#customPlanSubmit');
+  const before = { minutes: state.minutes, prefs: new Set(state.prefs) };
+  status.dataset.state = 'working';
+  status.textContent = 'Updating your plan…';
+  submit.disabled = true;
+  submit.textContent = 'Updating…';
+
+  let result;
   try {
+    const body = { query: text, minutes: state.minutes, preferences: [...state.prefs], live: state.live ? { weather: state.live.weather, alerts: state.live.alerts, alertStatus: state.live.alertStatus, daylight: state.live.daylight } : null };
     const res = await fetch(PLAN_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (!res.ok) throw new Error(`Planner ${res.status}`);
-    const result = await res.json();
-    applyInferred(result);
-    $('#jevStatus').textContent = 'Plan adapted from your request';
-    $('#answerSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    result = await res.json();
   } catch {
-    $('#jevStatus').textContent = 'Plan adapted from your request';
     const t = text.toLowerCase();
     const prefs = [];
     if (/mom|dad|grand|wheelchair|walker|mobility|stairs|accessible/.test(t)) prefs.push('easy');
@@ -233,9 +250,25 @@ async function adaptSituation(text) {
     if (/hike|trail|miles/.test(t)) prefs.push('hike');
     if (/lunch|dinner|food|eat|brew/.test(t)) prefs.push('food');
     if (/ski|winter|snow/.test(t)) prefs.push('winter');
-    const match = t.match(/(\d+(?:\.\d+)?)\s*(hour|hr)/);
-    applyInferred({ preferences: prefs, minutes: match ? Math.round(Number(match[1]) * 60) : state.minutes });
+    const hourMatch = t.match(/(\d+(?:\.\d+)?)\s*(hour|hr)/);
+    const minuteMatch = t.match(/(\d+)\s*(minute|min)/);
+    result = {
+      preferences: prefs,
+      minutes: hourMatch ? Math.round(Number(hourMatch[1]) * 60) : minuteMatch ? Number(minuteMatch[1]) : state.minutes
+    };
   }
+
+  applyInferred(result);
+  const applied = appliedPlanSummary(result, before);
+  if (applied.length) {
+    status.dataset.state = 'applied';
+    status.textContent = `Updated: ${applied.join(' · ')}`;
+  } else {
+    status.dataset.state = 'nochange';
+    status.textContent = 'No new constraint found. Add a time limit, mobility need, kids, food, hiking, photos, or winter plans.';
+  }
+  submit.disabled = false;
+  submit.textContent = 'Update plan';
 }
 
 function loadLeaflet() {
