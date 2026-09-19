@@ -174,8 +174,8 @@ function renderPlan() {
 }
 
 function syncControls() {
-  $$$('#timeChoices button').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.minutes) === state.minutes));
-  $$$('#preferenceChoices button').forEach(btn => btn.classList.toggle('active', state.prefs.has(btn.dataset.pref)));
+  $$('#timeChoices button').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.minutes) === state.minutes));
+  $$('#preferenceChoices button').forEach(btn => btn.classList.toggle('active', state.prefs.has(btn.dataset.pref)));
 }
 
 function seasonalHeadline(fall) {
