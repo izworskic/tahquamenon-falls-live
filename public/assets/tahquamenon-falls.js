@@ -206,9 +206,7 @@ function applyInferred(result) {
   const prefs = result?.preferences || [];
   prefs.forEach(pref => state.prefs.add(pref));
   if (Number.isFinite(Number(result?.minutes))) {
-    const requested = Number(result.minutes);
-    const options = [45,90,180,300,480];
-    state.minutes = options.reduce((best, x) => Math.abs(x - requested) < Math.abs(best - requested) ? x : best, options[0]);
+    state.minutes = Math.max(30, Math.min(600, Math.round(Number(result.minutes))));
   }
   state.inferred = result;
   syncControls();
