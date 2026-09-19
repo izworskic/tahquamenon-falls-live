@@ -35,7 +35,7 @@ assert(css.includes('@media(max-width:760px)'), 'Mobile layout gate missing');
 assert(plannerApi.includes('agentbase-registry-izworski-gmailcoms-projects.vercel.app/api/harness'), 'Shared harness route missing');
 assert(plannerApi.includes('x-vercel-oidc-token'), 'Vercel OIDC caller auth missing');
 assert(plannerApi.includes('getVercelOidcToken'), 'Supported Vercel OIDC helper missing');
-assert(plannerApi.includes("architecture:'shared-harness-v1'"), 'Shared-harness build marker missing');
+assert(plannerApi.includes("architecture:'shared-harness-v2'"), 'Shared-harness v2 build marker missing');
 assert(!plannerApi.includes('api.typesafe.ai'), 'Tool project must not call TypeSafe directly');
 assert(!plannerApi.includes('TYPESAFE_API_KEY'), 'Tool project must not receive the shared JEV key');
 console.log('Tahquamenon visit-engine rebuild checks passed');
