@@ -15,7 +15,7 @@ assert(clean.preferences.includes('kids'));
 assert(clean.preferences.includes('photo'));
 assert(!clean.preferences.includes('bogus'));
 assert.equal(deterministicResult(clean).engine, 'deterministic');
-assert.equal(oidcToken({headers:{'x-vercel-oidc-token':'abc123'}}), 'abc123');
+assert.equal(await oidcToken({headers:{'x-vercel-oidc-token':'abc123'}}), 'abc123');
 
 const html = await readFile(new URL('../public/tahquamenon-falls/index.html', import.meta.url), 'utf8');
 const js = await readFile(new URL('../public/assets/tahquamenon-falls.js', import.meta.url), 'utf8');
@@ -34,6 +34,8 @@ assert(js.includes('IntersectionObserver'), 'Lazy map loading missing');
 assert(css.includes('@media(max-width:660px)'), 'Mobile layout gate missing');
 assert(plannerApi.includes('agentbase-registry.vercel.app/api/harness'), 'Shared harness route missing');
 assert(plannerApi.includes('x-vercel-oidc-token'), 'Vercel OIDC caller auth missing');
+assert(plannerApi.includes('getVercelOidcToken'), 'Supported Vercel OIDC helper missing');
+assert(plannerApi.includes("architecture:'shared-harness-v1'"), 'Shared-harness build marker missing');
 assert(!plannerApi.includes('api.typesafe.ai'), 'Tool project must not call TypeSafe directly');
 assert(!plannerApi.includes('TYPESAFE_API_KEY'), 'Tool project must not receive the shared JEV key');
 console.log('Tahquamenon visit-engine rebuild checks passed');
