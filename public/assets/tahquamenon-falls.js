@@ -452,8 +452,8 @@ function copyPlan() {
 
 function bind() {
   $('#customPlan')?.addEventListener('toggle', e => { if (e.currentTarget.open) track('customize_open'); });
-  $('#timeChoices button').forEach(btn => btn.addEventListener('click', () => { state.minutes = Number(btn.dataset.minutes); track('planner_time_select',{minutes:state.minutes}); syncControls(); renderPlan(); }));
-  $('#preferenceChoices button').forEach(btn => btn.addEventListener('click', () => { const pref = btn.dataset.pref; state.prefs.has(pref) ? state.prefs.delete(pref) : state.prefs.add(pref); track('priority_select',{priority:pref,active:state.prefs.has(pref)}); syncControls(); renderPlan(); }));
+  $$('#timeChoices button').forEach(btn => btn.addEventListener('click', () => { state.minutes = Number(btn.dataset.minutes); track('planner_time_select',{minutes:state.minutes}); syncControls(); renderPlan(); }));
+  $$('#preferenceChoices button').forEach(btn => btn.addEventListener('click', () => { const pref = btn.dataset.pref; state.prefs.has(pref) ? state.prefs.delete(pref) : state.prefs.add(pref); track('priority_select',{priority:pref,active:state.prefs.has(pref)}); syncControls(); renderPlan(); }));
   $('#buildPlanButton').addEventListener('click', () => { const plan=basePlan(); track('planner_build',{minutes:state.minutes,persona:state.persona||'none',season:state.seasonal?.season||'unknown',value:totalProductValue(plan,{minutes:state.minutes,prefs:state.prefs,intent:state.intent,persona:state.persona,seasonal:state.seasonal,live:state.live}).total}); renderPlan(); $('#answerSection').scrollIntoView({behavior:'smooth',block:'start'}); });
   $('#situationForm').addEventListener('submit', e => { e.preventDefault(); const text = $('#situationInput').value.trim(); if (text) adaptSituation(text); });
   $('#copyPlanButton').addEventListener('click', () => { track('copy_plan',{minutes:state.minutes}); copyPlan(); });
