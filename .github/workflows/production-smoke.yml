@@ -49,10 +49,10 @@ jobs:
               raise SystemExit(f"Alert health/status mismatch: {source_health} / {alert_status}")
 
           plan = json.loads(Path('/tmp/plan.json').read_text())
-          if plan.get('architecture') != 'shared-harness-v1':
+          if plan.get('architecture') != 'shared-harness-v2':
               raise SystemExit(f"Shared-harness production build not promoted yet: {plan}")
-          if plan.get('engine') not in ('shared-harness-jev', 'deterministic'):
-              raise SystemExit(f"Unexpected planner engine: {plan}")
+          if plan.get('engine') != 'shared-harness-jev':
+              raise SystemExit(f"Jev harness did not execute: engine={plan.get('engine')} harnessStatus={plan.get('harnessStatus')} payload={plan}")
           if plan.get('minutes') != 120:
               raise SystemExit(f"Natural-language time parse failed: {plan}")
           prefs = set(plan.get('preferences') or [])
@@ -66,6 +66,7 @@ jobs:
           print('plannerArchitecture=', plan.get('architecture'))
           print('plannerEngine=', plan.get('engine'))
           print('plannerFocus=', plan.get('focus'))
+          print('harnessStatus=', plan.get('harnessStatus'))
           PY
                     then
                       ok=1
