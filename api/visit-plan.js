@@ -77,7 +77,9 @@ async function oidcToken(req) {
 
 async function askSharedHarness(req, s) {
   const token = await oidcToken(req);
-  if (!token || !s.query) return null;
+  if (!s.query) return { result:null, status:'no-query' };
+  if (!token) return { result:null, status:'no-oidc-token' };
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 4500);
   try {
@@ -105,6 +107,7 @@ async function askSharedHarness(req, s) {
       ],
       evidence: [{ id: 'visitor_request', source: 'visitor', text: s.query }]
     };
+
     const response = await fetch(HARNESS_URL, {
       method: 'POST',
       headers: {
@@ -115,30 +118,58 @@ async function askSharedHarness(req, s) {
       body: JSON.stringify(payload),
       signal: controller.signal
     });
-    if (!response.ok) return null;
-    const data = await response.json();
-    const judged = data?.result?.choice || {};
+
+    const raw = await response.text();
+    let data = null;
+    try { data = raw ? JSON.parse(raw) : null; } catch {}
+
+    if (!response.ok) {
+      return {
+        result:null,
+        status:`harness-http-${response.status}`,
+        detail: clampText(data?.detail || data?.error || response.statusText, 160)
+      };
+    }
+
+    if (!data || data.action !== 'decide' || !data.result) {
+      return { result:null, status:'invalid-harness-success' };
+    }
+
+    const judged = data.result.choice || {};
     const focus = judged.choice;
     const confidence = Number(judged.confidence) || 0;
-    const injectionDependency = Number(data?.result?.injection_dependency);
-    if (!focus || focus === 'NONE' || confidence < 0.52) return null;
-    if (Number.isFinite(injectionDependency) && injectionDependency >= 0.45) return null;
+    const injectionDependency = Number(data.result.injection_dependency);
+
+    if (!focus || focus === 'NONE') return { result:null, status:'jev-no-supported-choice' };
+    if (confidence < 0.52) return { result:null, status:'jev-low-confidence' };
+    if (Number.isFinite(injectionDependency) && injectionDependency >= 0.45) {
+      return { result:null, status:'jev-injection-gate' };
+    }
+
     const prefs = new Set(s.preferences);
     const focusMap = {
       accessibility:'easy', kids:'kids', hiking:'hike',
       photography:'photo', food:'food', winter_ski:'winter'
     };
     if (focusMap[focus]) prefs.add(focusMap[focus]);
+
     return {
-      engine: 'shared-harness-jev',
-      confidence,
-      model: data?.result?.model || 'jev-latest',
-      minutes: s.minutes,
-      preferences: [...prefs].filter(x => ALLOWED_PREFS.has(x)),
-      focus
+      status:'ok',
+      result: {
+        engine: 'shared-harness-jev',
+        confidence,
+        model: data.result.model || 'jev-latest',
+        minutes: s.minutes,
+        preferences: [...prefs].filter(x => ALLOWED_PREFS.has(x)),
+        focus
+      }
     };
-  } catch {
-    return null;
+  } catch (error) {
+    return {
+      result:null,
+      status:error?.name === 'AbortError' ? 'harness-timeout' : 'harness-request-error',
+      detail: clampText(error?.message || error, 160)
+    };
   } finally {
     clearTimeout(timer);
   }
@@ -148,11 +179,22 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error:'Method not allowed' });
   const s = sanitizeClientState(req.body || {});
   if (!s.query) return res.status(400).json({ error:'A visitor situation is required.' });
-  const judged = await askSharedHarness(req, s);
-  const result = judged || deterministicResult(s);
-  console.info(JSON.stringify({ event:'visit_plan_engine', engine:result.engine, focus:result.focus }));
+
+  const harness = await askSharedHarness(req, s);
+  const result = harness.result || deterministicResult(s);
+  console.info(JSON.stringify({
+    event:'visit_plan_engine',
+    engine:result.engine,
+    focus:result.focus,
+    harnessStatus:harness.status
+  }));
+
   res.setHeader('Cache-Control','no-store');
-  return res.status(200).json({ ...result, architecture:'shared-harness-v1' });
+  return res.status(200).json({
+    ...result,
+    architecture:'shared-harness-v2',
+    harnessStatus:harness.status
+  });
 }
 
 export { inferVisitPreferences, inferMinutes, sanitizeClientState, deterministicResult, oidcToken };
