@@ -21,6 +21,7 @@ Release gate: 92/100.
 
 - A generic “worth going?” waterfall score returns to the first screen.
 - JEV is allowed to invent park facts, hours, closures, accessibility, trail lengths, shuttle operation or safety state.
+- The public tool calls TypeSafe directly or receives a copied JEV/TypeSafe key; JEV access must route server-side through the private shared harness using Vercel OIDC.
 - NWS alert failure is presented as “no hazards.”
 - River flow is presented as the reason to visit or not visit.
 - The winter section lacks a working link to the Michigan XC tool.

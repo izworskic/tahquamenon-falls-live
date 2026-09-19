@@ -23,9 +23,10 @@ jobs:
           for attempt in $(seq 1 36); do
             echo "Smoke attempt ${attempt}/36"
             if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 20 -fsS "$PROD_URL/tahquamenon-falls/" -o /tmp/index.html; then
-              if grep -q "Tahquamenon" /tmp/index.html; then
+              if grep -q "Plan the Tahquamenon day you actually have." /tmp/index.html && ! grep -q "Worth going right now?" /tmp/index.html; then
                 if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 25 -fsS "$PROD_URL/api/tahquamenon-falls" -o /tmp/live.json; then
-                  if python - <<'PY'
+                  if curl --retry 1 --connect-timeout 8 --max-time 20 -fsS                     -H 'content-type: application/json'                     --data '{"query":"We have two kids, my 77-year-old mom uses a walker, we have 2 hours and want lunch.","minutes":180,"preferences":[]}'                     "$PROD_URL/api/visit-plan" -o /tmp/plan.json; then
+                    if python - <<'PY'
           import json
           from pathlib import Path
 
@@ -47,27 +48,34 @@ jobs:
           if source_health.get('nwsAlerts') and not alert_status.get('verified'):
               raise SystemExit(f"Alert health/status mismatch: {source_health} / {alert_status}")
 
-          river = data.get('river') or {}
+          plan = json.loads(Path('/tmp/plan.json').read_text())
+          if plan.get('engine') not in ('shared-harness-jev', 'deterministic'):
+              raise SystemExit(f"Unexpected planner engine: {plan}")
+          if plan.get('minutes') != 120:
+              raise SystemExit(f"Natural-language time parse failed: {plan}")
+          prefs = set(plan.get('preferences') or [])
+          if not {'kids','easy','food'}.issubset(prefs):
+              raise SystemExit(f"Visitor preference parse failed: {plan}")
+
           print('generatedAt=', data.get('generatedAt'))
-          print('score=', decision.get('score'))
-          print('decision=', decision.get('label'))
           print('confidence=', decision.get('confidence'))
-          print('cfs=', river.get('cfs'))
+          print('cfs=', (data.get('river') or {}).get('cfs'))
           print('sourceHealth=', source_health)
+          print('plannerEngine=', plan.get('engine'))
+          print('plannerFocus=', plan.get('focus'))
           PY
-                  then
-                    ok=1
-                    break
+                    then
+                      ok=1
+                      break
+                    fi
                   fi
                 fi
               fi
             fi
             sleep 10
           done
-
           if [ "$ok" -ne 1 ]; then
             echo "Production smoke test failed after 36 attempts" >&2
             exit 1
           fi
-
           echo "Production smoke test passed"
