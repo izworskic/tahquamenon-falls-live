@@ -49,7 +49,7 @@ jobs:
               raise SystemExit(f"Alert health/status mismatch: {source_health} / {alert_status}")
 
           plan = json.loads(Path('/tmp/plan.json').read_text())
-          if plan.get('architecture') != 'shared-harness-v1':
+          if plan.get('architecture') != 'shared-harness-v2':
               raise SystemExit(f"Shared-harness production build not promoted yet: {plan}")
           if plan.get('engine') not in ('shared-harness-jev', 'deterministic'):
               raise SystemExit(f"Unexpected planner engine: {plan}")
