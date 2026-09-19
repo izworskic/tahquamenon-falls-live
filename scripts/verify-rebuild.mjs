@@ -22,6 +22,11 @@ const js = await readFile(new URL('../public/assets/tahquamenon-falls.js', impor
 const css = await readFile(new URL('../public/assets/tahquamenon-falls.css', import.meta.url), 'utf8');
 const plannerApi = await readFile(new URL('../api/visit-plan.js', import.meta.url), 'utf8');
 assert(html.includes('Plan the Tahquamenon day you actually have.'), 'Visit-first hero missing');
+assert(!html.includes('Need something more specific?'), 'Old custom-plan wording returned');
+assert(html.includes('Have a specific group or constraint?'), 'Optional custom-plan control missing');
+assert(html.includes('customPlanSubmit'), 'Custom-plan submit control missing');
+assert(js.includes('No new constraint found.'), 'Custom-plan no-change feedback missing');
+assert(js.includes('Updated:'), 'Custom-plan applied feedback missing');
 assert(!html.includes('Worth going right now?'), 'Old go/no-go framing must stay removed');
 assert(!html.includes('score-orb'), 'Old waterfall score must stay removed');
 assert(html.includes('xcski.chrisizworski.com'), 'XC cross-link missing');
