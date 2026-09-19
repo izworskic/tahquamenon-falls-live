@@ -1,3 +1,4 @@
+import { getVercelOidcToken } from '@vercel/oidc';
 const ALLOWED_PREFS = new Set(['kids','easy','hike','photo','food','winter']);
 const HARNESS_URL = process.env.HARNESS_URL || 'https://agentbase-registry.vercel.app/api/harness';
 
@@ -62,14 +63,20 @@ function deterministicResult(s) {
   };
 }
 
-function oidcToken(req) {
+async function oidcToken(req) {
   const raw = req?.headers?.['x-vercel-oidc-token'];
-  if (Array.isArray(raw)) return raw[0] || '';
-  return String(raw || process.env.VERCEL_OIDC_TOKEN || '');
+  if (Array.isArray(raw) && raw[0]) return raw[0];
+  if (raw) return String(raw);
+  if (process.env.VERCEL_OIDC_TOKEN) return String(process.env.VERCEL_OIDC_TOKEN);
+  try {
+    return String(await getVercelOidcToken() || '');
+  } catch {
+    return '';
+  }
 }
 
 async function askSharedHarness(req, s) {
-  const token = oidcToken(req);
+  const token = await oidcToken(req);
   if (!token || !s.query) return null;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 4500);
@@ -145,7 +152,7 @@ export default async function handler(req, res) {
   const result = judged || deterministicResult(s);
   console.info(JSON.stringify({ event:'visit_plan_engine', engine:result.engine, focus:result.focus }));
   res.setHeader('Cache-Control','no-store');
-  return res.status(200).json(result);
+  return res.status(200).json({ ...result, architecture:'shared-harness-v1' });
 }
 
 export { inferVisitPreferences, inferMinutes, sanitizeClientState, deterministicResult, oidcToken };
