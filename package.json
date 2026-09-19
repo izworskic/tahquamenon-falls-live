@@ -5,9 +5,10 @@
   "type": "module",
   "description": "Tahquamenon Falls season-aware destination intelligence engine with live conditions, shared fall-color context, JEV personas and winter XC integration",
   "scripts": {
-    "check": "node --check public/assets/tahquamenon-falls.js && node --check public/assets/tahquamenon-seasonal.js && node --check public/tahquamenon-falls/data/places.js && node --check api/tahquamenon-falls.js && node --check api/tahquamenon-seasonal-context.js && node --check api/visit-plan.js && node --check scripts/verify-integrity.mjs && node --check scripts/verify-rebuild.mjs && node --check scripts/verify-seasonal-intelligence.mjs && node --check scripts/score-seasonal-release.mjs",
-    "verify": "npm run check && node scripts/verify-integrity.mjs && node scripts/verify-rebuild.mjs && node scripts/verify-seasonal-intelligence.mjs && node scripts/score-seasonal-release.mjs",
-    "vercel-build": "npm run verify && node scripts/inject-ga4.mjs"
+    "check": "node --check public/assets/tahquamenon-falls.js && node --check public/assets/tahquamenon-seasonal.js && node --check public/tahquamenon-falls/data/places.js && node --check api/tahquamenon-falls.js && node --check api/tahquamenon-seasonal-context.js && node --check api/visit-plan.js && node --check scripts/verify-integrity.mjs && node --check scripts/verify-rebuild.mjs && node --check scripts/verify-seasonal-intelligence.mjs && node --check scripts/score-seasonal-release.mjs && node --check api/shoshone-falls.js && node --check public/assets/shoshone-falls.js && node --check scripts/score-shoshone-release.mjs",
+    "verify": "npm run check && node scripts/verify-integrity.mjs && node scripts/verify-rebuild.mjs && node scripts/verify-seasonal-intelligence.mjs && node scripts/score-seasonal-release.mjs && node scripts/score-shoshone-release.mjs",
+    "vercel-build": "npm run verify && node scripts/inject-ga4.mjs",
+    "benchmark:shoshone": "node scripts/score-shoshone-release.mjs"
   },
   "dependencies": {
     "@vercel/oidc": "latest"
