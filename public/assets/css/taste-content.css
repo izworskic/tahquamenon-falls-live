@@ -54,6 +54,8 @@
 .mini-band i { position: absolute; top: 50%; left: 0; width: 10px; height: 10px; transform: translate(-50%,-50%); border-radius: 50%; border: 2px solid var(--surface); background: var(--evergreen); transition: left .6s ease; }
 .alert-card.has-alert { border-color: rgba(180,79,63,.4); background: rgba(180,79,63,.06); }
 .alert-card.has-alert .signal-icon, .alert-card.has-alert .signal-title strong { color: var(--danger); }
+.alert-card.unverified { border-style: dashed; border-color: rgba(215,168,102,.58); background: rgba(215,168,102,.07); }
+.alert-card.unverified .signal-icon, .alert-card.unverified .signal-title strong { color: var(--tannin-deep); }
 .outlook-bar { margin-top: 12px; padding: 15px 18px; display: flex; gap: 18px; align-items: center; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.24); }
 .outlook-label { flex: none; color: var(--tannin); font-size: 9px; font-weight: 800; letter-spacing: .11em; }
 .outlook-bar p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
