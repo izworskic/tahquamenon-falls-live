@@ -1,13 +1,18 @@
 {
-  "name":"tahquamenon-falls-live",
-  "version":"2.0.0",
-  "private":true,
-  "type":"module",
-  "description":"Tahquamenon Falls time-and-intent visit planning engine with live conditions and winter XC integration",
-  "scripts":{
-    "check":"node --check public/assets/tahquamenon-falls.js && node --check public/tahquamenon-falls/data/places.js && node --check api/tahquamenon-falls.js && node --check api/visit-plan.js && node --check scripts/verify-integrity.mjs && node --check scripts/verify-rebuild.mjs",
-    "verify":"npm run check && node scripts/verify-integrity.mjs && node scripts/verify-rebuild.mjs",
-    "vercel-build":"npm run verify && node scripts/inject-ga4.mjs"
+  "name": "tahquamenon-falls-live",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Tahquamenon Falls time-and-intent visit planning engine with live conditions and winter XC integration",
+  "scripts": {
+    "check": "node --check public/assets/tahquamenon-falls.js && node --check public/tahquamenon-falls/data/places.js && node --check api/tahquamenon-falls.js && node --check api/visit-plan.js && node --check scripts/verify-integrity.mjs && node --check scripts/verify-rebuild.mjs",
+    "verify": "npm run check && node scripts/verify-integrity.mjs && node scripts/verify-rebuild.mjs",
+    "vercel-build": "npm run verify && node scripts/inject-ga4.mjs"
   },
-  "engines":{"node":">=20"}
+  "dependencies": {
+    "@vercel/oidc": "latest"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }
