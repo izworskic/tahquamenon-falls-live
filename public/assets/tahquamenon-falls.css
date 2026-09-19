@@ -1,12 +1,252 @@
-:root{--ink:#17231d;--muted:#65726b;--paper:#f5f2e9;--surface:#fffdf7;--line:#d8d7ce;--forest:#153a2b;--forest2:#0d2b20;--moss:#59765d;--tannin:#a75c2b;--gold:#d49a48;--foam:#fffaf0;--shadow:0 18px 48px rgba(21,58,43,.11)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;line-height:1.55}button,a,textarea{font:inherit}button{cursor:pointer}.shell{width:min(1180px,calc(100% - 40px));margin-inline:auto}.skip-link{position:absolute;left:-9999px;top:8px;z-index:1000;background:#fff;color:#111;padding:8px 12px}.skip-link:focus{left:8px}.site-header{position:absolute;z-index:20;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:22px max(24px,calc((100vw - 1180px)/2));color:#fff}.brand{display:flex;gap:10px;align-items:center;color:inherit;text-decoration:none}.brand-mark{width:35px;height:35px;border:1px solid rgba(255,255,255,.55);display:grid;place-items:center;border-radius:50%;font-size:12px;font-weight:800}.brand strong,.brand small{display:block;line-height:1.1}.brand small{font-size:11px;opacity:.75;margin-top:3px}.site-header nav{display:flex;gap:10px;align-items:center}.site-header nav a,.site-header nav button{color:#fff;background:rgba(0,0,0,.12);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:9px 14px;text-decoration:none;font-weight:700;font-size:13px}
-.hero{min-height:760px;position:relative;color:var(--foam);overflow:hidden}.hero-photo,.hero-shade{position:absolute;inset:0}.hero-photo{background:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Tahquamenon_falls_upper.jpg?width=1800") center 43%/cover no-repeat;transform:scale(1.01)}.hero-shade{background:linear-gradient(90deg,rgba(4,20,13,.9),rgba(8,29,19,.65) 48%,rgba(7,22,15,.3)),linear-gradient(0deg,rgba(4,18,12,.7),transparent 55%)}.hero-inner{min-height:760px;position:relative;z-index:2;display:grid;grid-template-columns:1fr .92fr;gap:60px;align-items:end;padding:150px 0 72px}.eyebrow,.section-kicker,.step-label{font-size:11px;font-weight:800;letter-spacing:.14em}.eyebrow{color:#e8d4b6}.hero h1{font-family:"Source Serif 4",Georgia,serif;font-size:clamp(56px,7vw,92px);line-height:.94;letter-spacing:-.055em;margin:10px 0 22px;max-width:800px}.hero-lede{font-size:20px;max-width:690px;margin:0;color:rgba(255,250,240,.88)}.planner-card{background:rgba(255,253,247,.97);color:var(--ink);border-radius:24px;padding:26px;box-shadow:0 28px 80px rgba(0,0,0,.32);backdrop-filter:blur(10px)}.planner-step+.planner-step{margin-top:24px}.step-label{display:block;color:var(--tannin);margin-bottom:10px}.time-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.time-grid button{border:1px solid var(--line);background:#f6f2e8;border-radius:12px;padding:12px 8px;font-weight:800;color:var(--ink);line-height:1.05}.time-grid small{display:block;font-weight:500;color:var(--muted);font-size:10px;margin-top:6px}.time-grid button.active{background:var(--forest);color:#fff;border-color:var(--forest)}.time-grid button.active small{color:#d9e7dd}.choice-row{display:flex;flex-wrap:wrap;gap:7px}.choice-row button,.filter-row button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:8px 12px;font-weight:700;color:var(--ink)}.choice-row button.active,.filter-row button.active{background:#eadfce;border-color:#c7aa88;color:#6e3e21}.primary-button,.secondary-button{display:inline-flex;align-items:center;justify-content:center;border-radius:12px;padding:12px 18px;text-decoration:none;font-weight:800;border:1px solid transparent}.primary-button{background:var(--tannin);color:#fff}.secondary-button{background:transparent;color:var(--forest);border-color:#b9c3bc}.full{width:100%;margin-top:22px}.photo-credit{position:absolute;z-index:3;bottom:9px;right:18px;font-size:10px;color:rgba(255,255,255,.65)}
-.answer-section{padding:74px 0}.answer-topline{display:flex;justify-content:space-between;gap:28px;align-items:flex-start}.section-kicker{color:var(--tannin);margin:0 0 8px}.answer-section h2,.section-heading h2,.question-grid h2,.winter-copy h2{font-family:"Source Serif 4",Georgia,serif;font-size:clamp(38px,5vw,62px);line-height:1;letter-spacing:-.045em;margin:0}.answer-topline>div>p:last-child{font-size:18px;color:var(--muted);max-width:700px;margin:12px 0 0}.live-pill{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:10px 14px;display:flex;gap:8px;align-items:center;white-space:nowrap;font-size:12px}.live-pill span{width:9px;height:9px;border-radius:50%;background:#aeb7b0}.live-pill.ok span{background:#4f9462}.live-pill.warn span{background:#c47b32}.answer-layout{display:grid;grid-template-columns:1fr 300px;gap:42px;margin-top:38px}.timeline{list-style:none;padding:0;margin:0;counter-reset:step}.timeline li{position:relative;margin-left:26px;padding:0 0 28px 34px;border-left:2px solid #d8d5ca}.timeline li:last-child{border-left-color:transparent}.timeline li::before{counter-increment:step;content:counter(step);position:absolute;left:-16px;top:-2px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--forest);color:#fff;font-weight:800;font-size:12px}.timeline .time{display:block;font-size:11px;font-weight:800;color:var(--tannin);letter-spacing:.1em}.timeline h3{font-family:"Source Serif 4",Georgia,serif;font-size:28px;line-height:1.05;margin:4px 0}.timeline p{margin:0;color:var(--muted)}.timeline .remove-stop{margin-top:8px;border:0;background:none;color:#8b4a2a;padding:0;font-size:12px;font-weight:700}.plan-aside{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;height:max-content;box-shadow:var(--shadow)}.plan-metric{display:flex;justify-content:space-between;gap:15px;padding:11px 0;border-bottom:1px solid #e4e1d8}.plan-metric span{font-size:12px;color:var(--muted)}.plan-metric strong{font-size:13px}.plan-actions{display:grid;gap:8px;margin-top:18px}.live-adjustment{margin-top:30px;border-left:4px solid var(--gold);background:#f2e8d7;padding:17px 20px;border-radius:0 12px 12px 0}.live-adjustment strong{display:block}.live-adjustment p{margin:4px 0 0;color:#5f5548}
-.question-section{background:#e7e3d8;padding:70px 0}.question-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:70px;align-items:center}.question-grid>div>p:last-child{color:var(--muted);font-size:17px}.situation-card{background:var(--surface);padding:22px;border:1px solid var(--line);border-radius:18px}.situation-card label{display:block;font-weight:800;margin-bottom:8px}.situation-card textarea{width:100%;min-height:126px;resize:vertical;border:1px solid #cfcfc6;border-radius:12px;padding:13px;background:#fff;color:var(--ink)}.situation-actions{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-top:10px}.situation-actions span{font-size:11px;color:var(--muted)}
-.decision-surface{padding:86px 0}.section-heading{max-width:830px;margin-bottom:32px}.section-heading>p:last-child{color:var(--muted);font-size:17px}.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.compare-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden}.compare-photo{height:300px;background-size:cover;background-position:center}.upper-photo{background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Tahquamenon_falls_upper.jpg?width=1300")}.lower-photo{background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Lower_Tahquamenon_Falls.jpg?width=1300")}.compare-copy{padding:24px}.compare-copy>span{font-size:10px;font-weight:800;color:var(--tannin);letter-spacing:.13em}.compare-copy h3{font-family:"Source Serif 4",Georgia,serif;font-size:34px;line-height:1;margin:5px 0 10px}.compare-copy p{color:var(--muted)}.compare-copy ul{padding-left:18px}.compare-copy button{border:0;background:none;padding:0;color:var(--tannin);font-weight:800}
-.now-section{padding:72px 0;background:#fdfaf2}.section-heading.compact{margin-bottom:24px}.signal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.signal-grid article{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}.signal-grid article>span{font-size:10px;letter-spacing:.12em;font-weight:800;color:var(--muted)}.signal-grid strong{display:block;font-size:26px;margin:5px 0 3px}.signal-grid p{font-size:13px;color:var(--muted);margin:0}.signal-grid .warning{border-color:#d7a373;background:#fff7ec}
-.map-section{padding:80px 0}.map-heading{display:flex;justify-content:space-between;gap:30px;align-items:flex-end}.filter-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}.map-shell{display:grid;grid-template-columns:1fr 330px;gap:16px;margin-top:24px}.park-map{min-height:560px;background:#e8ebe5;border:1px solid var(--line);border-radius:18px;overflow:hidden}.map-placeholder{height:560px;display:grid;place-items:center;color:var(--muted)}.map-placeholder::before{content:"";width:22px;height:22px;border:3px solid #9aa69e;border-top-color:var(--forest);border-radius:50%;animation:spin 1s linear infinite;margin-right:10px}@keyframes spin{to{transform:rotate(360deg)}}.place-panel{background:var(--forest);color:#fff;border-radius:18px;padding:22px}.place-panel>span{font-size:10px;letter-spacing:.13em;color:#c9dbce;font-weight:800}.place-panel h3{font-family:"Source Serif 4",Georgia,serif;font-size:30px;line-height:1;margin:8px 0}.place-panel p{color:#d5e2d9}.fact-chips{display:flex;flex-wrap:wrap;gap:6px}.fact-chips span{font-size:11px;border:1px solid rgba(255,255,255,.23);border-radius:999px;padding:6px 8px}.place-actions{display:grid;gap:10px;margin-top:20px}.place-panel .secondary-button{border-color:rgba(255,255,255,.4);color:#fff}.place-panel a{color:#fff;font-weight:700}
-.winter-section{position:relative;min-height:680px;background:var(--forest2);color:#fff;display:flex;align-items:center;overflow:hidden}.winter-photo{position:absolute;inset:0;background:url("https://www.michigan.gov/recsearch/-/media/Project/Websites/recsearch/images/ParksQ-T/TahquamenonFalls/Upper_Falls_in_winter.jpg?extension=webp&hash=BE21AEDA4D12CD878973BED8D1BC8F5B&rev=bb1756b350b04eff89f6a7dd3ad60c79") center/cover no-repeat;opacity:.24}.winter-section::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,32,23,.98) 0%,rgba(8,32,23,.9) 52%,rgba(8,32,23,.35))}.winter-copy{position:relative;z-index:2;padding:86px 0;max-width:1180px}.winter-copy>*{max-width:750px}.winter-copy .section-kicker{color:#d8b27e}.winter-copy>p{font-size:18px;color:#d8e5dc}.winter-facts{display:flex;gap:12px;margin:26px 0}.winter-facts div{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.17);border-radius:14px;padding:14px 18px;min-width:130px}.winter-facts strong,.winter-facts span{display:block}.winter-facts strong{font-size:22px}.winter-facts span{font-size:11px;color:#c9dbce}.winter-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.secondary-button.light{color:#fff;border-color:rgba(255,255,255,.4)}.text-link.light{color:#fff}.winter-note{font-size:13px!important;color:#c1d0c6!important}
-.guide-section,.faq-section{padding:86px 0}.guide-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.guide-grid article{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px}.guide-grid h3{font-family:"Source Serif 4",Georgia,serif;font-size:27px;margin:0 0 8px}.guide-grid p{color:var(--muted);margin:0}.faq-section{padding-top:20px}.faq-section details{border-top:1px solid var(--line);padding:17px 0}.faq-section details:last-child{border-bottom:1px solid var(--line)}.faq-section summary{font-weight:800;cursor:pointer}.faq-section details p{max-width:850px;color:var(--muted)}footer{background:#0c251b;color:#d7e2da;padding:50px 0}.footer-grid{display:flex;justify-content:space-between;gap:35px}.footer-grid strong{font-family:"Source Serif 4",Georgia,serif;font-size:25px}.footer-grid p{margin:4px 0;color:#9fb4a6}.footer-grid>div:last-child{display:grid;gap:5px}.footer-grid a{color:#fff}
-@media(max-width:900px){.hero-inner{grid-template-columns:1fr;gap:28px;align-content:end}.hero h1{font-size:64px}.planner-card{max-width:720px}.answer-layout,.question-grid,.map-shell{grid-template-columns:1fr}.plan-aside{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.plan-actions{grid-column:1/-1}.map-heading{display:block}.filter-row{justify-content:flex-start;margin-top:16px}.place-panel{min-height:auto}.signal-grid{grid-template-columns:repeat(2,1fr)}.guide-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:660px){.shell{width:min(100% - 24px,1180px)}.site-header{padding:16px 14px}.site-header nav a{display:none}.hero{min-height:auto}.hero-inner{min-height:760px;padding:108px 0 40px}.hero h1{font-size:48px}.hero-lede{font-size:17px}.planner-card{padding:18px;border-radius:18px}.time-grid{grid-template-columns:repeat(3,1fr)}.time-grid button:nth-child(4),.time-grid button:nth-child(5){grid-column:span 1}.answer-section,.decision-surface,.map-section,.guide-section,.faq-section{padding:58px 0}.answer-topline{display:block}.live-pill{width:max-content;margin-top:18px}.answer-layout{margin-top:26px}.plan-aside{display:block}.compare-grid{grid-template-columns:1fr}.compare-photo{height:230px}.signal-grid{grid-template-columns:1fr}.question-section{padding:52px 0}.question-grid{gap:24px}.situation-actions{align-items:flex-start;flex-direction:column}.situation-actions button{width:100%}.map-shell{width:100%}.park-map,.map-placeholder{min-height:430px;height:430px}.map-shell.shell{width:100%}.map-heading.shell{width:min(100% - 24px,1180px)}.place-panel{border-radius:0}.winter-copy{padding:60px 0}.winter-facts{display:grid;grid-template-columns:repeat(3,1fr)}.winter-facts div{min-width:0;padding:12px}.winter-actions{display:grid}.guide-grid{grid-template-columns:1fr}.footer-grid{display:block}.footer-grid>div:last-child{margin-top:25px}.photo-credit{display:none}}
+:root{
+  --ink:#1b241f;
+  --muted:#66716a;
+  --faint:#879088;
+  --paper:#f4f0e7;
+  --surface:#fbf8f1;
+  --surface-2:#eee8dc;
+  --line:#d7d2c6;
+  --forest:#17382b;
+  --forest-2:#0e2a20;
+  --pine:#2f5a45;
+  --tannin:#a86232;
+  --tannin-dark:#7d4525;
+  --cream:#fffaf1;
+  --shadow:0 14px 36px rgba(21,43,33,.09);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;line-height:1.5}
+button,a,textarea{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+.shell{width:min(1160px,calc(100% - 32px));margin-inline:auto}
+.skip-link{position:absolute;left:-9999px;top:8px;z-index:999;background:#fff;padding:8px 12px;border-radius:8px}
+.skip-link:focus{left:8px}
+.site-header{height:58px;background:rgba(244,240,231,.96);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;backdrop-filter:blur(14px)}
+.header-inner{height:100%;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none}
+.brand-mark{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--forest);color:#fff;font-size:10px;font-weight:800}
+.brand strong,.brand small{display:block;line-height:1.05}
+.brand strong{font-size:13px}
+.brand small{margin-top:3px;font-size:9px;color:var(--muted)}
+.site-header nav{display:flex;gap:7px}
+.site-header nav a,.site-header nav button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 11px;text-decoration:none;color:var(--forest);font-size:10px;font-weight:800}
+.site-header nav a:hover,.site-header nav button:hover{background:#fff}
+
+.hero{padding:34px 0 28px}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center}
+.eyebrow,.section-kicker,.planner-label{margin:0;color:var(--tannin);font-size:9px;font-weight:800;letter-spacing:.13em}
+.hero h1,.answer-section h2,.section-heading h2,.map-heading h2,.winter-copy h2{font-family:"Source Serif 4",Georgia,serif;letter-spacing:-.035em}
+.hero h1{max-width:720px;margin:7px 0 10px;font-size:clamp(42px,5.2vw,68px);line-height:.98;font-weight:600}
+.hero-lede{max-width:700px;margin:0;color:var(--muted);font-size:16px}
+.quick-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+.quick-links a{border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:rgba(255,255,255,.34);text-decoration:none;color:var(--forest);font-size:10px;font-weight:700}
+.hero-photo-card{overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:var(--shadow)}
+.hero-photo{height:225px;background:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Tahquamenon_falls_upper.jpg?width=1200") center 42%/cover no-repeat}
+.hero-photo-card span{display:block;padding:8px 10px;color:var(--faint);font-size:8px}
+
+.planner-band{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#ece6da}
+.planner-layout{min-height:86px;display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;padding:12px 0}
+.planner-group{min-width:0}
+.planner-label{display:block;margin-bottom:6px}
+.time-grid,.choice-row,.filter-row{display:flex;gap:5px;align-items:center}
+.time-grid button,.choice-row button,.filter-row button{border:1px solid #cfc7b9;border-radius:999px;background:transparent;color:var(--forest);font-size:10px;font-weight:800;white-space:nowrap}
+.time-grid button{padding:7px 11px}
+.choice-row button,.filter-row button{padding:7px 10px}
+.time-grid button.active,.choice-row button.active,.filter-row button.active{background:var(--forest);border-color:var(--forest);color:#fff}
+.primary-button,.secondary-button{display:inline-flex;align-items:center;justify-content:center;border-radius:10px;padding:10px 14px;text-decoration:none;font-size:11px;font-weight:800}
+.primary-button{border:1px solid var(--tannin);background:var(--tannin);color:#fff}
+.primary-button:hover{background:var(--tannin-dark);border-color:var(--tannin-dark)}
+.secondary-button{border:1px solid #bfc6c0;background:transparent;color:var(--forest)}
+.secondary-button:hover{background:#fff}
+.planner-build{min-width:108px}
+
+.answer-section{padding:42px 0 50px}
+.answer-topline{display:flex;justify-content:space-between;gap:24px;align-items:flex-start}
+.answer-topline h2{margin:3px 0 6px;font-size:clamp(30px,4vw,46px);line-height:1;font-weight:600}
+.answer-topline>div>p:last-child{margin:0;max-width:720px;color:var(--muted);font-size:14px}
+.live-pill{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;background:var(--surface);padding:7px 10px;color:var(--muted);font-size:9px;white-space:nowrap}
+.live-pill span{width:7px;height:7px;border-radius:50%;background:#a8afa9}
+.live-pill.ok span{background:#6aa173}
+.live-pill.warn span{background:#c17d38}
+.answer-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;margin-top:24px}
+.timeline{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.28);overflow:hidden;counter-reset:step}
+.timeline li{position:relative;padding:16px 18px 16px 52px;border-bottom:1px solid var(--line)}
+.timeline li:last-child{border-bottom:0}
+.timeline li::before{counter-increment:step;content:counter(step);position:absolute;left:16px;top:17px;width:23px;height:23px;border-radius:50%;display:grid;place-items:center;background:var(--forest);color:#fff;font-size:9px;font-weight:800}
+.timeline .time{display:block;color:var(--tannin);font-size:8px;font-weight:800;letter-spacing:.08em}
+.timeline h3{margin:3px 0 4px;font-family:"Source Serif 4",Georgia,serif;font-size:20px;line-height:1.05;font-weight:600}
+.timeline p{margin:0;color:var(--muted);font-size:11px;line-height:1.45}
+.timeline .remove-stop{margin-top:6px;border:0;background:none;padding:0;color:var(--tannin-dark);font-size:9px;font-weight:800}
+.plan-side{display:grid;gap:10px;align-content:start}
+.plan-metrics{display:grid;grid-template-columns:1fr;border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+.plan-metrics div{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.plan-metrics div:last-child{border-bottom:0}
+.plan-metrics span{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.07em}
+.plan-metrics strong{font-size:11px}
+.plan-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.live-adjustment{border-left:3px solid var(--tannin);border-radius:0 10px 10px 0;background:#ece0cf;padding:12px 13px}
+.live-adjustment strong{display:block;font-size:10px}
+.live-adjustment p{margin:3px 0 0;color:#645b50;font-size:10px;line-height:1.4}
+.situation-inline{display:grid;grid-template-columns:160px 1fr auto;gap:10px;align-items:center;margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.34)}
+.situation-inline label{font-size:11px;font-weight:800}
+.situation-inline textarea{width:100%;min-height:54px;resize:vertical;border:1px solid #cbc6bb;border-radius:9px;padding:9px 10px;background:#fff;color:var(--ink);font-size:11px;line-height:1.35}
+.situation-footer{display:flex;flex-direction:column;align-items:stretch;gap:6px}
+.situation-footer span{max-width:150px;color:var(--faint);font-size:8px;line-height:1.25;text-align:right}
+
+.compare-section,.now-section,.map-section,.guide-section,.faq-section{padding:48px 0}
+.compare-section{border-top:1px solid var(--line);background:#f8f5ee}
+.compact-heading{max-width:780px;margin-bottom:20px}
+.compact-heading h2{margin:3px 0 0;font-size:clamp(27px,3.7vw,42px);line-height:1.03;font-weight:600}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.compare-card{display:grid;grid-template-columns:200px 1fr;min-height:220px;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.compare-photo{height:100%;min-height:220px;background-position:center;background-size:cover}
+.upper-photo{background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Tahquamenon_falls_upper.jpg?width=900")}
+.lower-photo{background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Lower_Tahquamenon_Falls.jpg?width=900")}
+.compare-copy{padding:17px}
+.compare-copy>span{color:var(--tannin);font-size:8px;font-weight:800;letter-spacing:.12em}
+.compare-copy h3{margin:4px 0 6px;font-family:"Source Serif 4",Georgia,serif;font-size:24px;line-height:1;font-weight:600}
+.compare-copy p{margin:0;color:var(--muted);font-size:11px;line-height:1.45}
+.tag-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:11px}
+.tag-row b{border:1px solid var(--line);border-radius:999px;padding:4px 7px;color:var(--pine);font-size:8px}
+.compare-copy button{margin-top:11px;padding:0;border:0;background:none;color:var(--tannin-dark);font-size:10px;font-weight:800}
+
+.now-section{background:#ece6da;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.signal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.signal-grid article{min-height:130px;padding:14px;border:1px solid #d3ccbe;border-radius:12px;background:rgba(255,255,255,.48)}
+.signal-grid article>span{color:var(--faint);font-size:8px;font-weight:800;letter-spacing:.1em}
+.signal-grid strong{display:block;margin:4px 0 3px;color:var(--forest);font-size:21px;letter-spacing:-.03em}
+.signal-grid p{margin:0;color:var(--muted);font-size:9px;line-height:1.4}
+.signal-grid .warning{border-color:#c98d5c;background:#fff3e8}
+
+.map-section{background:var(--forest-2);color:var(--cream)}
+.map-heading{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin-bottom:14px}
+.map-heading h2{margin:3px 0 0;font-size:34px;line-height:1;font-weight:600}
+.map-heading .section-kicker{color:#e3b77d}
+.filter-row{max-width:560px;justify-content:flex-end;flex-wrap:wrap}
+.filter-row button{border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.78)}
+.filter-row button.active{background:#efd7b8;border-color:#efd7b8;color:var(--forest-2)}
+.map-shell{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:12px}
+.park-map{height:490px;overflow:hidden;border:1px solid rgba(255,255,255,.13);border-radius:14px;background:#17352a}
+.map-placeholder{height:100%;display:grid;place-items:center;color:rgba(255,255,255,.62);font-size:10px}
+.map-placeholder::before{content:"";position:absolute;width:17px;height:17px;border:2px solid rgba(255,255,255,.2);border-top-color:#efd7b8;border-radius:50%;animation:spin .85s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.leaflet-container{font-family:inherit}
+.leaflet-tile{filter:saturate(.72) brightness(.82) contrast(1.03)}
+.place-panel{padding:17px;border:1px solid rgba(255,255,255,.14);border-radius:14px;background:#143327}
+.place-panel>span{color:#d6b487;font-size:8px;font-weight:800;letter-spacing:.11em}
+.place-panel h3{margin:5px 0 6px;font-family:"Source Serif 4",Georgia,serif;font-size:25px;line-height:1;font-weight:600}
+.place-panel p{margin:0;color:rgba(255,255,255,.68);font-size:10px;line-height:1.45}
+.fact-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
+.fact-chips span{border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:4px 6px;color:#e6eee8;font-size:8px}
+.place-actions{display:grid;gap:7px;margin-top:14px}
+.place-panel .secondary-button{border-color:rgba(255,255,255,.26);color:#fff}
+.place-panel a{color:#fff;font-size:10px;font-weight:700}
+
+.winter-section{padding:48px 0;background:#f8f5ee;border-bottom:1px solid var(--line)}
+.winter-grid{display:grid;grid-template-columns:340px 1fr;gap:28px;align-items:center}
+.winter-photo{height:245px;border-radius:16px;background:url("https://www.michigan.gov/recsearch/-/media/Project/Websites/recsearch/images/ParksQ-T/TahquamenonFalls/Upper_Falls_in_winter.jpg?extension=webp&hash=BE21AEDA4D12CD878973BED8D1BC8F5B&rev=bb1756b350b04eff89f6a7dd3ad60c79") center/cover no-repeat;box-shadow:var(--shadow)}
+.winter-copy h2{margin:3px 0 8px;font-size:38px;line-height:1;font-weight:600}
+.winter-copy>p{margin:0;color:var(--muted);font-size:12px}
+.winter-facts{display:flex;gap:7px;margin:15px 0}
+.winter-facts div{min-width:104px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.winter-facts strong,.winter-facts span{display:block}
+.winter-facts strong{font-size:15px}
+.winter-facts span{color:var(--muted);font-size:8px}
+.winter-actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.text-link{color:var(--tannin-dark);font-size:10px;font-weight:800}
+
+.guide-section{padding-bottom:30px}
+.guide-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.guide-grid article{padding:15px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.3)}
+.guide-grid h3{margin:0 0 5px;font-family:"Source Serif 4",Georgia,serif;font-size:20px;font-weight:600}
+.guide-grid p{margin:0;color:var(--muted);font-size:10px;line-height:1.45}
+
+.faq-section{padding-top:24px}
+.faq-section details{border-top:1px solid var(--line);padding:12px 0}
+.faq-section details:last-child{border-bottom:1px solid var(--line)}
+.faq-section summary{cursor:pointer;font-size:11px;font-weight:800}
+.faq-section details p{max-width:820px;margin:7px 0 0;color:var(--muted);font-size:10px;line-height:1.45}
+
+footer{margin-top:40px;padding:28px 0;background:var(--forest-2);color:#d9e2dc}
+.footer-grid{display:flex;justify-content:space-between;gap:30px}
+.footer-grid strong,.footer-grid span{display:block}
+.footer-grid strong{font-family:"Source Serif 4",Georgia,serif;font-size:18px}
+.footer-grid span{margin-top:2px;color:#9fb2a6;font-size:9px}
+.footer-grid>div:last-child{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:flex-end}
+.footer-grid a{color:#fff;font-size:9px}
+
+@media(max-width:980px){
+  .hero-grid{grid-template-columns:1fr 320px}
+  .planner-layout{grid-template-columns:1fr auto}
+  .pref-group{grid-column:1/-1;grid-row:2}
+  .planner-build{grid-column:2;grid-row:1}
+  .answer-grid{grid-template-columns:1fr 260px}
+  .compare-card{grid-template-columns:150px 1fr}
+  .map-shell{grid-template-columns:1fr 250px}
+}
+@media(max-width:760px){
+  .shell{width:min(100% - 22px,1160px)}
+  .site-header{height:54px}
+  .brand small{display:none}
+  .site-header nav a{display:none}
+  .hero{padding:22px 0 18px}
+  .hero-grid{grid-template-columns:1fr;gap:14px}
+  .hero h1{font-size:40px;max-width:520px}
+  .hero-lede{font-size:14px}
+  .hero-photo-card{display:none}
+  .quick-links{overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px}
+  .quick-links a{white-space:nowrap}
+  .planner-layout{display:block;min-height:0;padding:10px 0}
+  .planner-group+.planner-group{margin-top:10px}
+  .time-grid,.choice-row,.filter-row{overflow-x:auto;padding-bottom:3px}
+  .time-grid button,.choice-row button,.filter-row button{flex:none}
+  .planner-build{width:100%;margin-top:8px}
+  .answer-section{padding:30px 0 36px}
+  .answer-topline{display:block}
+  .live-pill{width:max-content;margin-top:10px}
+  .answer-grid{grid-template-columns:1fr;margin-top:16px}
+  .plan-side{grid-template-columns:1fr}
+  .plan-metrics{grid-template-columns:repeat(3,1fr)}
+  .plan-metrics div{display:block;border-bottom:0;border-right:1px solid var(--line);padding:9px}
+  .plan-metrics div:last-child{border-right:0}
+  .plan-metrics span,.plan-metrics strong{display:block}
+  .plan-metrics strong{margin-top:3px}
+  .situation-inline{grid-template-columns:1fr;margin-top:10px}
+  .situation-footer{display:flex;flex-direction:row;justify-content:space-between;align-items:center}
+  .situation-footer span{text-align:left}
+  .compare-section,.now-section,.map-section,.guide-section,.faq-section{padding:36px 0}
+  .compare-grid{grid-template-columns:1fr}
+  .compare-card{grid-template-columns:120px 1fr;min-height:180px}
+  .compare-photo{min-height:180px}
+  .signal-grid{grid-template-columns:1fr 1fr}
+  .map-heading{display:block}
+  .filter-row{justify-content:flex-start;margin-top:11px;flex-wrap:nowrap}
+  .map-shell{grid-template-columns:1fr}
+  .park-map{height:430px;border-radius:12px}
+  .place-panel{border-radius:12px}
+  .winter-grid{grid-template-columns:1fr;gap:18px}
+  .winter-photo{height:190px}
+  .winter-copy h2{font-size:32px}
+  .guide-grid{grid-template-columns:1fr 1fr}
+  .footer-grid{display:block}
+  .footer-grid>div:last-child{justify-content:flex-start;margin-top:14px}
+}
+@media(max-width:480px){
+  .hero h1{font-size:36px}
+  .hero-lede{font-size:13px}
+  .answer-topline h2{font-size:31px}
+  .timeline li{padding:14px 13px 14px 46px}
+  .timeline li::before{left:13px;top:15px}
+  .compare-card{grid-template-columns:1fr}
+  .compare-photo{height:145px;min-height:145px}
+  .signal-grid{grid-template-columns:1fr}
+  .guide-grid{grid-template-columns:1fr}
+  .winter-facts{display:grid;grid-template-columns:repeat(3,1fr)}
+  .winter-facts div{min-width:0}
+  .winter-actions{display:grid}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important}
+}
