@@ -33,7 +33,8 @@ score.itineraryQuality =
   seasonal.includes('applySeasonalIntelligence') ? 15 : 0;
 
 score.fallNetworkIntegration =
-  seasonalApi.includes('shared Michigan fall-color engine') &&
+  seasonalApi.includes('api/fall-color?view=snapshot') &&
+  seasonalApi.includes('existing Michigan fall-color engine') &&
   seasonal.includes('fall-color') &&
   html.includes('seasonLink') ? 10 : 0;
 
