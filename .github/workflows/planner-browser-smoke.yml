@@ -1,0 +1,27 @@
+name: Planner browser smoke
+
+on:
+  push:
+    branches:
+      - main
+      - agent/planner-browser-smoke-20260919
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install browser runner
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Click through live Tahquamenon planner
+        run: node scripts/planner-browser-smoke.mjs "https://chrisizworski.com/tahquamenon-falls/"
