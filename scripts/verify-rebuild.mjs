@@ -32,7 +32,7 @@ assert(js.includes('tahquamenon.visit.v2'), 'Local-first planner state missing')
 assert(js.includes('/api/visit-plan'), 'Structured visitor-intent endpoint missing');
 assert(js.includes('IntersectionObserver'), 'Lazy map loading missing');
 assert(css.includes('@media(max-width:660px)'), 'Mobile layout gate missing');
-assert(plannerApi.includes('agentbase-registry.vercel.app/api/harness'), 'Shared harness route missing');
+assert(plannerApi.includes('agentbase-registry-izworski-gmailcoms-projects.vercel.app/api/harness'), 'Shared harness route missing');
 assert(plannerApi.includes('x-vercel-oidc-token'), 'Vercel OIDC caller auth missing');
 assert(plannerApi.includes('getVercelOidcToken'), 'Supported Vercel OIDC helper missing');
 assert(plannerApi.includes("architecture:'shared-harness-v1'"), 'Shared-harness build marker missing');
