@@ -48,7 +48,9 @@ Tahquamenon v2 reverses the hierarchy:
 - **Observed USGS discharge is primary.**
 - The discharge is compared with **USGS daily percentiles for the same calendar date**, so seasonal context is preserved.
 - Forecast precipitation is kept in a **Next 24 Hours** outlook only.
-- NWS/Open-Meteo drive trail comfort, photography and safety, not fake river flow.
+- NWS/Open-Meteo drive trail comfort and photography, not fake river flow.
+- The NWS alert feed is checked independently from the NWS forecast. If alert verification fails, the UI says hazard status is unknown instead of claiming there are no alerts.
+- USGS freshness is tied specifically to the discharge observation timestamp; a newer stage or precipitation reading cannot make stale discharge look fresh.
 - If USGS is unavailable, the tool can still describe weather but does **not** claim a current waterfall-flow score.
 
 ### Current score weights
@@ -133,7 +135,9 @@ This project's own tahquamenon-falls-live-94is.vercel.app domain still serves th
 tags always point at the chrisizworski.com URL, so that is the one that should get indexed and
 linked to.
 
-The only front-end runtime dependency is Leaflet loaded from a public CDN. OpenStreetMap supplies map tiles. The Vercel function uses Node's native `fetch` and needs no npm dependencies.
+The only front-end runtime dependency is Leaflet loaded from a public CDN. It is lazy-loaded when the map approaches the viewport or the visitor asks for a map action, so the first screen does not pay the map cost. OpenStreetMap supplies map tiles. The Vercel function uses Node's native `fetch` and needs no npm dependencies.
+
+Visit length, map filter and user-added stops are stored locally in the browser so a visitor can refresh or return without rebuilding the plan. This is intentionally local-first state, not an account or cloud-sync system.
 
 ## Local checks
 
@@ -143,17 +147,19 @@ cd public && python3 -m http.server 8080
 # then open http://localhost:8080/tahquamenon-falls/
 ```
 
-The static server renders the page and map. `/api/live` requires Vercel dev or deployment because it is a Vercel serverless function.
+Run the release gate with `npm run verify`. The static server renders the page and lazy map shell. `/api/tahquamenon-falls` requires Vercel dev or deployment because it is a Vercel serverless function.
 
 ## Production verification checklist
 
-- `/api/live` returns HTTP 200 and includes `river.cfs`, `decision.score`, `sourceHealth`.
+- `/api/tahquamenon-falls` returns HTTP 200 and includes `river.cfs`, `decision.score`, `sourceHealth` and `alertStatus`.
 - USGS observation timestamp is visible and fresh.
 - Current-day USGS percentile is populated when the stats service is healthy.
-- NWS alert card changes when active alerts are returned.
+- NWS alert card changes when active alerts are returned, and explicitly shows **Not verified** if the alert endpoint cannot be checked.
 - Filter chips add/remove map categories.
 - `?place=upper-falls` deep-links and centers the selected point.
 - 90-minute / half-day / full-day / hiker plans render and copy correctly.
+- User-added map stops persist across refresh and can be removed individually.
+- Leaflet/map tiles are not requested until the map approaches the viewport or the visitor asks for a map action.
 - 390px mobile viewport has no horizontal page scroll.
 - Turning off USGS causes no current river score claim.
 - Turning off NWS keeps the page usable through Open-Meteo.
