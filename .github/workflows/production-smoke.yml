@@ -91,8 +91,16 @@ jobs:
               -fsS "https://chrisizworski.com/tahquamenon-falls/?proxy-smoke=compact-20260919-v2" -o /tmp/canonical.html; then
               if grep -q 'name="tahquamenon-build" content="compact-20260919-v2"' /tmp/canonical.html && \
                  grep -q 'tahquamenon-falls.css?v=compact-20260919-v2' /tmp/canonical.html; then
-                echo "Canonical Tahquamenon proxy is serving the compact build"
-                exit 0
+                echo "Canonical Tahquamenon proxy is serving the compact build with cache bypass"
+                if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 20 -fsS \
+                  "https://chrisizworski.com/tahquamenon-falls/" -o /tmp/canonical-plain.html && \
+                   grep -q 'name="tahquamenon-build" content="compact-20260919-v2"' /tmp/canonical-plain.html && \
+                   grep -q 'tahquamenon-falls.css?v=compact-20260919-v2' /tmp/canonical-plain.html; then
+                  echo "Plain canonical Tahquamenon URL is serving the compact build"
+                  exit 0
+                fi
+                echo "Plain canonical URL is still stale" >&2
+                exit 1
               fi
             fi
             sleep 10
