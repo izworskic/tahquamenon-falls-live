@@ -19,20 +19,22 @@
   .section-shell, .site-header, footer { width: min(100% - 24px, 1180px); }
   .site-header { height: 66px; }
   .brand small { display: none; }
-  .hero { min-height: 900px; }
-  .hero-inner { min-height: 900px; padding-top: 118px; padding-bottom: 54px; }
+  .hero { min-height: 790px; }
+  .hero-inner { min-height: 790px; gap: 20px; padding-top: 96px; padding-bottom: 28px; }
   .hero-media { background-position: 58% 42%; }
   .hero-scrim { background: linear-gradient(180deg, rgba(7,22,15,.42) 0%, rgba(7,22,15,.25) 28%, rgba(7,22,15,.82) 67%, rgba(7,22,15,.95) 100%); }
-  .hero h1 { font-size: clamp(58px, 18vw, 84px); }
-  .hero-sub { font-size: 16px; }
-  .hero-facts { gap: 16px; margin-top: 26px; }
+  .hero-place { margin-top: 12px; }
+  .hero h1 { margin: 10px 0 14px; font-size: clamp(50px, 15vw, 70px); }
+  .hero-sub { font-size: 15px; line-height: 1.45; }
+  .hero-actions { margin-top: 18px; }
+  .hero-facts { display: none; }
   .photo-credit { display: none; }
-  .decision-card { padding: 18px; border-radius: 20px; }
-  .decision-main { grid-template-columns: 98px 1fr; gap: 14px; padding: 22px 0; }
-  .score-orb { width: 94px; height: 94px; }
-  .score-number { font-size: 34px; }
-  .score-orb small { transform: translateY(20px); font-size: 8px; }
-  .decision-label { font-size: 31px; }
+  .decision-card { padding: 15px; border-radius: 18px; }
+  .decision-main { grid-template-columns: 84px 1fr; gap: 12px; padding: 16px 0; }
+  .score-orb { width: 82px; height: 82px; }
+  .score-number { font-size: 30px; }
+  .score-orb small { transform: translateY(18px); font-size: 8px; }
+  .decision-label { font-size: 28px; }
   .decision-main p { font-size: 11px; }
   .score-strip div { padding: 10px 5px; }
   .score-strip span { font-size: 8px; }
@@ -70,8 +72,8 @@
 
 @media (max-width: 460px) {
   .ghost-button { padding: 8px 9px; font-size: 11px; }
-  .hero { min-height: 940px; }
-  .hero-inner { min-height: 940px; }
+  .hero { min-height: 760px; }
+  .hero-inner { min-height: 760px; padding-top: 88px; padding-bottom: 22px; }
   .hero-place { font-size: 11px; }
   .hero-actions { width: 100%; }
   .hero-actions .primary-button, .hero-actions .secondary-button { flex: 1; text-align: center; }
