@@ -82,4 +82,20 @@ jobs:
             echo "Production smoke test failed after 36 attempts" >&2
             exit 1
           fi
-          echo "Production smoke test passed"
+          echo "Production origin smoke test passed"
+
+          echo "Checking canonical public proxy..."
+          for attempt in $(seq 1 24); do
+            if curl --retry 2 --retry-delay 1 --connect-timeout 8 --max-time 20 \
+              -H 'Cache-Control: no-cache' \
+              -fsS "https://chrisizworski.com/tahquamenon-falls/?proxy-smoke=compact-20260919-v2" -o /tmp/canonical.html; then
+              if grep -q 'name="tahquamenon-build" content="compact-20260919-v2"' /tmp/canonical.html && \
+                 grep -q 'tahquamenon-falls.css?v=compact-20260919-v2' /tmp/canonical.html; then
+                echo "Canonical Tahquamenon proxy is serving the compact build"
+                exit 0
+              fi
+            fi
+            sleep 10
+          done
+          echo "Canonical public proxy is not serving compact-20260919-v2" >&2
+          exit 1
