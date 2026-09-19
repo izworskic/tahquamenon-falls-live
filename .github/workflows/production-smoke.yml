@@ -49,6 +49,8 @@ jobs:
               raise SystemExit(f"Alert health/status mismatch: {source_health} / {alert_status}")
 
           plan = json.loads(Path('/tmp/plan.json').read_text())
+          if plan.get('architecture') != 'shared-harness-v1':
+              raise SystemExit(f"Shared-harness production build not promoted yet: {plan}")
           if plan.get('engine') not in ('shared-harness-jev', 'deterministic'):
               raise SystemExit(f"Unexpected planner engine: {plan}")
           if plan.get('minutes') != 120:
@@ -61,6 +63,7 @@ jobs:
           print('confidence=', decision.get('confidence'))
           print('cfs=', (data.get('river') or {}).get('cfs'))
           print('sourceHealth=', source_health)
+          print('plannerArchitecture=', plan.get('architecture'))
           print('plannerEngine=', plan.get('engine'))
           print('plannerFocus=', plan.get('focus'))
           PY
