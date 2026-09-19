@@ -174,8 +174,8 @@ function renderPlan() {
 }
 
 function syncControls() {
-  $$('#timeChoices button').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.minutes) === state.minutes));
-  $$('#preferenceChoices button').forEach(btn => btn.classList.toggle('active', state.prefs.has(btn.dataset.pref)));
+  $$$('#timeChoices button').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.minutes) === state.minutes));
+  $$$('#preferenceChoices button').forEach(btn => btn.classList.toggle('active', state.prefs.has(btn.dataset.pref)));
 }
 
 function seasonalHeadline(fall) {
@@ -461,7 +461,7 @@ function bind() {
   $$('[data-scroll]').forEach(btn => btn.addEventListener('click', () => document.querySelector(btn.dataset.scroll)?.scrollIntoView({behavior:'smooth'})));
   $$('#filterRow button').forEach(btn => btn.addEventListener('click', async () => { state.activeFilter = btn.dataset.filter; $$('#filterRow button').forEach(x => x.classList.toggle('active', x === btn)); await ensureMap(); renderMarkers(); }));
   $('#addPlaceButton').addEventListener('click', () => { const p = state.selectedPlace; if (!p || state.customStops.includes(p.id)) return; state.customStops.push(p.id); track('map_stop_add',{stop_id:p.id}); saveState(); renderPlan(); selectPlace(p,false); });
-  $('[data-place-id]').forEach(btn => btn.addEventListener('click', async () => { const p = places().find(x => x.id === btn.dataset.placeId); if (!p) return; $('#mapSection').scrollIntoView({behavior:'smooth'}); await ensureMap(); selectPlace(p,true); }));
+  $$('[data-place-id]').forEach(btn => btn.addEventListener('click', async () => { const p = places().find(x => x.id === btn.dataset.placeId); if (!p) return; $('#mapSection').scrollIntoView({behavior:'smooth'}); await ensureMap(); selectPlace(p,true); }));
   $('#seasonLink')?.addEventListener('click', () => {
     const kind=$('#seasonLink').dataset.seasonLink;
     track(kind==='xc'?'xc_detail_click':'fall_color_detail_click',{placement:'season_context'});
