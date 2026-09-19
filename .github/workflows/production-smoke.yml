@@ -37,10 +37,15 @@ jobs:
 
           decision = data.get('decision') or {}
           source_health = data.get('sourceHealth') or {}
+          alert_status = data.get('alertStatus') or {}
           if 'confidence' not in decision:
               raise SystemExit('Decision confidence missing')
           if not any(source_health.get(k) for k in ('usgs', 'nws', 'openMeteo')):
               raise SystemExit(f"No live source healthy: {source_health}")
+          if not isinstance(alert_status.get('verified'), bool):
+              raise SystemExit(f"Alert verification state missing: {alert_status}")
+          if source_health.get('nwsAlerts') and not alert_status.get('verified'):
+              raise SystemExit(f"Alert health/status mismatch: {source_health} / {alert_status}")
 
           river = data.get('river') or {}
           print('generatedAt=', data.get('generatedAt'))

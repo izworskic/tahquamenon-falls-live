@@ -8,7 +8,11 @@
 .filter-chip:hover { border-color: rgba(255,255,255,.38); color: #fff; }
 .filter-chip.active { border-color: #efd6b8; background: #efd6b8; color: var(--evergreen-deep); }
 .map-stage { height: 670px; position: relative; border-top: 1px solid rgba(255,255,255,.10); }
-#parkMap { width: 100%; height: 100%; background: #173229; }
+#parkMap { width: 100%; height: 100%; display: grid; place-items: center; background: #173229; }
+#parkMap.leaflet-container { display: block; }
+.map-placeholder { max-width: 360px; padding: 28px; text-align: center; color: rgba(255,250,241,.72); font-size: 12px; line-height: 1.55; }
+.map-loading .map-placeholder::before { content: ""; width: 18px; height: 18px; display: block; margin: 0 auto 12px; border: 2px solid rgba(255,255,255,.22); border-top-color: #efd6b8; border-radius: 50%; animation: map-spin .8s linear infinite; }
+@keyframes map-spin { to { transform: rotate(360deg); } }
 .leaflet-container { background: #173229; font-family: inherit; }
 .leaflet-tile { filter: saturate(.68) brightness(.77) contrast(1.04) sepia(.08); }
 .leaflet-control-attribution { background: rgba(10,31,22,.82) !important; color: #9bac9f !important; font-size: 8px !important; }
@@ -51,6 +55,7 @@
 .plan-stop h3 { margin: 0; font-family: "Source Serif 4", Georgia, serif; font-size: 19px; font-weight: 600; }
 .plan-stop p { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
 .stop-time { color: var(--faint); font-size: 10px; font-weight: 700; white-space: nowrap; }
+.remove-stop { display: block; margin: 6px 0 0 auto; padding: 0; border: 0; background: transparent; color: var(--tannin-deep); cursor: pointer; font-size: 9px; font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
 .plan-context { position: sticky; top: 18px; padding: 22px; border-radius: 18px; background: var(--evergreen); color: var(--foam); box-shadow: 0 18px 44px rgba(23,54,41,.13); }
 .mono-label { color: #e5b77d; font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
 .plan-context h3 { margin: 8px 0; font-family: "Source Serif 4", Georgia, serif; font-size: 30px; line-height: 1.05; font-weight: 600; letter-spacing: -.035em; }
