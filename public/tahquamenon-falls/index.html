@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#153a2b">
+  <meta name="theme-color" content="#16372a">
   <meta name="description" content="Plan a Tahquamenon Falls visit by time, mobility, kids, hiking, photography, food or winter skiing. Get a practical Upper and Lower Falls itinerary with live weather, river and hazard context.">
   <link rel="canonical" href="https://chrisizworski.com/tahquamenon-falls/">
   <meta property="og:type" content="website">
@@ -64,182 +64,258 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to planner</a>
+
   <header class="site-header">
-    <a class="brand" href="https://chrisizworski.com/"><span class="brand-mark">MI</span><span><strong>Chris Izworski</strong><small>Michigan decision tools</small></span></a>
-    <nav aria-label="Site links"><a href="https://chrisizworski.com/tools/">All tools</a><button id="shareButton" type="button">Share</button></nav>
+    <div class="shell header-inner">
+      <a class="brand" href="https://chrisizworski.com/">
+        <span class="brand-mark">CI</span>
+        <span><strong>Chris Izworski</strong><small>Michigan decision tools</small></span>
+      </a>
+      <nav aria-label="Site links">
+        <a href="https://chrisizworski.com/tools/">All tools</a>
+        <button id="shareButton" type="button">Share</button>
+      </nav>
+    </div>
   </header>
 
   <main id="main">
-    <section class="hero" aria-labelledby="heroTitle">
-      <div class="hero-photo" role="img" aria-label="Upper Tahquamenon Falls in Michigan's Upper Peninsula"></div>
-      <div class="hero-shade"></div>
-      <div class="hero-inner shell">
+    <section class="hero">
+      <div class="shell hero-grid">
         <div class="hero-copy">
           <p class="eyebrow">TAHQUAMENON FALLS · PARADISE, MICHIGAN</p>
-          <h1 id="heroTitle">Plan the Tahquamenon day you actually have.</h1>
-          <p class="hero-lede">Most people are going to the falls anyway. This planner helps you decide <strong>where to start, what fits, what to skip and how to use your time.</strong></p>
+          <h1>Plan the Tahquamenon day you actually have.</h1>
+          <p class="hero-lede">Pick your time. Tell us what matters. Get a practical order for Upper Falls, Lower Falls, trails, food and winter stops.</p>
+
+          <div class="quick-links" aria-label="Jump to">
+            <a href="#answerSection">My plan</a>
+            <a href="#upperLower">Upper vs Lower</a>
+            <a href="#now">Live conditions</a>
+            <a href="#mapSection">Map</a>
+            <a href="#winter">XC skiing</a>
+          </div>
         </div>
 
-        <div class="planner-card" id="plannerCard">
-          <div class="planner-step">
-            <span class="step-label">1 · HOW MUCH TIME?</span>
-            <div class="time-grid" id="timeChoices">
-              <button data-minutes="45" type="button">45 min<small>one strong stop</small></button>
-              <button data-minutes="90" type="button">90 min<small>Upper Falls+</small></button>
-              <button data-minutes="180" class="active" type="button">3 hours<small>both falls</small></button>
-              <button data-minutes="300" type="button">Half day<small>explore more</small></button>
-              <button data-minutes="480" type="button">Full day<small>trails + extras</small></button>
-            </div>
-          </div>
-          <div class="planner-step">
-            <span class="step-label">2 · WHAT MATTERS TODAY?</span>
-            <div class="choice-row" id="preferenceChoices">
-              <button data-pref="kids" type="button">Kids</button>
-              <button data-pref="easy" type="button">Easy / accessible</button>
-              <button data-pref="hike" type="button">Hiking</button>
-              <button data-pref="photo" type="button">Photos</button>
-              <button data-pref="food" type="button">Food</button>
-              <button data-pref="winter" type="button">Winter / ski</button>
-            </div>
-          </div>
-          <button class="primary-button full" id="buildPlanButton" type="button">Build my visit</button>
+        <div class="hero-photo-card">
+          <div class="hero-photo" role="img" aria-label="Upper Tahquamenon Falls in Michigan's Upper Peninsula"></div>
+          <span>Upper Falls · Wikimedia Commons</span>
         </div>
       </div>
-      <p class="photo-credit">Upper Falls photo: Wikimedia Commons · Attila Nagy, CC BY 2.5</p>
+    </section>
+
+    <section class="planner-band">
+      <div class="shell planner-layout" id="plannerCard">
+        <div class="planner-group time-group">
+          <span class="planner-label">TIME</span>
+          <div class="time-grid" id="timeChoices">
+            <button data-minutes="45" type="button">45m</button>
+            <button data-minutes="90" type="button">90m</button>
+            <button data-minutes="180" class="active" type="button">3 hr</button>
+            <button data-minutes="300" type="button">½ day</button>
+            <button data-minutes="480" type="button">Full day</button>
+          </div>
+        </div>
+
+        <div class="planner-group pref-group">
+          <span class="planner-label">PRIORITIES</span>
+          <div class="choice-row" id="preferenceChoices">
+            <button data-pref="kids" type="button">Kids</button>
+            <button data-pref="easy" type="button">Easy access</button>
+            <button data-pref="hike" type="button">Hiking</button>
+            <button data-pref="photo" type="button">Photos</button>
+            <button data-pref="food" type="button">Food</button>
+            <button data-pref="winter" type="button">Winter / ski</button>
+          </div>
+        </div>
+
+        <button class="primary-button planner-build" id="buildPlanButton" type="button">Build plan</button>
+      </div>
     </section>
 
     <section class="answer-section shell" id="answerSection" aria-labelledby="answerTitle">
       <div class="answer-topline">
         <div>
-          <p class="section-kicker">YOUR BEST PLAN RIGHT NOW</p>
+          <p class="section-kicker">YOUR PLAN</p>
           <h2 id="answerTitle">Upper first, then Lower Falls.</h2>
           <p id="answerSummary">Three hours is enough to see both without turning the park into a race.</p>
         </div>
         <div class="live-pill" id="livePill"><span></span><strong>Loading live context…</strong></div>
       </div>
 
-      <div class="answer-layout">
+      <div class="answer-grid">
         <ol class="timeline" id="planTimeline" aria-live="polite"></ol>
-        <aside class="plan-aside">
-          <div class="plan-metric"><span>Estimated visit</span><strong id="planDuration">~3 hr</strong></div>
-          <div class="plan-metric"><span>Falls order</span><strong id="fallsOrder">Upper → Lower</strong></div>
-          <div class="plan-metric"><span>Walking</span><strong id="walkingLevel">Moderate</strong></div>
+
+        <aside class="plan-side">
+          <div class="plan-metrics">
+            <div><span>Time</span><strong id="planDuration">~3 hr</strong></div>
+            <div><span>Order</span><strong id="fallsOrder">Upper → Lower</strong></div>
+            <div><span>Walking</span><strong id="walkingLevel">Moderate</strong></div>
+          </div>
           <div class="plan-actions">
             <button class="secondary-button" id="copyPlanButton" type="button">Copy plan</button>
-            <button class="secondary-button" data-scroll="#mapSection" type="button">See on map</button>
+            <button class="secondary-button" data-scroll="#mapSection" type="button">Map stops</button>
+          </div>
+          <div class="live-adjustment" id="liveAdjustment">
+            <strong>Live adjustment</strong>
+            <p>Weather, river flow, daylight and active hazards adjust the plan; they do not decide whether the park is worth visiting.</p>
           </div>
         </aside>
       </div>
 
-      <div class="live-adjustment" id="liveAdjustment">
-        <strong>Live adjustment</strong>
-        <p>Weather, river flow, daylight and active hazards will appear here. They adjust the plan; they do not decide whether Tahquamenon is “worth going.”</p>
-      </div>
-    </section>
-
-    <section class="question-section">
-      <div class="shell question-grid">
-        <div>
-          <p class="section-kicker">MAKE IT PERSONAL</p>
-          <h2>Tell the planner your situation.</h2>
-          <p>Useful for the stuff buttons miss: grandparents, a toddler nap, someone who hates stairs, wanting lunch, arriving late, or trying to fit the falls around Whitefish Point.</p>
+      <form class="situation-inline" id="situationForm">
+        <label for="situationInput">Need something more specific?</label>
+        <textarea id="situationInput" maxlength="700" rows="2" placeholder="Example: 77-year-old mom, two hours, want both falls and lunch, avoid long stairs."></textarea>
+        <div class="situation-footer">
+          <span id="jevStatus">Tell us what matters; park facts stay source-backed</span>
+          <button class="primary-button" type="submit">Adapt plan</button>
         </div>
-        <form class="situation-card" id="situationForm">
-          <label for="situationInput">What does your day look like?</label>
-          <textarea id="situationInput" maxlength="700" placeholder="Example: We have my 77-year-old mom, want to see both falls, don't want a long hike, and have about two hours before dinner."></textarea>
-          <div class="situation-actions"><span id="jevStatus">Tell us what matters; park facts stay source-backed</span><button class="primary-button" type="submit">Adapt my plan</button></div>
-        </form>
-      </div>
+      </form>
     </section>
 
-    <section class="decision-surface shell" aria-labelledby="upperLowerTitle">
-      <div class="section-heading">
-        <p class="section-kicker">THE QUESTION ALMOST EVERYONE HAS</p>
-        <h2 id="upperLowerTitle">Upper Falls or Lower Falls first?</h2>
-        <p>There is no universal answer. Start with the experience you would regret missing if time gets tight.</p>
-      </div>
-      <div class="compare-grid">
-        <article class="compare-card upper">
-          <div class="compare-photo upper-photo" role="img" aria-label="Upper Tahquamenon Falls"></div>
-          <div class="compare-copy"><span>UPPER FALLS</span><h3>Best default first stop.</h3><p>The signature waterfall is the fastest high-value stop. The paved approach, accessible boardwalk, multiple overlooks, Fact Shack and brewery make it efficient for a first visit.</p><ul><li>Best when time is short</li><li>Best signature view</li><li>Strong accessibility option</li><li>Easy food pairing</li></ul><button data-place-id="upper-falls" type="button">Show on map</button></div>
-        </article>
-        <article class="compare-card lower">
-          <div class="compare-photo lower-photo" role="img" aria-label="Lower Tahquamenon Falls"></div>
-          <div class="compare-copy"><span>LOWER FALLS</span><h3>Best when you want to explore.</h3><p>Lower Falls is less about one big overlook and more about moving around: island access, boardwalks, multiple cascades, river access and nearby camping.</p><ul><li>Better with kids who need movement</li><li>Island + bridge experience</li><li>More time-worthy wandering</li><li>Paddling and campground nearby</li></ul><button data-place-id="lower-falls" type="button">Show on map</button></div>
-        </article>
-      </div>
-    </section>
-
-    <section class="now-section" aria-labelledby="nowTitle">
+    <section class="compare-section" id="upperLower" aria-labelledby="upperLowerTitle">
       <div class="shell">
-        <div class="section-heading compact">
-          <p class="section-kicker">LIVE CONTEXT, NOT A GIMMICK SCORE</p>
-          <h2 id="nowTitle">What changes your day today.</h2>
-          <p>These signals matter once you have decided to visit: comfort, safety, light, spray and trail choices.</p>
+        <div class="section-heading compact-heading">
+          <p class="section-kicker">UPPER OR LOWER FIRST?</p>
+          <h2 id="upperLowerTitle">Use the stop you’d regret missing as the anchor.</h2>
         </div>
+
+        <div class="compare-grid">
+          <article class="compare-card">
+            <div class="compare-photo upper-photo" role="img" aria-label="Upper Tahquamenon Falls"></div>
+            <div class="compare-copy">
+              <span>UPPER FALLS</span>
+              <h3>Best default first stop.</h3>
+              <p>Fastest path to the signature waterfall. Good for short visits, accessibility, and pairing with the brewery.</p>
+              <div class="tag-row"><b>Short visit</b><b>Signature view</b><b>Accessible</b></div>
+              <button data-place-id="upper-falls" type="button">Show on map →</button>
+            </div>
+          </article>
+
+          <article class="compare-card">
+            <div class="compare-photo lower-photo" role="img" aria-label="Lower Tahquamenon Falls"></div>
+            <div class="compare-copy">
+              <span>LOWER FALLS</span>
+              <h3>Best when you want to explore.</h3>
+              <p>Multiple cascades, island access and more room to move make it the better place to spend a longer block of time.</p>
+              <div class="tag-row"><b>Kids</b><b>Island bridge</b><b>More wandering</b></div>
+              <button data-place-id="lower-falls" type="button">Show on map →</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="now-section" id="now" aria-labelledby="nowTitle">
+      <div class="shell">
+        <div class="section-heading compact-heading">
+          <p class="section-kicker">RIGHT NOW</p>
+          <h2 id="nowTitle">Conditions that can actually change your day.</h2>
+        </div>
+
         <div class="signal-grid">
           <article><span>WEATHER</span><strong id="weatherValue">—</strong><p id="weatherText">Loading walking conditions…</p></article>
-          <article><span>RIVER CHARACTER</span><strong id="riverValue">—</strong><p id="riverText">Loading Upper Falls discharge…</p></article>
-          <article><span>DAYLIGHT</span><strong id="daylightValue">—</strong><p id="daylightText">Loading sunset…</p></article>
+          <article><span>RIVER</span><strong id="riverValue">—</strong><p id="riverText">Loading Upper Falls discharge…</p></article>
+          <article><span>SUNSET</span><strong id="daylightValue">—</strong><p id="daylightText">Loading sunset…</p></article>
           <article id="hazardCard"><span>NWS HAZARDS</span><strong id="hazardValue">Checking</strong><p id="hazardText">Verifying active alert feed…</p></article>
         </div>
       </div>
     </section>
 
     <section class="map-section" id="mapSection" aria-labelledby="mapTitle">
-      <div class="shell map-heading">
-        <div><p class="section-kicker">PLAN AND MAP TOGETHER</p><h2 id="mapTitle">See the park as one day, not separate attractions.</h2><p>Tap a stop for the practical reason to go there, then add it to your plan.</p></div>
-        <div class="filter-row" id="filterRow">
-          <button class="active" data-filter="all" type="button">All</button><button data-filter="falls" type="button">Falls</button><button data-filter="trail" type="button">Trails</button><button data-filter="access" type="button">Access</button><button data-filter="food" type="button">Food</button><button data-filter="camp" type="button">Camp</button><button data-filter="paddle" type="button">Paddle</button><button data-filter="photo" type="button">Photos</button>
+      <div class="shell">
+        <div class="map-heading">
+          <div>
+            <p class="section-kicker">PARK MAP</p>
+            <h2 id="mapTitle">Add stops without losing the plan.</h2>
+          </div>
+          <div class="filter-row" id="filterRow">
+            <button class="active" data-filter="all" type="button">All</button>
+            <button data-filter="falls" type="button">Falls</button>
+            <button data-filter="trail" type="button">Trails</button>
+            <button data-filter="access" type="button">Access</button>
+            <button data-filter="food" type="button">Food</button>
+            <button data-filter="camp" type="button">Camp</button>
+            <button data-filter="paddle" type="button">Paddle</button>
+            <button data-filter="photo" type="button">Photos</button>
+          </div>
         </div>
-      </div>
-      <div class="map-shell shell">
-        <div id="parkMap" class="park-map" role="region" aria-label="Interactive Tahquamenon Falls State Park map"><div class="map-placeholder">Map loads when you reach it.</div></div>
-        <aside class="place-panel" id="placePanel">
-          <span id="placeKicker">PARK STOP</span>
-          <h3 id="placeTitle">Choose a point on the map</h3>
-          <p id="placeDescription">Falls, trailheads, camping, food, access and photo stops are tied to the same visit plan above.</p>
-          <div class="fact-chips" id="placeFacts"></div>
-          <div class="place-actions"><button class="secondary-button" id="addPlaceButton" type="button" disabled>Add to plan</button><a id="placeLink" href="https://www.michigan.gov/recsearch/parks/tahquamenonfalls" target="_blank" rel="noopener">Official details ↗</a></div>
-        </aside>
+
+        <div class="map-shell">
+          <div id="parkMap" class="park-map" role="region" aria-label="Interactive Tahquamenon Falls State Park map">
+            <div class="map-placeholder">Map loads when you reach it.</div>
+          </div>
+
+          <aside class="place-panel" id="placePanel">
+            <span id="placeKicker">PARK STOP</span>
+            <h3 id="placeTitle">Choose a point on the map</h3>
+            <p id="placeDescription">Falls, trailheads, camping, food, access and photo stops can be added directly to your visit plan.</p>
+            <div class="fact-chips" id="placeFacts"></div>
+            <div class="place-actions">
+              <button class="secondary-button" id="addPlaceButton" type="button" disabled>Add to plan</button>
+              <a id="placeLink" href="https://www.michigan.gov/recsearch/parks/tahquamenonfalls" target="_blank" rel="noopener">Official details ↗</a>
+            </div>
+          </aside>
+        </div>
       </div>
     </section>
 
     <section class="winter-section" id="winter" aria-labelledby="winterTitle">
-      <div class="winter-photo" role="img" aria-label="Tahquamenon Falls in winter"></div>
-      <div class="winter-copy shell">
-        <p class="section-kicker">WINTER IS NOT AN OFF-SEASON</p>
-        <h2 id="winterTitle">Tahquamenon is also a cross-country ski destination.</h2>
-        <p>Michigan DNR lists <strong>4 miles of groomed cross-country ski trails</strong> in the Upper Falls area. The 1-mile Lantern Loop and 3.8-mile Giant Pines Loop use the park's hiking network, with backcountry skiing also allowed elsewhere in the park.</p>
-        <div class="winter-facts"><div><strong>1 mi</strong><span>Lantern Loop</span></div><div><strong>3.8 mi</strong><span>Giant Pines Loop</span></div><div><strong>Classic</strong><span>single-track grooming</span></div></div>
-        <div class="winter-actions"><a class="primary-button" href="https://xcski.chrisizworski.com/">Check Michigan XC conditions →</a><a class="secondary-button light" href="https://chrisizworski.com/michigan-cross-country-skiing/">Michigan XC planning guide</a><a class="text-link light" href="https://www.michigan.gov/dnr/-/media/Project/Websites/dnr/Documents/Education/visitorcenters/TF-2020-Winter-Trail-Maps.pdf" target="_blank" rel="noopener">Official Tahquamenon winter trail map ↗</a></div>
-        <p class="winter-note">Keep pets and foot traffic off groomed ski tracks. Snowshoers have separate marked winter routes and can also explore backcountry areas.</p>
+      <div class="shell winter-grid">
+        <div class="winter-photo" role="img" aria-label="Tahquamenon Falls in winter"></div>
+        <div class="winter-copy">
+          <p class="section-kicker">WINTER / XC SKIING</p>
+          <h2 id="winterTitle">Tahquamenon is a real cross-country ski stop.</h2>
+          <p>Michigan DNR lists <strong>4 miles of groomed skiing</strong> in the Upper Falls area, including the <strong>1-mile Lantern Loop</strong> and <strong>3.8-mile Giant Pines Loop</strong>.</p>
+          <div class="winter-facts">
+            <div><strong>1 mi</strong><span>Lantern Loop</span></div>
+            <div><strong>3.8 mi</strong><span>Giant Pines</span></div>
+            <div><strong>Classic</strong><span>grooming</span></div>
+          </div>
+          <div class="winter-actions">
+            <a class="primary-button" href="https://xcski.chrisizworski.com/">Check Michigan XC conditions</a>
+            <a class="secondary-button" href="https://chrisizworski.com/michigan-cross-country-skiing/">XC planning guide</a>
+            <a class="text-link" href="https://www.michigan.gov/dnr/-/media/Project/Websites/dnr/Documents/Education/visitorcenters/TF-2020-Winter-Trail-Maps.pdf" target="_blank" rel="noopener">Official winter map ↗</a>
+          </div>
+        </div>
       </div>
     </section>
 
     <section class="guide-section shell" aria-labelledby="guideTitle">
-      <div class="section-heading"><p class="section-kicker">PLAN BEFORE YOU LOSE A BAR OF SERVICE</p><h2 id="guideTitle">The practical Tahquamenon guide.</h2><p>Static answers for the questions people search before a trip, with the live planner above for the parts that change.</p></div>
+      <div class="section-heading compact-heading">
+        <p class="section-kicker">PRACTICAL GUIDE</p>
+        <h2 id="guideTitle">The answers people actually need before the drive.</h2>
+      </div>
+
       <div class="guide-grid">
-        <article id="how-long"><h3>How long do you need?</h3><p><strong>45 minutes:</strong> make it an Upper Falls visit. <strong>90 minutes:</strong> Upper Falls plus time for another overlook or food. <strong>About 3 hours:</strong> both falls without rushing. <strong>Half day:</strong> both falls plus the island, a longer walk or meal. <strong>Full day:</strong> add serious trail time, Rivermouth, photography or a neighboring destination.</p></article>
-        <article id="accessibility"><h3>Accessibility</h3><p>Both falls have accessible viewing opportunities. The Upper Falls area now includes a 1,100-foot accessible boardwalk with switchback landings toward the brink. Lower Falls includes accessible viewpoints and the Ronald A. Olson Island Bridge. The park also offers a track chair that visitors can borrow at no cost; confirm current availability with the park.</p></article>
-        <article id="river-trail"><h3>River Trail</h3><p>The point-to-point River Trail is about 5.1 miles between the falls. Roots, hills and stairs make it a real hike rather than a casual connector. Seasonal shuttle service can solve the one-way transportation problem, but verify the operating schedule before committing.</p></article>
-        <article id="kids"><h3>With kids</h3><p>Do not assume the biggest waterfall is the whole day. Lower Falls gives children more to do: an island crossing, multiple cascades and room to move. For young kids, use Upper Falls as the quick signature stop and spend the larger share of time at Lower Falls.</p></article>
-        <article id="food"><h3>Food and breaks</h3><p>The Tahquamenon Falls Brewery & Pub is in the Upper Falls area, so it fits naturally before or after the main overlook. Lower Falls has seasonal concessions. The planner treats food as part of the route instead of sending you on a separate detour.</p></article>
-        <article id="winter-guide"><h3>Winter</h3><p>The park remains a real winter destination with groomed skiing, marked snowshoe trails, winter waterfall views and snowmobile access on designated routes. Use the XC conditions tool for regional snow intelligence, then verify park grooming locally before a long drive.</p></article>
+        <article id="how-long"><h3>How long?</h3><p><strong>45 min:</strong> Upper Falls. <strong>90 min:</strong> Upper Falls plus another overlook or food. <strong>3 hr:</strong> both falls. <strong>Half day:</strong> add island or longer walk. <strong>Full day:</strong> add serious trail time or Rivermouth.</p></article>
+        <article id="accessibility"><h3>Accessibility</h3><p>Both falls have accessible viewing opportunities. Upper Falls includes a <strong>1,100-foot accessible boardwalk</strong>. Lower Falls has accessible viewpoints and the Ronald A. Olson Island Bridge. A track chair may be available; confirm with the park.</p></article>
+        <article id="river-trail"><h3>River Trail</h3><p>The point-to-point River Trail is about <strong>5.1 miles</strong>. Roots, hills and stairs make it a real hike. Verify seasonal shuttle operation before relying on a one-way plan.</p></article>
+        <article id="kids"><h3>With kids</h3><p>Use Upper Falls as the signature stop, but budget more time at Lower Falls for the island, bridge, multiple cascades and room to move.</p></article>
+        <article id="food"><h3>Food</h3><p>The Tahquamenon Falls Brewery & Pub is in the Upper Falls area, making it easy to pair with the main overlook without adding another drive.</p></article>
+        <article id="winter-guide"><h3>Winter</h3><p>Groomed skiing, snowshoeing and winter waterfall views make this more than a summer stop. Use the XC tool for regional snow intelligence, then verify local grooming.</p></article>
       </div>
     </section>
 
     <section class="faq-section shell" aria-labelledby="faqTitle">
-      <div class="section-heading"><p class="section-kicker">QUICK ANSWERS</p><h2 id="faqTitle">Tahquamenon Falls FAQ</h2></div>
-      <details><summary>Can I see both Upper and Lower Falls in one visit?</summary><p>Yes. They are about four road miles apart, and a three-hour visit is a practical baseline for seeing both without making every stop a sprint.</p></details>
-      <details><summary>Which falls is more impressive?</summary><p>Upper Falls is the park's signature single waterfall and the stronger choice when you have limited time. Lower Falls is a broader experience with multiple cascades, an island and more wandering.</p></details>
-      <details><summary>Do I need to hike between the falls?</summary><p>No. You can drive between the Upper and Lower day-use areas. The River Trail is an optional point-to-point hike, not the normal way most visitors have to connect the two.</p></details>
-      <details><summary>Is Tahquamenon worth visiting in winter?</summary><p>Yes. Winter adds frozen-waterfall scenery, groomed cross-country skiing, marked snowshoeing and a much quieter park experience. Winter access and grooming can change with conditions, so verify locally.</p></details>
+      <div class="section-heading compact-heading">
+        <p class="section-kicker">FAQ</p>
+        <h2 id="faqTitle">Quick answers.</h2>
+      </div>
+      <details><summary>Can I see both Upper and Lower Falls in one visit?</summary><p>Yes. They are about four road miles apart, and a three-hour visit is a practical baseline for seeing both without rushing every stop.</p></details>
+      <details><summary>Which falls should I prioritize?</summary><p>Upper Falls is the stronger default if time is limited. Lower Falls is better when you want to explore, move around or give kids more to do.</p></details>
+      <details><summary>Do I need to hike between the falls?</summary><p>No. You can drive between the Upper and Lower day-use areas. The River Trail is an optional point-to-point hike.</p></details>
+      <details><summary>Is Tahquamenon worth visiting in winter?</summary><p>Yes. Winter adds frozen-waterfall scenery, groomed cross-country skiing, marked snowshoeing and a quieter park experience. Verify current access and grooming before the drive.</p></details>
     </section>
   </main>
 
   <footer>
-    <div class="shell footer-grid"><div><strong>Tahquamenon Falls Visit Planner</strong><p>A Chris Izworski Michigan decision tool.</p></div><div><a href="https://chrisizworski.com/tools/">More tools</a><a href="https://xcski.chrisizworski.com/">Michigan XC Ski Conditions</a><a href="https://www.michigan.gov/recsearch/parks/tahquamenonfalls" target="_blank" rel="noopener">Official Michigan DNR park page ↗</a></div></div>
+    <div class="shell footer-grid">
+      <div><strong>Tahquamenon Falls Visit Planner</strong><span>A Chris Izworski Michigan decision tool.</span></div>
+      <div>
+        <a href="https://chrisizworski.com/tools/">More tools</a>
+        <a href="https://xcski.chrisizworski.com/">Michigan XC Ski Conditions</a>
+        <a href="https://www.michigan.gov/recsearch/parks/tahquamenonfalls" target="_blank" rel="noopener">Official DNR park page ↗</a>
+      </div>
+    </div>
   </footer>
 
   <script src="/tahquamenon-falls/data/places.js"></script>
