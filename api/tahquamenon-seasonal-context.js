@@ -1,4 +1,4 @@
-const FALL_SNAPSHOT_URL = process.env.FALL_SNAPSHOT_URL || 'https://chrisizworski.com/api/fall-color?view=snapshot';
+const FALL_SNAPSHOT_URL = process.env.FALL_SNAPSHOT_URL || 'https://chrisizworski.com/api/fall-color?view=snapshot&consumer=tahquamenon-v2';
 
 function etDateParts(now = new Date()) {
   const parts = new Intl.DateTimeFormat('en-US',{timeZone:'America/Detroit',month:'numeric',day:'numeric'}).formatToParts(now);
@@ -81,7 +81,7 @@ export default async function handler(req,res){
   const winter=winterModule(intent,now);
   const spring={active:season==='spring',available:true,relevance:season==='spring'?.72:.1,label:'Spring waterfall season',basis:'Tahquamenon live weather and river context become more important in spring; trail conditions still require local verification.'};
   const summer={active:season==='summer',available:true,relevance:season==='summer'?.72:.1,label:'Summer park season',basis:'Long daylight, both falls, island access, hiking, food and water-oriented activities shape the summer visit.'};
-  res.setHeader('Cache-Control','public, s-maxage=1800, stale-while-revalidate=7200');
+  res.setHeader('Cache-Control', fallStatus === 'ok' ? 'public, s-maxage=1800, stale-while-revalidate=7200' : 'public, s-maxage=60, stale-while-revalidate=120');
   res.setHeader('X-Robots-Tag','noindex, nofollow');
   return res.status(200).json({
     schemaVersion:1,
