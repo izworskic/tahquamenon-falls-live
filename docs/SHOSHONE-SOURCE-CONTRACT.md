@@ -34,7 +34,7 @@ Until then the public tool links to the official Idaho Power portal and does not
 
 City of Twin Falls official Shoshone Falls live stream:
 
-https://www.youtube.com/watch?v=PS0N6ZlbiqQ
+https://www.youtube.com/watch?v=-Y7P-WfeXuE
 
 This is visual evidence. It must never be converted by JEV into an invented CFS value.
 
