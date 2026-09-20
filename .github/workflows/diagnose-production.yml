@@ -1,0 +1,42 @@
+name: Diagnose Tahquamenon production
+
+on:
+  push:
+    branches:
+      - agent/diagnose-production-smoke-20260919
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe live endpoints
+        shell: bash
+        run: |
+          set -u
+          probe() {
+            name="$1"
+            url="$2"
+            method="${3:-GET}"
+            body="${4:-}"
+            echo "=== $name ==="
+            if [ "$method" = "POST" ]; then
+              code=$(curl -sS -o /tmp/out -w '%{http_code}' --connect-timeout 8 --max-time 25 -H 'content-type: application/json' --data "$body" "$url" || true)
+            else
+              code=$(curl -sS -o /tmp/out -w '%{http_code}' --connect-timeout 8 --max-time 25 "$url" || true)
+            fi
+            echo "status=$code"
+            head -c 3000 /tmp/out || true
+            echo
+          }
+          probe "origin page" "https://tahquamenon-falls-live-94is.vercel.app/tahquamenon-falls/"
+          probe "origin live api" "https://tahquamenon-falls-live-94is.vercel.app/api/tahquamenon-falls"
+          probe "origin seasonal api" "https://tahquamenon-falls-live-94is.vercel.app/api/tahquamenon-seasonal-context?intent=fall-color"
+          probe "origin planner api" "https://tahquamenon-falls-live-94is.vercel.app/api/visit-plan" POST '{"query":"We have two kids, my 77-year-old mom uses a walker, we have 2 hours and want lunch.","minutes":180,"preferences":[]}'
+          probe "canonical page" "https://chrisizworski.com/tahquamenon-falls/"
+          probe "canonical seasonal api" "https://chrisizworski.com/api/tahquamenon-seasonal-context?intent=fall-color"
+          probe "canonical planner api" "https://chrisizworski.com/api/visit-plan" POST '{"query":"Full day fall color road trip on M-123 with photos.","minutes":480,"preferences":["photo"]}'
