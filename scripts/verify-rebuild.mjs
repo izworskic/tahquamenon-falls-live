@@ -29,6 +29,7 @@ const plannerApi = await readFile(new URL('../api/visit-plan.js', import.meta.ur
 const seasonalApi = await readFile(new URL('../api/tahquamenon-seasonal-context.js', import.meta.url), 'utf8');
 const seasonalJs = await readFile(new URL('../public/assets/tahquamenon-seasonal.js', import.meta.url), 'utf8');
 assert(html.includes('Plan the Tahquamenon day you actually have.'), 'Visit-first hero missing');
+assert(html.includes('A Michigan decision tool built by <a href="https://chrisizworski.com/chris-izworski/">Chris Izworski</a>.'), 'Linked creator attribution missing');
 assert(html.includes('id="seasonContext"'), 'Compact seasonal context surface missing');
 assert(html.includes('type="module"'), 'Season-aware client must load as an ES module');
 assert(js.includes('loadSeasonal()'), 'Seasonal context loader missing');
