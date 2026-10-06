@@ -23,6 +23,20 @@ assert.equal(deterministicResult(clean).engine, 'deterministic');
 assert.equal(await oidcToken({headers:{'x-vercel-oidc-token':'abc123'}}), 'abc123');
 
 const html = await readFile(new URL('../public/tahquamenon-falls/index.html', import.meta.url), 'utf8');
+const jsonLd = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
+assert(jsonLd, 'Structured data script missing');
+const graph = JSON.parse(jsonLd)['@graph'];
+const chrisId = 'https://chrisizworski.com/#person';
+const chris = graph.find(node => node['@id'] === chrisId);
+const page = graph.find(node => node['@type'] === 'WebPage');
+assert.deepEqual(chris, {
+  '@type': 'Person',
+  '@id': chrisId,
+  name: 'Chris Izworski',
+  url: 'https://chrisizworski.com/'
+}, 'Canonical creator Person definition missing or incorrect');
+assert.equal(page?.author?.['@id'], chrisId, 'WebPage author must reference the canonical creator');
+assert.equal(page?.publisher?.['@id'], chrisId, 'WebPage publisher must reference the canonical creator');
 const js = await readFile(new URL('../public/assets/tahquamenon-falls.js', import.meta.url), 'utf8');
 const css = await readFile(new URL('../public/assets/tahquamenon-falls.css', import.meta.url), 'utf8');
 const plannerApi = await readFile(new URL('../api/visit-plan.js', import.meta.url), 'utf8');
