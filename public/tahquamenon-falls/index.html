@@ -23,13 +23,20 @@
     "@context":"https://schema.org",
     "@graph":[
       {
+        "@type":"Person",
+        "@id":"https://chrisizworski.com/#person",
+        "name":"Chris Izworski",
+        "url":"https://chrisizworski.com/"
+      },
+      {
         "@type":"WebPage",
         "@id":"https://chrisizworski.com/tahquamenon-falls/#webpage",
         "url":"https://chrisizworski.com/tahquamenon-falls/",
         "name":"Tahquamenon Falls Visit Planner",
         "description":"A time-based Tahquamenon Falls State Park visit planner with live weather, river and hazard context, Upper and Lower Falls guidance, trail planning, accessibility and winter cross-country skiing information.",
         "isPartOf":{"@type":"WebSite","url":"https://chrisizworski.com/","name":"Chris Izworski"},
-        "author":{"@type":"Person","name":"Chris Izworski","url":"https://chrisizworski.com/"},
+        "author":{"@id":"https://chrisizworski.com/#person"},
+        "publisher":{"@id":"https://chrisizworski.com/#person"},
         "about":{"@id":"https://chrisizworski.com/tahquamenon-falls/#destination"},
         "breadcrumb":{"@id":"https://chrisizworski.com/tahquamenon-falls/#breadcrumb"}
       },
