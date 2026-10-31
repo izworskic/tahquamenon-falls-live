@@ -66,10 +66,14 @@ try {
     assert.match(await page.locator('#rangerNotesTitle').innerText(),/more to Tahquamenon/);
     const readability = await page.evaluate(() => ({
       guide: parseFloat(getComputedStyle(document.querySelector('.guide-grid p')).fontSize),
+      comparison: parseFloat(getComputedStyle(document.querySelector('.compare-copy p')).fontSize),
+      conditions: parseFloat(getComputedStyle(document.querySelector('.signal-grid p')).fontSize),
       field: parseFloat(getComputedStyle(document.querySelector('.ranger-story p')).fontSize),
       chapters: [...document.querySelectorAll('.ranger-story')].map(el => Math.round(el.getBoundingClientRect().width))
     }));
     assert.ok(readability.guide>=14,'Practical guide paragraphs cannot stay tiny at '+width);
+    assert.ok(readability.comparison>=14,'Falls comparisons must be readable at '+width);
+    assert.ok(readability.conditions>=13,'Live conditions must be readable at '+width);
     assert.ok(readability.field>=14,'Interpretive field notes must be readable at '+width);
     assert.ok(readability.chapters.every(w=>w>=230),'Ranger chapters are too narrow at '+width);
         const dims = await page.evaluate(()=>({window:innerWidth,scroll:document.documentElement.scrollWidth}));
