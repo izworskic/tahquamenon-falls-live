@@ -52,6 +52,15 @@
 .experience-stop-empty{padding:12px;background:#f6f2e9;color:#344e3d;border-radius:9px;font-size:13px}
 .experience-map-fallback{position:absolute;z-index:900;bottom:11px;left:11px;right:11px;padding:11px 15px;border-radius:10px;border:1px solid #e6c99a;background:#fff4e2;color:#352d23;font-size:13px;line-height:1.45;box-shadow:0 4px 16px rgba(0,0,0,.18)}
 .experience-card-choice:focus-visible,.experience-plan-step:focus-visible,.experience-stop-button:focus-visible,.experience-browse summary:focus-visible,.experience-stop-source:focus-visible,.experience-photo-credit:focus-visible{outline:3px solid #e59d3b;outline-offset:3px}
+
+/* Bring the original selected-place detail panel up to readable visitor-guide scale. */
+.map-section .place-panel>span{font-size:11px}
+.map-section .place-panel h3{font-size:clamp(27px,2.6vw,32px);line-height:1.08;margin:8px 0 11px}
+.map-section .place-panel p{font-size:14px;line-height:1.6;color:#e4ebe5}
+.map-section .fact-chips span{font-size:11px;padding:6px 9px;line-height:1.35}
+.map-section .place-panel .secondary-button{min-height:44px;font-size:13px}
+.map-section .place-panel a{display:inline-flex;align-items:center;min-height:30px;font-size:12px;line-height:1.45}
+.map-section .place-panel{padding:19px}
 @media(max-width:850px){
  .experience-route-heading{display:block}
  .experience-route-heading p{margin-top:9px}
