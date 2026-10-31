@@ -18,6 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/tahquamenon-falls.css?v=seasonal-20260919-v2">
+  <link rel="stylesheet" href="/assets/tahquamenon-experience.css?v=experience-os-1">
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -169,6 +170,17 @@
         </aside>
       </div>
 
+      <div class="experience-route" aria-labelledby="experienceRouteTitle">
+        <div class="experience-route-heading">
+          <div><span class="section-kicker">YOUR DAY, CONNECTED</span><h3 id="experienceRouteTitle">Follow your stops into the park.</h3></div>
+          <p id="experiencePlanSummary" aria-live="polite">With three hours, begin at Upper Falls and continue to Lower Falls. Open the park map for current stop details.</p>
+        </div>
+        <div id="experiencePlanPath" class="experience-plan-path" aria-label="Stops in your current plan">
+          <a href="#mapSection">Upper Falls</a><a href="#mapSection">Lower Falls</a>
+        </div>
+        <p class="experience-route-note">Planning estimates, not measured driving or trail times. Verify seasonal access with Michigan DNR before departing.</p>
+      </div>
+
       <aside class="season-context" id="seasonContext" hidden>
         <div class="season-context-copy">
           <span class="season-context-kicker" id="seasonKicker">SEASONAL CONTEXT</span>
@@ -192,6 +204,90 @@
           <p class="custom-plan-status" id="jevStatus" aria-live="polite"></p>
         </form>
       </details>
+    </section>
+
+    <section class="map-section" id="mapSection" aria-labelledby="mapTitle">
+      <div class="shell">
+        <div class="map-heading">
+          <div>
+            <p class="section-kicker">PARK MAP</p>
+            <h2 id="mapTitle">Add stops without losing the plan.</h2>
+          </div>
+          <div class="filter-row" id="filterRow">
+            <button class="active" data-filter="all" type="button">All</button>
+            <button data-filter="falls" type="button">Falls</button>
+            <button data-filter="trail" type="button">Trails</button>
+            <button data-filter="access" type="button">Access</button>
+            <button data-filter="food" type="button">Food</button>
+            <button data-filter="camp" type="button">Camp</button>
+            <button data-filter="paddle" type="button">Paddle</button>
+            <button data-filter="photo" type="button">Photos</button>
+          </div>
+        </div>
+
+        <div class="experience-chooser" id="experienceChooser" aria-labelledby="experienceTitle">
+          <div class="experience-intro">
+            <p class="section-kicker">THREE WAYS TO EXPERIENCE THE FALLS</p>
+            <h3 id="experienceTitle">Choose the view you want to remember.</h3>
+            <p>Upper Falls announces itself with a broad, amber curtain. Downriver, the Lower Falls spread through the woods around an island. Choose a photograph to connect the place, the map and your plan.</p>
+          </div>
+          <div class="experience-cards">
+            <article class="experience-card" data-experience-card="upper-falls">
+              <button class="experience-card-choice" data-experience-place="upper-falls" aria-pressed="false" type="button">
+                <img loading="lazy" decoding="async" width="720" height="540" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Tahquamenon_Falls_-_Autumn.JPG?width=720" alt="Upper Tahquamenon Falls amid autumn foliage">
+                <span class="experience-card-body"><span class="experience-card-eyebrow">THE SIGNATURE VIEW</span><strong>Upper Falls</strong><span>Come for the sound of the river before it drops. The accessible boardwalk and overlooks make this a rewarding first stop.</span><span class="experience-card-status" data-experience-card-status>In your plan</span></span>
+              </button>
+              <a class="experience-photo-credit" href="https://commons.wikimedia.org/wiki/File:Tahquamenon_Falls_-_Autumn.JPG" target="_blank" rel="noopener noreferrer">Photo: Wfgc · public domain · archival</a>
+            </article>
+            <article class="experience-card" data-experience-card="lower-falls">
+              <button class="experience-card-choice" data-experience-place="lower-falls" aria-pressed="false" type="button">
+                <img loading="lazy" decoding="async" width="720" height="540" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Lower_Tahquamenon_Falls.jpg?width=720" alt="Lower Tahquamenon Falls cascading around a wooded island">
+                <span class="experience-card-body"><span class="experience-card-eyebrow">GIVE YOURSELF ROOM TO WANDER</span><strong>Lower Falls</strong><span>Smaller cascades, forest boardwalks and river views invite a slower afternoon. Allow time to explore instead of rushing back to the car.</span><span class="experience-card-status" data-experience-card-status>In your plan</span></span>
+              </button>
+              <a class="experience-photo-credit" href="https://commons.wikimedia.org/wiki/File:Lower_Tahquamenon_Falls.jpg" target="_blank" rel="noopener noreferrer">Photo: Joe Passe · CC BY-SA 2.0 · archival</a>
+            </article>
+            <article class="experience-card" data-experience-card="island-bridge">
+              <button class="experience-card-choice" data-experience-place="island-bridge" aria-pressed="false" type="button">
+                <img loading="lazy" decoding="async" width="720" height="480" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Tahquamenon_Falls_State_Park_bridge.jpg?width=720" alt="Pedestrian bridge at Tahquamenon Falls State Park">
+                <span class="experience-card-body"><span class="experience-card-eyebrow">THE LOWER FALLS ISLAND</span><strong>Cross the bridge</strong><span>Follow the accessible bridge to the island and find new angles on the falling water. Check park conditions before relying on access.</span><span class="experience-card-status" data-experience-card-status>Explore as an alternative</span></span>
+              </button>
+              <a class="experience-photo-credit" href="https://commons.wikimedia.org/wiki/File:Tahquamenon_Falls_State_Park_bridge.jpg" target="_blank" rel="noopener noreferrer">Photo: Notorious4life · CC0 · archival</a>
+            </article>
+          </div>
+          <p class="experience-chooser-note">Photographs show past visits, not live conditions. Selection changes the park detail and highlighted map stop, not the conditions feed. <a href="https://www.michigan.gov/recsearch/parks/tahquamenonfalls" target="_blank" rel="noopener noreferrer">Verify with Michigan DNR</a>.</p>
+        </div>
+
+        <div class="map-shell">
+          <div id="parkMap" class="park-map" role="region" aria-label="Interactive Tahquamenon Falls State Park map">
+            <div class="map-placeholder">Map loads when you reach it.</div>
+          </div>
+
+          <aside class="place-panel" id="placePanel">
+            <figure id="experiencePanelPhoto" class="experience-panel-photo" hidden>
+              <img id="experiencePanelPhotoImage" loading="lazy" decoding="async" width="720" height="480" alt="">
+              <figcaption><a id="experiencePanelPhotoCredit" href="https://commons.wikimedia.org/" target="_blank" rel="noopener noreferrer">Photograph credit</a></figcaption>
+            </figure>
+            <span id="placeKicker">PARK STOP</span>
+            <h3 id="placeTitle">Choose a point on the map</h3>
+            <p id="placeDescription">Falls, trailheads, camping, food, access and photo stops can be added directly to your visit plan.</p>
+            <div class="fact-chips" id="placeFacts"></div>
+            <div class="place-actions">
+              <button class="secondary-button" id="addPlaceButton" type="button" disabled>Add to plan</button>
+              <a id="placeLink" href="https://www.michigan.gov/recsearch/parks/tahquamenonfalls" target="_blank" rel="noopener">Official details ↗</a>
+            </div>
+          </aside>
+        </div>
+        <details class="experience-browse" id="experienceBrowse">
+          <summary>Browse all park stops without relying on map tiles <span>(17 destinations)</span></summary>
+          <p>These are planning points, not turn-by-turn navigation or assurances that a trail, concession or shuttle is open. Choose a place to inspect its source and add it to your plan.</p>
+          <ul id="experienceStopList" class="experience-stop-list">
+            <li><a href="https://www.michigan.gov/recsearch/parks/tahquamenonfalls">Upper Falls and accessible boardwalk · Michigan DNR</a></li>
+            <li><a href="https://www.michigan.gov/recsearch/parks/tahquamenonfalls">Lower Falls, island bridge and visitor facilities · Michigan DNR</a></li>
+            <li><a href="https://www.michigan.gov/recsearch/-/media/Project/Websites/recsearch/documents/MapsT-Z/tahquamenon_hiking_trail_map.pdf">River Trail and walking routes · official DNR map</a></li>
+          </ul>
+          <a href="https://www.michigan.gov/recsearch/-/media/Project/Websites/recsearch/documents/MapsT-Z/tahquamenon_hiking_trail_map.pdf" target="_blank" rel="noopener noreferrer">Open the official Lower Falls walking map (PDF)</a>
+        </details>
+      </div>
     </section>
 
     <section class="compare-section" id="upperLower" aria-labelledby="upperLowerTitle">
@@ -239,44 +335,6 @@
           <article><span>RIVER</span><strong id="riverValue">—</strong><p id="riverText">Loading Upper Falls discharge…</p></article>
           <article><span>SUNSET</span><strong id="daylightValue">—</strong><p id="daylightText">Loading sunset…</p></article>
           <article id="hazardCard"><span>NWS HAZARDS</span><strong id="hazardValue">Checking</strong><p id="hazardText">Verifying active alert feed…</p></article>
-        </div>
-      </div>
-    </section>
-
-    <section class="map-section" id="mapSection" aria-labelledby="mapTitle">
-      <div class="shell">
-        <div class="map-heading">
-          <div>
-            <p class="section-kicker">PARK MAP</p>
-            <h2 id="mapTitle">Add stops without losing the plan.</h2>
-          </div>
-          <div class="filter-row" id="filterRow">
-            <button class="active" data-filter="all" type="button">All</button>
-            <button data-filter="falls" type="button">Falls</button>
-            <button data-filter="trail" type="button">Trails</button>
-            <button data-filter="access" type="button">Access</button>
-            <button data-filter="food" type="button">Food</button>
-            <button data-filter="camp" type="button">Camp</button>
-            <button data-filter="paddle" type="button">Paddle</button>
-            <button data-filter="photo" type="button">Photos</button>
-          </div>
-        </div>
-
-        <div class="map-shell">
-          <div id="parkMap" class="park-map" role="region" aria-label="Interactive Tahquamenon Falls State Park map">
-            <div class="map-placeholder">Map loads when you reach it.</div>
-          </div>
-
-          <aside class="place-panel" id="placePanel">
-            <span id="placeKicker">PARK STOP</span>
-            <h3 id="placeTitle">Choose a point on the map</h3>
-            <p id="placeDescription">Falls, trailheads, camping, food, access and photo stops can be added directly to your visit plan.</p>
-            <div class="fact-chips" id="placeFacts"></div>
-            <div class="place-actions">
-              <button class="secondary-button" id="addPlaceButton" type="button" disabled>Add to plan</button>
-              <a id="placeLink" href="https://www.michigan.gov/recsearch/parks/tahquamenonfalls" target="_blank" rel="noopener">Official details ↗</a>
-            </div>
-          </aside>
         </div>
       </div>
     </section>

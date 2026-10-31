@@ -1,0 +1,37 @@
+name: EXPERIENCE_OS Tahquamenon browser QA
+
+on:
+  pull_request:
+    paths:
+      - 'public/tahquamenon-falls/**'
+      - 'public/assets/tahquamenon-*.js'
+      - 'public/assets/tahquamenon-*.css'
+      - 'scripts/experience-browser-smoke.mjs'
+      - '.github/workflows/experience-browser-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  experience:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Chromium browser test harness
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Exercise 45m/3h planning, photos, map, no-JS and network failure
+        run: node scripts/experience-browser-smoke.mjs
+      - name: Retain actual mobile, desktop and failure screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tahquamenon-experience-screenshots
+          path: artifacts/
+          if-no-files-found: warn
