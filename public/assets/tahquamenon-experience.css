@@ -1,6 +1,10 @@
 
 /* EXPERIENCE_OS_V1 pilot: compact photographs, linked map/plan, readable fallback. */
 .park-map{position:relative}
+.park-map.has-experience-map-error{height:auto!important;min-height:0;padding:9px;border-color:#d3af79;background:#244637}
+.park-map.has-experience-map-error .map-placeholder{display:none}
+.park-map.has-experience-map-error .experience-map-fallback{position:static;box-shadow:none;margin:0;min-height:66px;display:flex;align-items:center;font-size:14px}
+.park-map.has-experience-map-error .leaflet-control-container{display:none}
 .experience-route{margin-top:20px;padding:19px 21px;border:1px solid #b9c6ba;border-radius:16px;background:#f5f6ef;color:#173b2c}
 .experience-route-heading{display:flex;align-items:end;justify-content:space-between;gap:25px}
 .experience-route .section-kicker{font-size:11px;letter-spacing:.09em;font-weight:800;color:#82502b}
