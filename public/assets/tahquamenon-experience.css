@@ -69,6 +69,12 @@
  .experience-stop-list{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(max-width:600px){
+ /* Keep the hero's scrollable jump links inside the phone viewport rather than
+    allowing the CSS grid's intrinsic min-content width to expand the page. */
+ .hero-grid{grid-template-columns:minmax(0,1fr);min-width:0}
+ .hero-copy{min-width:0;max-width:100%}
+ .quick-links{max-width:100%;min-width:0;overflow-x:auto}
+
  .experience-route{margin-top:16px;padding:15px}
  .experience-route-heading p{font-size:13px}
  .experience-plan-path{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
