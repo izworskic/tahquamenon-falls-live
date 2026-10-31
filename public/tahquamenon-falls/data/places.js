@@ -188,8 +188,8 @@ window.TAHQUAMENON_PLACES = [
     lat: 46.57780,
     lng: -85.25230,
     kicker: 'Skip the 4-mile drive or the 5.1-mile hike',
-    description: 'A fee-based shuttle runs between the Upper and Lower Falls day-use areas, the practical way to see both without doubling back to your vehicle or hiking the River Trail one way.',
-    facts: ['Noon–8pm daily through Labor Day', 'Weekend-only before/after peak season', 'Fee-based, book ahead in summer'],
+    description: 'A seasonal fee-based shuttle may provide transportation between the Upper and Lower Falls. Check the operator for service on your date before planning the 5.1-mile point-to-point River Trail; Michigan DNR warns against walking on M-123.',
+    facts: ['Seasonal, fee-based shuttle', 'Verify date-specific schedule before hiking', 'Do not rely on road walking as a fallback'],
     action: 'Shuttle schedule & booking ↗',
     url: 'https://huntertransportation.net/',
     source: 'Hunter Shuttle Service'
@@ -214,8 +214,8 @@ window.TAHQUAMENON_PLACES = [
     lat: 46.57760,
     lng: -85.25340,
     kicker: 'Lantern Loop + Giant Pines Loop',
-    description: 'The Upper Falls hiking trail system doubles as the park\u2019s groomed cross-country ski network in winter: the 1-mile Lantern Loop and the 3.8-mile Giant Pines Loop, both starting from the Upper Falls day-use area and open to snowshoeing and winter hiking as well.',
-    facts: ['1-mi Lantern Loop', '3.8-mi Giant Pines Loop', 'Groomed for skiing in winter', 'Open to hiking/snowshoeing'],
+    description: 'The Upper Falls area offers groomed cross-country ski trails in winter, including the 1-mile Lantern Loop and 3.8-mile Giant Pines Loop. Michigan DNR asks visitors not to walk or snowshoe on groomed ski tracks. Use separately designated snowshoe routes and verify current grooming and access.',
+    facts: ['1-mi Lantern Loop', '3.8-mi Giant Pines Loop', 'Ski tracks: no walking or snowshoeing', 'Verify current winter access'],
     action: 'Winter trail map (PDF) \u2197',
     url: 'https://www.michigan.gov/recsearch/-/media/Project/Websites/recsearch/documents/MapsT-Z/tahquamenon_upper_falls_winter_trail_map.pdf',
     source: 'Michigan DNR'
