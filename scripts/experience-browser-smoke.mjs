@@ -27,11 +27,16 @@ try {
     const context = await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'});
     const page = await context.newPage();
     const errors=[];
-    page.on('pageerror',e=>errors.push(e.message));
+    page.on('pageerror',e=>{errors.push(e.message);console.error('[browser pageerror]',e.message);});
+    page.on('console',msg=>{if(msg.type()==='error')console.error('[browser console]',msg.text().slice(0,550));});
+    page.on('response',resp=>{if(resp.url().includes('/assets/')&&resp.status()>=400)console.error('[browser asset error]',resp.status(),resp.url());});
     await page.route('**/api/**',route=>route.fulfill({status:503,contentType:'application/json',body:'{"error":"unavailable"}'}));
     await page.goto(origin + '/tahquamenon-falls/',{waitUntil:'domcontentloaded',timeout:30000});
     await page.locator('#experienceChooser').waitFor({state:'visible'});
-    await page.waitForFunction(()=>document.querySelectorAll('#experiencePlanPath button').length>0);
+    await page.waitForTimeout(1400);
+    console.log('[browser init]', width, JSON.stringify(await page.evaluate(()=>({path:document.querySelector('#experiencePlanPath')?.innerHTML?.slice(0,200),answer:document.querySelector('#answerTitle')?.textContent,script:[...document.scripts].filter(x=>x.type==='module').map(x=>x.src)}))), 'errors=',errors);
+    await page.screenshot({path:'artifacts/experience-tahquamenon-init-'+width+'.png',fullPage:false,animations:'disabled'});
+    await page.waitForFunction(()=>document.querySelectorAll('#experiencePlanPath button').length>0,{},{timeout:6000});
     await page.locator('#timeChoices button[data-minutes="45"]').click();
     await page.waitForFunction(()=>!document.querySelector('#experiencePlanPath')?.textContent.includes('Lower Falls'));
     assert.equal(await page.locator('#experiencePlanPath button[data-experience-plan-stop="lower-falls"]').count(),0,'45-minute plan should not contain Lower');
