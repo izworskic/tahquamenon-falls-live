@@ -22,6 +22,17 @@ try {
   assert.equal(await time45.evaluate(el => el.classList.contains('active')), true);
   assert.match(await page.locator('#answerTitle').innerText(), /Upper Falls visit/i);
 
+  // This runs on the PUBLIC canonical domain: the hub must proxy the imported
+  // EXPERIENCE_OS JS/CSS as well as the original planner assets.
+  await page.locator('#experienceChooser').waitFor({state:'visible',timeout:15000});
+  assert.equal(await page.locator('#experiencePlanPath [data-experience-plan-stop="lower-falls"]').count(),0,
+    '45-minute visit should not include Lower Falls in the connected stop strip');
+  for (const asset of ['tahquamenon-experience.js','tahquamenon-experience.css']) {
+    const destination=new URL('/assets/'+asset,url).href;
+    const response=await page.request.get(destination);
+    assert.equal(response.status(),200,'public hub must serve '+asset);
+  }
+
   const kids = page.locator('#preferenceChoices button[data-pref="kids"]');
   await kids.click();
   assert.equal(await kids.evaluate(el => el.classList.contains('active')), true);
@@ -31,6 +42,16 @@ try {
   await page.locator('#buildPlanButton').click();
   await page.waitForFunction(() => /Lower first/i.test(document.querySelector('#answerTitle')?.textContent || ''));
   assert.match(await page.locator('#answerTitle').innerText(), /Lower first/i);
+  assert.equal(await page.locator('#experiencePlanPath [data-experience-plan-stop="lower-falls"]').count(),1,
+    '3-hour visit should include Lower Falls in connected stop strip');
+  const lower=page.locator('#experienceChooser [data-experience-place="lower-falls"]');
+  await lower.focus();
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(()=>document.querySelector('#placeTitle')?.textContent==='Lower Falls',{},{timeout:15000});
+  assert.equal(await lower.getAttribute('aria-pressed'),'true','photo select must synchronize');
+  assert.match(await page.locator('#experiencePanelPhotoCredit').innerText(),/Joe Passe/);
+  assert.match(await page.locator('#placeLink').getAttribute('href'),/^https:\/\//);
+  console.log('experiencePublicPhotoSelection= ok');
 
   await page.locator('#customPlan summary').click();
   await page.locator('#situationInput').fill('90 minutes, want lunch');
@@ -44,7 +65,7 @@ try {
   assert.equal(await page.locator('#preferenceChoices button[data-pref="food"]').evaluate(el => el.classList.contains('active')), true);
 
   assert.deepEqual(pageErrors, [], 'Browser page errors: ' + pageErrors.join(' | '));
-  console.log('Tahquamenon live planner browser smoke passed');
+  console.log('Tahquamenon public planner and EXPERIENCE_OS browser smoke passed');
 } finally {
   await browser.close();
 }
