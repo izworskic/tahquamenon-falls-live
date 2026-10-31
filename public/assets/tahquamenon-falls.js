@@ -414,6 +414,7 @@ function showMapFallback(message = 'Map tiles are unavailable. Use the park-stop
     box.setAttribute('role','status'); target.append(box);
   }
   box.textContent = message;
+  target.classList.add('has-experience-map-error');
 }
 async function ensureMap() {
   if (state.map) return state.map;
@@ -424,7 +425,7 @@ async function ensureMap() {
     state.map = L.map(el, { scrollWheelZoom: false }).setView([46.59, -85.20], 11);
     const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap contributors' }).addTo(state.map);
     let tileErrors = 0, tileSuccess = false;
-    tiles.on('tileload', () => { tileSuccess = true; el.querySelector('.experience-map-fallback')?.remove(); });
+    tiles.on('tileload', () => { tileSuccess = true; el.classList.remove('has-experience-map-error'); el.querySelector('.experience-map-fallback')?.remove(); });
     tiles.on('tileerror', () => { if (!tileSuccess && ++tileErrors >= 3) showMapFallback(); });
     renderMarkers();
     return state.map;
@@ -443,7 +444,7 @@ function renderMarkers() {
   places().filter(p => state.activeFilter === 'all' || p.category === state.activeFilter).forEach(p => {
     const chosen = p.id === state.selectedPlace?.id;
     const marker = L.circleMarker([p.lat,p.lng], { radius: chosen ? 12 : 8, color: chosen ? '#f4cc82' : '#fff', weight: chosen ? 4 : 2, fillColor:markerColor(p.category), fillOpacity:.95 }).addTo(state.map);
-    marker.bindTooltip(p.name, { direction:'top' }); marker.on('click', () => selectPlace(p, false)); marker._placeId = p.id; state.markers.push(marker);
+    marker.bindTooltip(p.name, { direction:'top' }); marker.on('click', () => { selectPlace(p, false); if (window.matchMedia('(max-width:760px)').matches) $('#placePanel')?.scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth', block:'center'}); }); marker._placeId = p.id; state.markers.push(marker);
   });
 }
 
@@ -507,7 +508,7 @@ experience = createExperience({
       experience?.filter('all');
     }
     await selectPlace(p, false);
-    if (opts.scroll) $('#mapSection').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto':'smooth'});
+    if (opts.scroll) $('#placePanel')?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto':'smooth',block:'center'});
     if (opts.fly) {
       try {
         const map = await ensureMap();
