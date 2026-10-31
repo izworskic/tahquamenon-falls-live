@@ -1,4 +1,5 @@
 import { applySeasonalIntelligence, plannedMinutes, totalProductValue } from '/assets/tahquamenon-seasonal.js?v=seasonal-20260919-v1';
+import { createExperience } from '/assets/tahquamenon-experience.js?v=experience-os-1';
 const STORAGE_KEY = 'tahquamenon.visit.v2';
 const API_URL = '/api/tahquamenon-falls';
 const PLAN_API_URL = '/api/visit-plan';
@@ -15,6 +16,7 @@ const state = {
   map: null,
   markers: [],
   mapPromise: null,
+  mapSetupPromise: null,
   inferred: null,
   seasonal: null,
   intent: ['fall-color','xc'].includes(new URLSearchParams(location.search).get('intent')) ? new URLSearchParams(location.search).get('intent') : null,
@@ -24,6 +26,7 @@ const state = {
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => [...document.querySelectorAll(sel)];
 const places = () => Array.isArray(window.TAHQUAMENON_PLACES) ? window.TAHQUAMENON_PLACES : [];
+let experience = null;
 
 function track(name, params = {}) {
   try {
@@ -171,6 +174,7 @@ function renderPlan() {
   renderSeasonExtension(plan);
   $$('.remove-stop').forEach(btn => btn.addEventListener('click', () => { state.customStops = state.customStops.filter(id => id !== btn.dataset.removeStop); saveState(); renderPlan(); }));
   saveState();
+  experience?.renderPlan(plan, state.minutes);
 }
 
 function syncControls() {
@@ -397,18 +401,36 @@ function loadLeaflet() {
       const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; css.dataset.leaflet = '1'; document.head.append(css);
     }
     const js = document.createElement('script'); js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; js.async = true; js.onload = resolve; js.onerror = reject; document.head.append(js);
-  });
+  }).catch(error => { state.mapPromise = null; throw error; });
   return state.mapPromise;
 }
 
+function showMapFallback(message = 'Map tiles are unavailable. Use the park-stop browser below and the official DNR map for planning.') {
+  const target = $('#parkMap');
+  if (!target) return;
+  let box = target.querySelector('.experience-map-fallback');
+  if (!box) {
+    box = document.createElement('div'); box.className = 'experience-map-fallback';
+    box.setAttribute('role','status'); target.append(box);
+  }
+  box.textContent = message;
+}
 async function ensureMap() {
   if (state.map) return state.map;
-  await loadLeaflet();
-  const el = $('#parkMap'); el.innerHTML = '';
-  state.map = L.map(el, { scrollWheelZoom: false }).setView([46.59, -85.20], 11);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap contributors' }).addTo(state.map);
-  renderMarkers();
-  return state.map;
+  if (state.mapSetupPromise) return state.mapSetupPromise;
+  state.mapSetupPromise = (async () => {
+    await loadLeaflet();
+    const el = $('#parkMap'); el.innerHTML = '';
+    state.map = L.map(el, { scrollWheelZoom: false }).setView([46.59, -85.20], 11);
+    const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap contributors' }).addTo(state.map);
+    let tileErrors = 0, tileSuccess = false;
+    tiles.on('tileload', () => { tileSuccess = true; el.querySelector('.experience-map-fallback')?.remove(); });
+    tiles.on('tileerror', () => { if (!tileSuccess && ++tileErrors >= 3) showMapFallback(); });
+    renderMarkers();
+    return state.map;
+  })();
+  try { return await state.mapSetupPromise; }
+  finally { state.mapSetupPromise = null; }
 }
 
 function markerColor(category) {
@@ -419,7 +441,8 @@ function renderMarkers() {
   if (!state.map) return;
   state.markers.forEach(m => m.remove()); state.markers = [];
   places().filter(p => state.activeFilter === 'all' || p.category === state.activeFilter).forEach(p => {
-    const marker = L.circleMarker([p.lat,p.lng], { radius: 8, color:'#fff', weight:2, fillColor:markerColor(p.category), fillOpacity:.95 }).addTo(state.map);
+    const chosen = p.id === state.selectedPlace?.id;
+    const marker = L.circleMarker([p.lat,p.lng], { radius: chosen ? 12 : 8, color: chosen ? '#f4cc82' : '#fff', weight: chosen ? 4 : 2, fillColor:markerColor(p.category), fillOpacity:.95 }).addTo(state.map);
     marker.bindTooltip(p.name, { direction:'top' }); marker.on('click', () => selectPlace(p, false)); marker._placeId = p.id; state.markers.push(marker);
   });
 }
@@ -434,13 +457,18 @@ async function selectPlace(place, fly = true) {
   $('#placeLink').textContent = place.action || 'Official details ↗';
   $('#addPlaceButton').disabled = state.customStops.includes(place.id);
   $('#addPlaceButton').textContent = state.customStops.includes(place.id) ? 'Already in plan' : 'Add to plan';
-  if (fly) { const map = await ensureMap(); map.flyTo([place.lat,place.lng], Math.max(map.getZoom(),13), {duration:.7}); }
+  experience?.select(place);
+  if (state.map) renderMarkers();
+  if (fly) {
+    try { const map = await ensureMap(); map.flyTo([place.lat,place.lng], Math.max(map.getZoom(),13), {duration: window.matchMedia('(prefers-reduced-motion:reduce)').matches ? 0 : .7}); }
+    catch { showMapFallback('Interactive map unavailable. The selected place details and DNR links remain available.'); }
+  }
 }
 
 function setupMap() {
   const target = $('#parkMap');
-  if (!('IntersectionObserver' in window)) { ensureMap().catch(() => target.textContent = 'Interactive map unavailable.'); return; }
-  const obs = new IntersectionObserver(entries => { if (entries.some(e => e.isIntersecting)) { obs.disconnect(); ensureMap().catch(() => target.textContent = 'Interactive map unavailable.'); } }, { rootMargin: '350px' });
+  if (!('IntersectionObserver' in window)) { ensureMap().catch(() => showMapFallback('Map unavailable. Use the full park-stop browser and DNR map below.')); return; }
+  const obs = new IntersectionObserver(entries => { if (entries.some(e => e.isIntersecting)) { obs.disconnect(); ensureMap().catch(() => showMapFallback('Map unavailable. Use the full park-stop browser and DNR map below.')); } }, { rootMargin: '350px' });
   obs.observe(target);
 }
 
@@ -459,19 +487,40 @@ function bind() {
   $('#copyPlanButton').addEventListener('click', () => { track('copy_plan',{minutes:state.minutes}); copyPlan(); });
   $('#shareButton').addEventListener('click', async () => { try { if (navigator.share) await navigator.share({title:document.title,url:location.href}); else await navigator.clipboard.writeText(location.href); } catch {} });
   $$('[data-scroll]').forEach(btn => btn.addEventListener('click', () => document.querySelector(btn.dataset.scroll)?.scrollIntoView({behavior:'smooth'})));
-  $$('#filterRow button').forEach(btn => btn.addEventListener('click', async () => { state.activeFilter = btn.dataset.filter; $$('#filterRow button').forEach(x => x.classList.toggle('active', x === btn)); await ensureMap(); renderMarkers(); }));
+  $$('#filterRow button').forEach(btn => btn.addEventListener('click', async () => { state.activeFilter = btn.dataset.filter; $$('#filterRow button').forEach(x => x.classList.toggle('active', x === btn)); experience?.filter(state.activeFilter); try { await ensureMap(); renderMarkers(); } catch { showMapFallback(); } }));
   $('#addPlaceButton').addEventListener('click', () => { const p = state.selectedPlace; if (!p || state.customStops.includes(p.id)) return; state.customStops.push(p.id); track('map_stop_add',{stop_id:p.id}); saveState(); renderPlan(); selectPlace(p,false); });
-  $$('[data-place-id]').forEach(btn => btn.addEventListener('click', async () => { const p = places().find(x => x.id === btn.dataset.placeId); if (!p) return; $('#mapSection').scrollIntoView({behavior:'smooth'}); await ensureMap(); selectPlace(p,true); }));
+  $('[data-place-id]').forEach(btn => btn.addEventListener('click', async () => { const p = places().find(x => x.id === btn.dataset.placeId); if (!p) return; $('#mapSection').scrollIntoView({behavior:'smooth'}); await selectPlace(p,true); }));
   $('#seasonLink')?.addEventListener('click', () => {
     const kind=$('#seasonLink').dataset.seasonLink;
     track(kind==='xc'?'xc_detail_click':'fall_color_detail_click',{placement:'season_context'});
   });
 }
 
+experience = createExperience({
+  places: places(),
+  choosePlace: async (id, opts = {}) => {
+    const p = places().find(x => x.id === id);
+    if (!p) return;
+    if (state.activeFilter !== 'all' && state.activeFilter !== p.category) {
+      state.activeFilter = 'all';
+      $('#filterRow button').forEach(button => button.classList.toggle('active', button.dataset.filter === 'all'));
+      experience?.filter('all');
+    }
+    await selectPlace(p, false);
+    if (opts.scroll) $('#mapSection').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto':'smooth'});
+    if (opts.fly) {
+      try {
+        const map = await ensureMap();
+        map.flyTo([p.lat,p.lng], Math.max(map.getZoom(),13), {duration:window.matchMedia('(prefers-reduced-motion:reduce)').matches ? 0 : .7});
+      } catch { showMapFallback('Map unavailable. Use the selected place details and the DNR link below.'); }
+    }
+  }
+});
 restoreState();
 syncControls();
 bind();
 renderPlan();
+selectPlace(places().find(p => p.id === 'upper-falls'), false);
 setupMap();
 loadSeasonal();
 loadLive();
