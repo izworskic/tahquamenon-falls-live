@@ -39,8 +39,19 @@ export function createExperience({places,choosePlace}){
   for(const b of path.querySelectorAll('[data-experience-plan-stop]'))b.setAttribute('aria-current',String(b.dataset.experiencePlanStop===selected));
   const feature=FEATURES[selected];
   if(photo&&image&&credit){
-   if(feature){photo.hidden=false;image.src=feature.image;image.alt=feature.name+' at Tahquamenon Falls State Park, archival image (not live conditions).';credit.href=feature.page;credit.textContent='Photo: '+feature.credit+' · archival';}
-   else{photo.hidden=true;image.removeAttribute('src');}
+   if(feature){
+    photo.hidden=true;
+    image.alt=feature.name+' at Tahquamenon Falls State Park, archival image (not live conditions).';
+    credit.href=feature.page;
+    credit.textContent='Photo: '+feature.credit+' · archival';
+    image.onload=()=>{if(selected===feature.id)photo.hidden=false;};
+    image.onerror=()=>{if(selected===feature.id)photo.hidden=true;};
+    image.src=feature.image;
+    if(image.complete&&image.naturalWidth>0)photo.hidden=false;
+   }else{
+    photo.hidden=true;
+    image.onload=null;image.onerror=null;image.removeAttribute('src');
+   }
   }
  }
  function renderPlan(plan,minutes){
