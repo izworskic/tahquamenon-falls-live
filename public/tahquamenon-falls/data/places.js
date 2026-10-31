@@ -33,7 +33,7 @@ window.TAHQUAMENON_PLACES = [
     lng: -85.25256,
     kicker: "A place to linger near the Upper Falls",
     description: "The privately operated brewery and pub stands near the Upper Falls day-use area. After the overlooks, it offers a chance to sit, talk about the river and enjoy a meal without moving the car. It can make a natural pause before driving to Lower Falls. Check the operator for seasonal hours and current service rather than treating a meal as guaranteed.",
-    facts: ['24019 Upper Falls Drive', '2026 posted hours: 11:00 AM–8:30 PM', 'Inside Upper Falls area'],
+    facts: ['24019 Upper Falls Drive', 'Hours vary by season; check operator', 'Inside Upper Falls area'],
     action: 'Brewery menu, hours & directions ↗',
     url: 'https://www.tahquamenonfallsbrewery.com/',
     source: 'Tahquamenon Falls Brewery & Pub'
@@ -85,7 +85,7 @@ window.TAHQUAMENON_PLACES = [
     lng: -85.20645,
     kicker: "A seasonal pause by the river",
     description: "The Lower Falls concession can offer food, a small gift shop and watercraft rentals during its operating season. It suits a longer afternoon exploring the boardwalks and island. Services, hours and available rentals change with the season, so check directly before making them part of your plan. Never assume a nearby stretch of river is safe for a casual paddle merely because boats are rented in the area.",
-    facts: ['6999 N. Lower Campground Ln', 'Seasonal, Memorial Day–mid-Oct', 'Rowboat, canoe & kayak rentals', 'Near Lower Falls day use'],
+    facts: ['6999 N. Lower Campground Ln', 'Seasonal; confirm current dates', 'Rowboat, canoe & kayak rentals', 'Near Lower Falls day use'],
     action: 'Menu, hours & rentals ↗',
     url: 'https://lowertahquamenonfalls.com/',
     source: 'Lower Tahquamenon Falls concession'
@@ -111,7 +111,7 @@ window.TAHQUAMENON_PLACES = [
     lng: -85.21020,
     kicker: "A more sheltered forest campsite",
     description: "Hemlock is the more wooded-feeling Lower Falls campground loop, with connections to the trail system. A slower morning here means listening for birds before taking the walk toward the falls. It is a good choice if the forest is as much a part of your trip as the waterfalls. Confirm loop availability, trail distances and services with Michigan DNR; do not assume all sites or facilities operate year-round.",
-    facts: ['Part of 188 Lower Falls sites', 'Open year-round', 'More shade', 'Trail access'],
+    facts: ['Part of 188 Lower Falls sites', 'Confirm seasonal campground access', 'More shade', 'Trail access'],
     action: 'Reserve a site ↗',
     url: 'https://www.midnrreservations.com/',
     source: 'Michigan DNR'
@@ -124,7 +124,7 @@ window.TAHQUAMENON_PLACES = [
     lng: -85.22971,
     kicker: "A proper hike through the woods",
     description: "The roughly 5.1-mile River Trail connects the Upper and Lower Falls parking areas through roots, hills and uneven forest ground. You may hear the river through the trees before you see it. This is a point-to-point hike, not a paved shortcut between scenic overlooks. Bring a map, appropriate footwear and water, and confirm your return ride before starting. Do not count on walking along M-123 if the shuttle is unavailable.",
-    facts: ['5.1 mi one way', 'Rated difficult, roots and hills', 'North Country Trail corridor', 'Pair with the Hunter Shuttle'],
+    facts: ['5.1 mi one way', 'Rated difficult, roots and hills', 'North Country Trail corridor', 'Confirm return transportation'],
     action: 'Official trail map (PDF) ↗',
     url: 'https://www.michigan.gov/recsearch/-/media/Project/Websites/recsearch/documents/MapsT-Z/tahquamenon-lower_hiking_trail_map.pdf',
     source: 'Michigan DNR 2025 trail map'
