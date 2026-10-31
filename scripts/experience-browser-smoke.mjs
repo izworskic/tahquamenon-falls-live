@@ -63,6 +63,10 @@ try {
     assert.equal(await page.locator('#filterRow button[data-filter="all"]').getAttribute('class'),'active','Choosing Upper Falls from a trail-only filter must restore All');
     assert.equal(await page.evaluate(()=>matchMedia('(prefers-reduced-motion:reduce)').matches),true,'Browser must honor reduced motion');
     const dims = await page.evaluate(()=>({window:innerWidth,scroll:document.documentElement.scrollWidth}));
+    if (dims.scroll > dims.window+1) {
+      const wide = await page.evaluate(() => [...document.querySelectorAll('body *')].map(el=>({tag:el.tagName,cls:String(el.className?.baseVal||el.className||'').slice(0,90),id:el.id,right:Math.round(el.getBoundingClientRect().right),left:Math.round(el.getBoundingClientRect().left),w:Math.round(el.getBoundingClientRect().width)})).filter(v=>v.right>innerWidth+2||v.left< -2).sort((a,b)=>b.right-a.right).slice(0,25));
+      console.error('[horizontal overflow details]', width, JSON.stringify(wide));
+    }
     assert.ok(dims.scroll<=dims.window+1, 'Horizontal overflow at '+width+': '+JSON.stringify(dims));
     assert.deepEqual(errors,[],'page errors at '+width);
     await page.screenshot({path:'artifacts/experience-tahquamenon-'+width+'.png',fullPage:true,animations:'disabled'});
