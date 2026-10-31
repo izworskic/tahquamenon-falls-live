@@ -55,7 +55,10 @@ try {
     await page.locator('#experienceBrowse summary').click();
     await page.locator('#experienceStopList [data-experience-stop="river-trail"]').click();
     await page.waitForFunction(()=>/River Trail/.test(document.querySelector('#placeTitle')?.textContent||''));
-    assert.equal(await page.locator('#filterRow button[data-filter="all"]').getAttribute('class'),'active');
+    assert.equal(await page.locator('#filterRow button[data-filter="trail"]').getAttribute('class'),'active','Choosing a trail within the active filter should keep that filter');
+    await page.locator('[data-experience-place="upper-falls"]').click();
+    await page.waitForFunction(()=>document.querySelector('#placeTitle')?.textContent==='Upper Falls');
+    assert.equal(await page.locator('#filterRow button[data-filter="all"]').getAttribute('class'),'active','Choosing Upper Falls from a trail-only filter must restore All');
     const dims = await page.evaluate(()=>({window:innerWidth,scroll:document.documentElement.scrollWidth}));
     assert.ok(dims.scroll<=dims.window+1, 'Horizontal overflow at '+width+': '+JSON.stringify(dims));
     assert.deepEqual(errors,[],'page errors at '+width);
