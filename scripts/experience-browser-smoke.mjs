@@ -23,7 +23,7 @@ const browser = await chromium.launch({headless:true});
 const failures = [];
 try {
   await mkdir('artifacts',{recursive:true});
-  for (const width of [390, 1440]) {
+  for (const width of [360, 390, 768, 1440]) {
     const context = await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'});
     const page = await context.newPage();
     const errors=[];
@@ -43,7 +43,8 @@ try {
     await page.locator('#timeChoices button[data-minutes="180"]').click();
     await page.waitForFunction(()=>document.querySelector('#experiencePlanPath')?.textContent.includes('Lower Falls'));
     assert.equal(await page.locator('#experiencePlanPath button[data-experience-plan-stop="lower-falls"]').count(),1);
-    await page.locator('[data-experience-place="lower-falls"]').click();
+    await page.locator('[data-experience-place="lower-falls"]').focus();
+    await page.keyboard.press('Enter');
     await page.waitForFunction(()=>document.querySelector('#placeTitle')?.textContent==='Lower Falls');
     assert.equal(await page.locator('[data-experience-place="lower-falls"]').getAttribute('aria-pressed'),'true');
     assert.match(await page.locator('#experiencePanelPhotoCredit').innerText(),/Joe Passe/);
@@ -52,13 +53,15 @@ try {
     await page.locator('#addPlaceButton').click();
     assert.equal(await page.locator('#experiencePlanPath button[data-experience-plan-stop="island-bridge"]').count(),1);
     await page.locator('#filterRow button[data-filter="trail"]').click();
-    await page.locator('#experienceBrowse summary').click();
+    await page.locator('#experienceBrowse summary').focus();
+    await page.keyboard.press('Enter');
     await page.locator('#experienceStopList [data-experience-stop="river-trail"]').click();
     await page.waitForFunction(()=>/River Trail/.test(document.querySelector('#placeTitle')?.textContent||''));
     assert.equal(await page.locator('#filterRow button[data-filter="trail"]').getAttribute('class'),'active','Choosing a trail within the active filter should keep that filter');
     await page.locator('[data-experience-place="upper-falls"]').click();
     await page.waitForFunction(()=>document.querySelector('#placeTitle')?.textContent==='Upper Falls');
     assert.equal(await page.locator('#filterRow button[data-filter="all"]').getAttribute('class'),'active','Choosing Upper Falls from a trail-only filter must restore All');
+    assert.equal(await page.evaluate(()=>matchMedia('(prefers-reduced-motion:reduce)').matches),true,'Browser must honor reduced motion');
     const dims = await page.evaluate(()=>({window:innerWidth,scroll:document.documentElement.scrollWidth}));
     assert.ok(dims.scroll<=dims.window+1, 'Horizontal overflow at '+width+': '+JSON.stringify(dims));
     assert.deepEqual(errors,[],'page errors at '+width);
@@ -84,7 +87,7 @@ try {
   assert.ok(await broken.locator('#parkMap').evaluate(el=>el.getBoundingClientRect().height < 150), 'A failed map must collapse to a compact notice');
   await broken.screenshot({path:'artifacts/experience-tahquamenon-map-fallback.png',fullPage:true,animations:'disabled'});
   await offline.close();
-  console.log('Experience browser smoke passed: 390/1440px, plan causality, photo/map selection, stop-list filter, add stop, no-JS and map-CDN failure.');
+  console.log('Experience browser smoke passed: 360/390/768/1440px, keyboard, plan causality, photo/map selection, stop-list filter, add stop, no-JS and map-CDN failure.');
 } catch (error) {
   failures.push(String(error.stack || error));
   throw error;
