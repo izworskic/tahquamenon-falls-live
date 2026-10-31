@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - agent/planner-browser-smoke-20260919
+  pull_request:
+    paths:
+      - 'scripts/planner-browser-smoke.mjs'
+      - '.github/workflows/planner-browser-smoke.yml'
   workflow_dispatch:
 
 permissions:
