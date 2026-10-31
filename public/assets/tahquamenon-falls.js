@@ -75,50 +75,50 @@ function corePlan() {
 
   if (winter) {
     const ski = [
-      stop('upper-falls', 35, 'Start with the Upper Falls winter view', 'Use the short, high-value waterfall stop first while everyone is warm and fresh.', 'Upper Falls'),
-      stop('winter-trail-system', m <= 90 ? 45 : 90, m <= 90 ? 'Ski the Lantern Loop' : 'Ski Lantern + part or all of Giant Pines', m <= 90 ? 'The 1-mile Lantern Loop is the cleanest fit for a short winter visit.' : 'The groomed Upper Falls network includes the 1-mile Lantern Loop and 3.8-mile Giant Pines Loop. Verify current grooming before driving.', 'Cross-country ski')
+      stop('upper-falls', 35, 'Start with the Upper Falls winter view', 'Begin at the Upper Falls overlook while your group is fresh. Even in winter, the sound of moving water carries through the trees. Watch for ice on the approaches.', 'Upper Falls'),
+      stop('winter-trail-system', m <= 90 ? 45 : 90, m <= 90 ? 'Ski the Lantern Loop' : 'Ski Lantern + part or all of Giant Pines', m <= 90 ? 'When it has snow and grooming, the one-mile Lantern Loop is a good introduction to skiing through this quiet northern forest.' : 'The Lantern Loop and longer Giant Pines Loop offer different journeys through the Upper Falls woods. Ski only when conditions allow; verify actual grooming before traveling.', 'Cross-country ski')
     ];
-    if (m >= 180) ski.push(stop('lower-falls', 45, 'Add Lower Falls if roads and daylight cooperate', 'The winter contrast between the two falls areas is worth the extra drive when conditions are comfortable.', 'Lower Falls'));
-    return { title: 'Make it a winter falls + ski day.', summary: 'Use the Upper Falls as your anchor, then let snow conditions decide how much of the groomed network you ski.', order: 'Upper → ski trails', walking: 'Winter', stops: ski };
+    if (m >= 180) ski.push(stop('lower-falls', 45, 'Add Lower Falls if roads and daylight cooperate', 'If roads and daylight cooperate, Lower Falls adds a different winter scene: smaller cascades, ice along the margins and snow settling into the forest.', 'Lower Falls'));
+    return { title: 'Make it a winter falls + ski day.', summary: 'Let the great waterfall anchor your day. Choose a ski route to suit the snow, your group and the remaining daylight. Do not walk on groomed ski tracks.', order: 'Upper → ski trails', walking: 'Winter', stops: ski };
   }
 
   if (m <= 45) return {
     title: 'Make this an Upper Falls visit.',
-    summary: 'Do one thing well. The signature waterfall gives you the biggest return for a short stop.',
+    summary: 'A short visit can still stay with you. Watch the amber river plunge into the gorge, and leave yourself a few quiet minutes to listen.',
     order: 'Upper only', walking: easy ? 'Easy' : 'Light',
-    stops: [stop('upper-boardwalk', 10, 'Park at Upper Falls and take the accessible approach', 'Use the boardwalk and paved route toward the main viewing area.', 'Upper Falls'), stop('upper-falls', 30, 'Spend your time at the main overlooks', 'Do not burn a short visit driving between areas. Get the signature view and leave satisfied.', 'Best use of 45 min')]
+    stops: [stop('upper-boardwalk', 10, 'Park at Upper Falls and take the accessible approach', 'Follow the accessible approach through the old trees. The 1,100-foot boardwalk and its landings make the walk to the river part of the experience.', 'Upper Falls'), stop('upper-falls', 30, 'Spend your time at the main overlooks', 'Look across the full width of the falls and notice how the amber water turns to pale foam below. There is no need to rush downriver to fit in another stop.', 'Best use of 45 min')]
   };
 
   if (m <= 90) {
-    const s = [stop('upper-boardwalk', 15, 'Start at Upper Falls', 'Take the accessible boardwalk/paved approach and settle into the park before chasing extra stops.', 'Upper Falls'), stop('upper-falls', 40, easy ? 'Use the accessible viewpoints' : 'See the brink, then choose one more overlook', easy ? 'Skip unnecessary stairs and use the new boardwalk plus accessible viewpoints.' : 'If legs and time are good, add another viewpoint. Do not turn this into a speed run.', 'Signature stop')];
-    if (food) s.push(stop('brewery', 30, 'Use the brewery as your finish', 'It is already in the Upper Falls area, so food does not cost another drive.', 'Food'));
-    else s.push(stop('fact-shack', 10, 'Use the remaining minutes locally', 'Fact Shack or a relaxed walk is a better use of the margin than driving to Lower Falls and rushing it.', 'No rush'));
-    return { title: 'Stay at Upper Falls and do it properly.', summary: 'Ninety minutes is enough for a good Upper Falls visit, but not enough to make both areas feel relaxed.', order: 'Upper only', walking: easy ? 'Easy' : 'Light', stops: s };
+    const s = [stop('upper-boardwalk', 15, 'Start at Upper Falls', 'Take the paved approach and accessible boardwalk toward Upper Falls. Pause where the trees open toward the river and let the sound guide you.', 'Upper Falls'), stop('upper-falls', 40, easy ? 'Use the accessible viewpoints' : 'See the brink, then choose one more overlook', easy ? 'The boardwalk and accessible viewing platforms let you experience Upper Falls without descending the long staircase into the gorge.' : 'If your group is comfortable with stairs, a second overlook offers a different angle on the same powerful drop. There is no prize for seeing them all quickly.', 'Signature stop')];
+    if (food) s.push(stop('brewery', 30, 'Use the brewery as your finish', 'The brewery is beside the Upper Falls day-use area. If it is open, a meal here makes an unhurried finish after the overlooks.', 'Food'));
+    else s.push(stop('fact-shack', 10, 'Use the remaining minutes locally', 'Visit the Fact Shack if it is staffed or spend a little longer beneath the old trees. A thoughtful Upper Falls visit beats rushing into a second parking lot.', 'No rush'));
+    return { title: 'Stay at Upper Falls and do it properly.', summary: 'Ninety minutes gives you the great waterfall and its forest approach. Save Lower Falls for a day when you can give the island and boardwalks time.', order: 'Upper only', walking: easy ? 'Easy' : 'Light', stops: s };
   }
 
   const first = kids ? 'lower' : 'upper';
   const steps = [];
   if (first === 'upper') {
-    steps.push(stop('upper-falls', easy ? 45 : 55, 'Start at Upper Falls', easy ? 'Use the accessible boardwalk and main viewing platforms.' : 'Get the signature waterfall first, then decide whether an extra overlook is worth the stairs.', 'Signature view'));
-    if (food) steps.push(stop('brewery', 45, 'Eat without leaving the route', 'The brewery is in the Upper Falls area, so lunch fits cleanly before the drive to Lower Falls.', 'Food'));
-    steps.push(stop('lower-falls', 55, 'Drive 4 miles to Lower Falls', kids ? 'Give kids the more interactive half of the visit: bridge, island and multiple cascades.' : 'Slow the pace here. Lower Falls rewards wandering more than one viewpoint.', 'Lower Falls'));
+    steps.push(stop('upper-falls', easy ? 45 : 55, 'Start at Upper Falls', easy ? 'Follow the accessible approach through old-growth forest and let the sound of the river lead toward the overlooks. You can enjoy the falls without the steep gorge stairs.' : 'Watch the river gather and drop nearly 50 feet. If your group has the energy and conditions allow, another overlook changes the perspective.', 'Signature view'));
+    if (food) steps.push(stop('brewery', 45, 'Eat without leaving the route', 'If the pub is serving, a meal near Upper Falls makes a natural pause before heading downstream. Confirm hours before counting on it.', 'Food'));
+    steps.push(stop('lower-falls', 55, 'Drive 4 miles to Lower Falls', kids ? 'At Lower Falls the river spreads around an island, with several views to discover. Cross the bridge if access is open, and keep children on the marked routes.' : 'Follow the boardwalk, watch the river divide around the island and listen to the separate rhythms of the smaller cascades. Lower Falls rewards a slower pace.', 'Lower Falls'));
   } else {
-    steps.push(stop('lower-falls', 70, 'Start at Lower Falls', 'Let kids move first: island access, bridge, boardwalks and multiple cascades make this the more interactive stop.', 'Kid-friendly start'));
-    steps.push(stop('upper-falls', 50, 'Finish with the big waterfall', 'End with the park signature so the day builds toward the classic view.', 'Upper Falls'));
-    if (food) steps.push(stop('brewery', 40, 'Finish with food at Upper Falls', 'No additional drive required.', 'Food'));
+    steps.push(stop('lower-falls', 70, 'Start at Lower Falls', 'Start with the island bridge and smaller cascades, where children can discover a new river view around each turn. Keep them close by the water.', 'Kid-friendly start'));
+    steps.push(stop('upper-falls', 50, 'Finish with the big waterfall', 'Finish with the great Upper Falls. After hearing the smaller cascades, that wide curtain of water feels like a fitting final chapter.', 'Upper Falls'));
+    if (food) steps.push(stop('brewery', 40, 'Finish with food at Upper Falls', 'The pub is near the Upper Falls day-use area. If it is open, a meal here gives everyone a chance to settle in after the overlooks.', 'Food'));
   }
 
   if (m >= 300) {
-    if (hike && !easy) steps.splice(1, 0, stop('river-trail', 150, 'Use the River Trail for the active part of the day', 'The trail is about 5.1 miles one way and hikes harder than its mileage. Confirm seasonal shuttle timing before relying on a one-way hike.', 'Serious hike'));
-    else steps.splice(first === 'upper' ? steps.length : 1, 0, stop('island-bridge', 35, 'Walk onto the Lower Falls island', 'The bridge and island turn Lower Falls from a quick overlook into an experience.', 'Worth the extra time'));
+    if (hike && !easy) steps.splice(1, 0, stop('river-trail', 150, 'Use the River Trail for the active part of the day', 'The 5.1-mile River Trail winds through roots and hills. Treat it as a real point-to-point forest hike, and confirm a return ride before you start.', 'Serious hike'));
+    else steps.splice(first === 'upper' ? steps.length : 1, 0, stop('island-bridge', 35, 'Walk onto the Lower Falls island', 'Cross the bridge and see the smaller falls from different angles. The island is worth lingering on, not merely another box to check.', 'Worth the extra time'));
   }
 
-  if (m >= 480 && photo) steps.push(stop('rivermouth-sunset', 60, 'Save Rivermouth for the light', 'If sunset timing works, finish where the river meets Lake Superior for a different photo environment.', 'Photo finish'));
-  else if (m >= 480 && !hike) steps.push(stop('clark-lake-trail', 70, 'Add a quieter trail', 'Trade a little waterfall crowding for forest and a backcountry feel.', 'Quiet extra'));
+  if (m >= 480 && photo) steps.push(stop('rivermouth-sunset', 60, 'Save Rivermouth for the light', 'If daylight works in your favor, finish near the Rivermouth, where the Tahquamenon opens toward Lake Superior and the sky grows wide.', 'Photo finish'));
+  else if (m >= 480 && !hike) steps.push(stop('clark-lake-trail', 70, 'Add a quieter trail', 'Leave the busiest overlooks for an established forest trail. Listen for birds and watch for tracks while keeping an eye on your return distance.', 'Quiet extra'));
 
   return {
     title: first === 'lower' ? 'Lower first, then finish at Upper Falls.' : 'Upper first, then give Lower Falls more room.',
-    summary: kids ? 'With kids, the island and multiple cascades make Lower Falls the better place to spend the larger block of time.' : 'See the signature waterfall early, then use the rest of the visit for the more exploratory Lower Falls area.',
+    summary: kids ? 'With children, begin where the river divides around the Lower Falls island. The bridge and several overlooks invite exploration; the grand Upper Falls makes a memorable finish.' : 'Experience the broad Upper Falls first, then follow the road downstream for a slower walk among the cascades. The two places reveal different sides of the same river.',
     order: first === 'lower' ? 'Lower → Upper' : 'Upper → Lower',
     walking: easy ? 'Easy' : hike ? 'Active' : 'Moderate',
     stops: steps

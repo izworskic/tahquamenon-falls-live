@@ -62,7 +62,21 @@ try {
     await page.waitForFunction(()=>document.querySelector('#placeTitle')?.textContent==='Upper Falls');
     assert.equal(await page.locator('#filterRow button[data-filter="all"]').getAttribute('class'),'active','Choosing Upper Falls from a trail-only filter must restore All');
     assert.equal(await page.evaluate(()=>matchMedia('(prefers-reduced-motion:reduce)').matches),true,'Browser must honor reduced motion');
-    const dims = await page.evaluate(()=>({window:innerWidth,scroll:document.documentElement.scrollWidth}));
+    assert.equal(await page.locator('.ranger-story').count(),4,'The full interpretive field guide must render');
+    assert.match(await page.locator('#rangerNotesTitle').innerText(),/more to Tahquamenon/);
+    const readability = await page.evaluate(() => ({
+      guide: parseFloat(getComputedStyle(document.querySelector('.guide-grid p')).fontSize),
+      comparison: parseFloat(getComputedStyle(document.querySelector('.compare-copy p')).fontSize),
+      conditions: parseFloat(getComputedStyle(document.querySelector('.signal-grid p')).fontSize),
+      field: parseFloat(getComputedStyle(document.querySelector('.ranger-story p')).fontSize),
+      chapters: [...document.querySelectorAll('.ranger-story')].map(el => Math.round(el.getBoundingClientRect().width))
+    }));
+    assert.ok(readability.guide>=14,'Practical guide paragraphs cannot stay tiny at '+width);
+    assert.ok(readability.comparison>=14,'Falls comparisons must be readable at '+width);
+    assert.ok(readability.conditions>=13,'Live conditions must be readable at '+width);
+    assert.ok(readability.field>=14,'Interpretive field notes must be readable at '+width);
+    assert.ok(readability.chapters.every(w=>w>=230),'Ranger chapters are too narrow at '+width);
+        const dims = await page.evaluate(()=>({window:innerWidth,scroll:document.documentElement.scrollWidth}));
     if (dims.scroll > dims.window+1) {
       const wide = await page.evaluate(() => [...document.querySelectorAll('body *')].map(el=>({tag:el.tagName,cls:String(el.className?.baseVal||el.className||'').slice(0,90),id:el.id,right:Math.round(el.getBoundingClientRect().right),left:Math.round(el.getBoundingClientRect().left),w:Math.round(el.getBoundingClientRect().width)})).filter(v=>v.right>innerWidth+2||v.left< -2).sort((a,b)=>b.right-a.right).slice(0,25));
       console.error('[horizontal overflow details]', width, JSON.stringify(wide));
