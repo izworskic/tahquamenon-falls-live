@@ -81,6 +81,7 @@ try {
   await broken.waitForFunction(()=>document.querySelector('#placeTitle')?.textContent==='Lower Falls');
   await broken.waitForFunction(()=>Boolean(document.querySelector('.experience-map-fallback')),{timeout:15000});
   assert.ok(await broken.locator('#placeLink[href^="https://"]').count()===1,'Official source must survive blocked map library');
+  assert.ok(await broken.locator('#parkMap').evaluate(el=>el.getBoundingClientRect().height < 150), 'A failed map must collapse to a compact notice');
   await broken.screenshot({path:'artifacts/experience-tahquamenon-map-fallback.png',fullPage:true,animations:'disabled'});
   await offline.close();
   console.log('Experience browser smoke passed: 390/1440px, plan causality, photo/map selection, stop-list filter, add stop, no-JS and map-CDN failure.');
