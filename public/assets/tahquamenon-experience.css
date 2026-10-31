@@ -135,3 +135,12 @@
  .guide-section .guide-grid article{padding:18px}
  .guide-section .guide-grid p{font-size:14px}
 }
+
+
+/* Screenshot QA: original comparison and live-condition text was only 9–11px,
+   far too small beside the new interpretive prose. Keep practical details legible. */
+.compare-section .compare-copy p{font-size:14px;line-height:1.65;color:#4b5c50}
+.compare-section .compare-copy h3{line-height:1.17}
+.compare-section .tag-row b{font-size:11px;line-height:1.3;padding:5px 8px}
+.compare-section .compare-copy button{font-size:13px;line-height:1.55;min-height:35px;text-decoration:underline;text-underline-offset:3px}
+.now-section .signal-grid p{font-size:13px;line-height:1.55;color:#4b5c50}
